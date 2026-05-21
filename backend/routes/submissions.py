@@ -1,7 +1,8 @@
-from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException
+from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from database import get_db
+from limiter import limiter
 from models import Submission, Photo, Team
 from utils.exif import extract_exif
 from config import PHOTOS_DIR
@@ -9,21 +10,40 @@ from PIL import Image
 import os, uuid, shutil
 
 HEIC_SUFFIXES = {".heic", ".heif"}
+MAX_UPLOAD_BYTES = 15 * 1024 * 1024   # 15 MB cap per photo
+CHUNK_SIZE = 64 * 1024
 
 
 router = APIRouter(prefix="/api/submissions", tags=["submissions"])
 
 @router.post("/")
+@limiter.limit("5/hour;30/day")
 async def create_submission(
+    request: Request,
     image: UploadFile = File(...),
     note: str = Form(None),
     team_name: str = Form(None),
     db: Session = Depends(get_db),
 ):
+    # Early reject if Content-Length header says it's too big (cheap upfront check)
+    content_length = request.headers.get("content-length")
+    if content_length and int(content_length) > MAX_UPLOAD_BYTES + 1_000_000:
+        raise HTTPException(status_code=413, detail="File too large (max 15 MB)")
+
     suffix = os.path.splitext(image.filename or "photo.jpg")[1] or ".jpg"
     temp_path = f"/tmp/{uuid.uuid4()}{suffix}"
+
+    # Stream to disk with hard size cap — protects against lying Content-Length
+    size = 0
     with open(temp_path, "wb") as f:
-        shutil.copyfileobj(image.file, f)
+        while chunk := await image.read(CHUNK_SIZE):
+            size += len(chunk)
+            if size > MAX_UPLOAD_BYTES:
+                f.close()
+                try: os.unlink(temp_path)
+                except OSError: pass
+                raise HTTPException(status_code=413, detail="File too large (max 15 MB)")
+            f.write(chunk)
 
     exif_data = extract_exif(temp_path)
 

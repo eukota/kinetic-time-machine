@@ -2,12 +2,19 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from slowapi.errors import RateLimitExceeded
+from slowapi import _rate_limit_exceeded_handler
 from database import init_db
+from limiter import limiter
 from routes import submissions, teams
 from config import PHOTOS_DIR
 import os
 
 app = FastAPI(title="KGC Race Tracker API")
+
+# Rate limiting (slowapi) — shared limiter, registered for the route decorators to find
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
