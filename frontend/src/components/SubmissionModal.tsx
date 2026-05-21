@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { useStore, Submission } from '../store'
 import { useSubmissions } from '../hooks/useSubmissions'
 
@@ -77,12 +78,13 @@ export const SubmissionModal = () => {
   if (!isOpen) return null
 
   const current = items[index]
+  // Portal renders into document.body — escapes any parent stacking context
   const photo = detail?.photos?.[0]
   const teamName = current?.team_id ? teams.find((t) => t.id === current.team_id)?.name : null
   const multi = items.length > 1
 
-  return (
-    <div className="fixed inset-0 bg-black/92 z-[1000] flex flex-col select-none" onClick={close}>
+  return createPortal(
+    <div className="fixed inset-0 bg-black/92 z-[9999] flex flex-col select-none" onClick={close}>
 
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 pt-3 pb-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
@@ -142,6 +144,7 @@ export const SubmissionModal = () => {
           <button onClick={handleDelete} className="text-xs text-red-400/70 hover:text-red-300">Delete</button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
