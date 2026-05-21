@@ -6,7 +6,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi import _rate_limit_exceeded_handler
 from database import init_db
 from limiter import limiter
-from routes import submissions, teams
+from routes import submissions, teams, admin
 from config import PHOTOS_DIR
 import os
 
@@ -27,6 +27,7 @@ init_db()
 
 app.include_router(submissions.router)
 app.include_router(teams.router)
+app.include_router(admin.router)
 
 if os.path.exists("static"):
     app.mount("/static", StaticFiles(directory="static"), name="static")

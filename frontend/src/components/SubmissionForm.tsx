@@ -39,11 +39,14 @@ export const SubmissionForm = ({ onClose }: Props) => {
     if (file) setPreview(URL.createObjectURL(file))
   }
 
+  const [successMsg, setSuccessMsg] = useState<string | null>(null)
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const file = fileRef.current?.files?.[0]
     if (!file) return
     setUploading(true)
+    setSuccessMsg(null)
     const formData = new FormData()
     formData.append('image', file)
     if (note) formData.append('note', note)
@@ -56,7 +59,13 @@ export const SubmissionForm = ({ onClose }: Props) => {
       setNote('')
       setPreview(null)
       if (fileRef.current) fileRef.current.value = ''
-      onClose?.()
+      setSuccessMsg(
+        result.pending_review
+          ? '✓ Submitted — pending review before it appears on the map'
+          : '✓ Submitted'
+      )
+      setTimeout(() => setSuccessMsg(null), 6000)
+      // Don't auto-close on success — keep the message visible briefly
     } else {
       alert('Upload failed — please try again')
     }
@@ -65,6 +74,11 @@ export const SubmissionForm = ({ onClose }: Props) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <h2 className="text-xl font-bold">Submit Photo</h2>
+      {successMsg && (
+        <div className="bg-green-50 border border-green-200 text-green-700 text-xs px-3 py-2 rounded">
+          {successMsg}
+        </div>
+      )}
       <div>
         <label className="block text-sm font-medium mb-1">Photo *</label>
         <input

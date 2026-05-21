@@ -19,6 +19,8 @@ export interface Submission {
   first_photo?: string | null
   first_photo_mime?: string | null
   photos?: Photo[]
+  approved?: boolean
+  pending_review?: boolean
 }
 
 export interface Team {

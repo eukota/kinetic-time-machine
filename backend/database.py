@@ -33,3 +33,12 @@ def _migrate():
                 if mime:
                     conn.exec_driver_sql("UPDATE photos SET mime_type=? WHERE id=?", (mime, photo_id))
         conn.commit()
+
+        # Migration: add `approved` column to submissions
+        sub_cols = [r[1] for r in conn.exec_driver_sql("PRAGMA table_info(submissions)")]
+        if "approved" not in sub_cols:
+            # New column defaults to 0 (False); we'll auto-approve all existing rows
+            # so the queue isn't suddenly flooded with old submissions
+            conn.exec_driver_sql("ALTER TABLE submissions ADD COLUMN approved INTEGER NOT NULL DEFAULT 0")
+            conn.exec_driver_sql("UPDATE submissions SET approved=1")
+            conn.commit()

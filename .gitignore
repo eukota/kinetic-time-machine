@@ -1,10 +1,14 @@
 # Backend
-backend/__pycache__/
-backend/*.pyc
+**/__pycache__/
+*.pyc
 backend/.env
 backend/.venv
 backend/venv/
 backend/kgc_race.db
+
+# Local data (runtime — DB, photos, downloaded artifacts)
+data/*.db
+data/*.pdf
 
 # Photos (user data, not committed)
 data/photos/*
@@ -31,3 +35,6 @@ frontend/.env.local
 # Implementation notes live in ~/Projects/ktm
 docs/
 resources/
+
+# Production secrets
+.env

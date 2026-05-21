@@ -45,30 +45,81 @@ def test_list_submissions_empty():
     assert r.status_code == 200
     assert r.json() == []
 
-def test_create_submission():
+def _upload_test_jpeg(note: str = "test"):
     img = Image.new("RGB", (100, 100), color="blue")
     buf = io.BytesIO()
     img.save(buf, format="JPEG")
     buf.seek(0)
-    r = client.post(
+    return client.post(
         "/api/submissions/",
         files={"image": ("test.jpg", buf, "image/jpeg")},
-        data={"note": "test note"},
+        data={"note": note},
     )
+
+def test_create_submission():
+    r = _upload_test_jpeg("test note")
     assert r.status_code == 200
     data = r.json()
     assert data["note"] == "test note"
     assert data["latitude"] is None
+    assert data["approved"] is False
+    assert data["pending_review"] is True
 
-def test_list_includes_first_photo():
+def test_new_submission_hidden_from_public_list():
+    # Pending submissions exist (from previous tests) but public list should be empty
     r = client.get("/api/submissions/")
     assert r.status_code == 200
-    items = r.json()
-    if items:
-        item = items[0]
-        assert "first_photo" in item
-        assert "first_photo_mime" in item
-        assert "created_at" in item
+    # All currently-created submissions are pending; public sees none
+    assert all(False for _ in r.json())
+
+def test_public_get_pending_returns_404():
+    upload = _upload_test_jpeg("hidden")
+    sid = upload.json()["id"]
+    r = client.get(f"/api/submissions/{sid}")
+    assert r.status_code == 404
+
+def test_admin_endpoints_require_token(monkeypatch):
+    # No token configured → 503
+    r = client.get("/api/admin/submissions/pending")
+    assert r.status_code in (401, 503)
+
+def test_admin_approve_flow(monkeypatch):
+    # Configure admin token
+    import auth
+    monkeypatch.setattr(auth, "ADMIN_TOKEN", "test-secret")
+
+    upload = _upload_test_jpeg("admin flow")
+    sid = upload.json()["id"]
+    headers = {"Authorization": "Bearer test-secret"}
+
+    # Wrong token rejected
+    bad = client.get("/api/admin/submissions/pending", headers={"Authorization": "Bearer wrong"})
+    assert bad.status_code == 401
+
+    # Pending list includes the new submission
+    pending = client.get("/api/admin/submissions/pending", headers=headers).json()
+    assert any(s["id"] == sid for s in pending)
+
+    # Approve it
+    r = client.post(f"/api/admin/submissions/{sid}/approve", headers=headers)
+    assert r.status_code == 200
+    assert r.json()["approved"] is True
+
+    # Public list now contains it
+    public = client.get("/api/submissions/").json()
+    assert any(s["id"] == sid for s in public)
+
+def test_list_includes_first_photo(monkeypatch):
+    import auth
+    monkeypatch.setattr(auth, "ADMIN_TOKEN", "test-secret")
+    upload = _upload_test_jpeg("photo fields")
+    sid = upload.json()["id"]
+    client.post(f"/api/admin/submissions/{sid}/approve", headers={"Authorization": "Bearer test-secret"})
+    items = client.get("/api/submissions/").json()
+    item = next(s for s in items if s["id"] == sid)
+    assert "first_photo" in item
+    assert "first_photo_mime" in item
+    assert "created_at" in item
 
 def test_get_submission_not_found():
     r = client.get("/api/submissions/nonexistent-id")

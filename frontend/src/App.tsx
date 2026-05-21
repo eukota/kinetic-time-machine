@@ -2,17 +2,19 @@ import { useState } from 'react'
 import { Map } from './components/Map'
 import { Gallery } from './components/Gallery'
 import { About } from './components/About'
+import { Admin } from './components/Admin'
 import { SubmissionForm } from './components/SubmissionForm'
 import { SubmissionModal } from './components/SubmissionModal'
 import { TeamFilter } from './components/TeamFilter'
 import { CourseFilter } from './components/CourseFilter'
 
-type View = 'map' | 'gallery' | 'about'
+type View = 'map' | 'gallery' | 'about' | 'admin'
 
 const TAB_LABELS: Record<View, string> = {
   map: '🗺 Map',
   gallery: '📷 Gallery',
   about: 'ℹ About',
+  admin: '🔒 Admin',
 }
 
 export default function App() {
@@ -26,7 +28,7 @@ export default function App() {
 
       {/* Tab bar */}
       <div className="flex items-center bg-white border-b flex-shrink-0 px-2 gap-0">
-        {(['map', 'gallery', 'about'] as View[]).map((v) => (
+        {(['map', 'gallery', 'about', 'admin'] as View[]).map((v) => (
           <button
             key={v}
             onClick={() => setView(v)}
@@ -63,6 +65,13 @@ export default function App() {
           {view === 'about' && (
             <div className="absolute inset-0">
               <About />
+            </div>
+          )}
+
+          {/* Admin */}
+          {view === 'admin' && (
+            <div className="absolute inset-0">
+              <Admin />
             </div>
           )}
 

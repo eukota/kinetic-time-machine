@@ -91,33 +91,44 @@ async def create_submission(
         "team_id": submission.team_id,
         "note": submission.note,
         "photo_count": len(submission.photos),
+        "approved": submission.approved,
+        "pending_review": not submission.approved,
     }
+
+def _serialize_submission_summary(s):
+    return {
+        "id": s.id,
+        "latitude": s.latitude,
+        "longitude": s.longitude,
+        "timestamp": s.timestamp,
+        "team_id": s.team_id,
+        "note": s.note,
+        "photo_count": len(s.photos),
+        "created_at": s.created_at,
+        "first_photo": s.photos[0].file_path if s.photos else None,
+        "first_photo_mime": s.photos[0].mime_type if s.photos else None,
+    }
+
 
 @router.get("/")
 def list_submissions(team_id: str = None, db: Session = Depends(get_db)):
-    query = db.query(Submission).order_by(desc(Submission.created_at))
+    # Public list — only approved submissions are visible
+    query = (
+        db.query(Submission)
+        .filter(Submission.approved == True)
+        .order_by(desc(Submission.created_at))
+    )
     if team_id:
         query = query.filter(Submission.team_id == team_id)
-    subs = query.all()
-    return [
-        {
-            "id": s.id,
-            "latitude": s.latitude,
-            "longitude": s.longitude,
-            "timestamp": s.timestamp,
-            "team_id": s.team_id,
-            "note": s.note,
-            "photo_count": len(s.photos),
-            "created_at": s.created_at,
-            "first_photo": s.photos[0].file_path if s.photos else None,
-            "first_photo_mime": s.photos[0].mime_type if s.photos else None,
-        }
-        for s in subs
-    ]
+    return [_serialize_submission_summary(s) for s in query.all()]
 
 @router.get("/{submission_id}")
 def get_submission(submission_id: str, db: Session = Depends(get_db)):
-    sub = db.query(Submission).filter(Submission.id == submission_id).first()
+    sub = (
+        db.query(Submission)
+        .filter(Submission.id == submission_id, Submission.approved == True)
+        .first()
+    )
     if not sub:
         raise HTTPException(status_code=404, detail="Submission not found")
     return {
@@ -132,14 +143,3 @@ def get_submission(submission_id: str, db: Session = Depends(get_db)):
             for p in sub.photos
         ],
     }
-
-@router.delete("/{submission_id}", status_code=204)
-def delete_submission(submission_id: str, db: Session = Depends(get_db)):
-    sub = db.query(Submission).filter(Submission.id == submission_id).first()
-    if not sub:
-        raise HTTPException(status_code=404, detail="Submission not found")
-    photo_dir = os.path.join(PHOTOS_DIR, submission_id)
-    if os.path.exists(photo_dir):
-        shutil.rmtree(photo_dir)
-    db.delete(sub)
-    db.commit()

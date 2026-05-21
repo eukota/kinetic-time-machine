@@ -21,6 +21,7 @@ class Submission(Base):
     timestamp = Column(DateTime, nullable=True)
     note = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+    approved = Column(Boolean, default=False, nullable=False, index=True)
     team = relationship("Team", back_populates="submissions")
     photos = relationship("Photo", back_populates="submission", cascade="all, delete-orphan")
 
