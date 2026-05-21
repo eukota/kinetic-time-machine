@@ -70,7 +70,7 @@ jobs:
           fingerprint: ${{ secrets.DEPLOY_HOST_FINGERPRINT }}
           script: |
             set -e
-            cd ~/kinetic-time-machine
+            cd /opt/kinetic-time-machine
             git pull --ff-only
             docker compose -f docker-compose.prod.yml up -d --build
             docker image prune -f
