@@ -70,8 +70,8 @@ export default function App() {
           {view === 'map' && (
             <button
               onClick={() => setSidebarOpen((o) => !o)}
-              className="hidden md:flex absolute top-3 z-[500] items-center justify-center
-                         bg-white border border-gray-200 shadow-md rounded-l-md w-5 h-10 text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors"
+              className="hidden md:flex absolute top-0 z-[500] items-center justify-center
+                         bg-white border border-gray-200 border-t-0 shadow-md rounded-b-md w-7 h-7 text-gray-500 hover:text-gray-800 hover:bg-gray-50 transition-colors text-sm"
               style={{ right: sidebarOpen ? '320px' : '0' }}
               title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
             >

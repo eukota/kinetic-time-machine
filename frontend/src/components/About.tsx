@@ -43,6 +43,20 @@ export const About = () => (
         </p>
       </div>
 
+      <div className="border-t border-white/10 pt-8">
+        <h2 className="text-lg font-semibold mb-3">What's next</h2>
+        <p className="text-white/70 leading-relaxed mb-3">
+          Ideas for future versions (this is a "time machine" after all):
+        </p>
+        <ul className="list-disc list-inside space-y-1.5 text-white/70 marker:text-white/30">
+          <li><span className="text-white">Temporal replay</span> — scrub through the race timeline and watch photos appear as they were taken, day by day, hour by hour</li>
+          <li><span className="text-white">Crowdsourced team tagging</span> — anyone can identify untagged photos; auto-tag once 3+ people agree</li>
+          <li><span className="text-white">Heatmaps</span> — see which sections of the course got the most photo activity</li>
+          <li><span className="text-white">Per-team timelines</span> — follow one team's journey across all three days</li>
+          <li><span className="text-white">Historical races</span> — back-fill past KGC years as the archive grows</li>
+        </ul>
+      </div>
+
       <div className="border-t border-white/10 pt-8 flex gap-4">
         <a
           href="https://github.com/eukota/kinetic-time-machine"
