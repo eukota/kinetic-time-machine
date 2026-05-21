@@ -55,17 +55,22 @@ export const About = () => (
       </div>
 
       <div className="border-t border-white/10 pt-8">
-        <h2 className="text-lg font-semibold mb-3">What's next</h2>
+        <h2 className="text-lg font-semibold mb-3">Ideas floating around</h2>
         <p className="text-white/70 leading-relaxed mb-3">
-          Ideas for future versions (this is a "time machine" after all):
+          Half-baked thoughts that might or might not happen — partly because the name "time machine"
+          deserves to live up to itself:
         </p>
-        <ul className="list-disc list-inside space-y-1.5 text-white/70 marker:text-white/30">
-          <li><span className="text-white">Temporal replay</span> — scrub through the race timeline and watch photos appear as they were taken, day by day, hour by hour</li>
-          <li><span className="text-white">Crowdsourced team tagging</span> — anyone can identify untagged photos; auto-tag once 3+ people agree</li>
-          <li><span className="text-white">Heatmaps</span> — see which sections of the course got the most photo activity</li>
-          <li><span className="text-white">Per-team timelines</span> — follow one team's journey across all three days</li>
-          <li><span className="text-white">Historical races</span> — back-fill past KGC years as the archive grows</li>
+        <ul className="list-disc list-inside space-y-1.5 text-white/60 marker:text-white/25">
+          <li>Some kind of timeline scrubber to watch the race unfold hour by hour after it's over</li>
+          <li>Letting viewers help identify photos that didn't get tagged with a team</li>
+          <li>Heatmaps showing where photos clustered along the course</li>
+          <li>A way to follow one team's whole journey across all three days</li>
+          <li>Pulling in archives from past years if the data is out there somewhere</li>
         </ul>
+        <p className="text-white/40 text-xs italic leading-relaxed mt-3">
+          No promises. Whether any of this happens depends on whether the app turns out to be useful
+          to anyone besides me.
+        </p>
       </div>
 
       <div className="border-t border-white/10 pt-8 flex gap-4">
