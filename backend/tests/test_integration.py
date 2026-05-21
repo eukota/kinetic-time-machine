@@ -60,6 +60,16 @@ def test_create_submission():
     assert data["note"] == "test note"
     assert data["latitude"] is None
 
+def test_list_includes_first_photo():
+    r = client.get("/api/submissions/")
+    assert r.status_code == 200
+    items = r.json()
+    if items:
+        item = items[0]
+        assert "first_photo" in item
+        assert "first_photo_mime" in item
+        assert "created_at" in item
+
 def test_get_submission_not_found():
     r = client.get("/api/submissions/nonexistent-id")
     assert r.status_code == 404

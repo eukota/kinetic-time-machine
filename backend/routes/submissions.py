@@ -88,6 +88,9 @@ def list_submissions(team_id: str = None, db: Session = Depends(get_db)):
             "team_id": s.team_id,
             "note": s.note,
             "photo_count": len(s.photos),
+            "created_at": s.created_at,
+            "first_photo": s.photos[0].file_path if s.photos else None,
+            "first_photo_mime": s.photos[0].mime_type if s.photos else None,
         }
         for s in subs
     ]
