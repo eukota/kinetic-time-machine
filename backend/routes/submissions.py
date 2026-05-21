@@ -5,7 +5,11 @@ from database import get_db
 from models import Submission, Photo, Team
 from utils.exif import extract_exif
 from config import PHOTOS_DIR
+from PIL import Image
 import os, uuid, shutil
+
+HEIC_SUFFIXES = {".heic", ".heif"}
+
 
 router = APIRouter(prefix="/api/submissions", tags=["submissions"])
 
@@ -22,6 +26,15 @@ async def create_submission(
         shutil.copyfileobj(image.file, f)
 
     exif_data = extract_exif(temp_path)
+
+    # Convert HEIC/HEIF → JPEG for browser compatibility (EXIF already extracted above)
+    original_mime = image.content_type
+    if suffix.lower() in HEIC_SUFFIXES:
+        jpeg_path = temp_path[: temp_path.rfind(".")] + ".jpg"
+        Image.open(temp_path).convert("RGB").save(jpeg_path, "JPEG", quality=88)
+        os.unlink(temp_path)
+        temp_path = jpeg_path
+        suffix = ".jpg"
 
     submission = Submission(
         latitude=exif_data["latitude"],
@@ -45,7 +58,7 @@ async def create_submission(
     shutil.move(temp_path, dest_path)
 
     rel_path = f"{submission.id}/{photo_id}{suffix}"
-    photo = Photo(submission_id=submission.id, file_path=rel_path, mime_type=image.content_type)
+    photo = Photo(submission_id=submission.id, file_path=rel_path, mime_type=original_mime)
     db.add(photo)
     db.commit()
     db.refresh(submission)
