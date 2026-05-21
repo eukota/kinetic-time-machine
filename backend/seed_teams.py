@@ -53,6 +53,16 @@ RACERS = [
     (420, "Hippie-potamus", None),
 ]
 
+# Non-race categories — for photos not tied to a specific sculpture
+# (color, name)
+NON_RACERS = [
+    ("#6b7280", "Spectator"),
+    ("#6b7280", "Volunteer"),
+    ("#6b7280", "Pit Crew"),
+    ("#6b7280", "Course / Scenery"),
+    ("#fbbf24", "Kinetic Madness Band"),  # gold — the band stands out
+]
+
 def make_color(index: int, total: int) -> str:
     h = index / total
     r, g, b = colorsys.hsv_to_rgb(h, 0.72, 0.88)
@@ -62,6 +72,8 @@ init_db()
 db = SessionLocal()
 
 added = skipped = 0
+
+# Race teams
 for i, (number, sculpture, team_name) in enumerate(RACERS):
     display = f"#{number} {sculpture}" + (f" — {team_name}" if team_name else "")
     existing = db.query(Team).filter(Team.name == display).first()
@@ -73,6 +85,16 @@ for i, (number, sculpture, team_name) in enumerate(RACERS):
     if old:
         db.delete(old)
     team = Team(name=display, color=make_color(i, len(RACERS)))
+    db.add(team)
+    added += 1
+
+# Non-race categories
+for color, name in NON_RACERS:
+    existing = db.query(Team).filter(Team.name == name).first()
+    if existing:
+        skipped += 1
+        continue
+    team = Team(name=name, color=color)
     db.add(team)
     added += 1
 
