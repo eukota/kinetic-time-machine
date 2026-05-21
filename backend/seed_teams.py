@@ -7,49 +7,50 @@ import colorsys
 from database import SessionLocal, init_db
 from models import Team
 
+# (number, sculpture_name, team_name_or_None)
 RACERS = [
-    (101, "Pa Pa Smurf's Coach"),
-    (102, "HMS Sea Cow"),
-    (103, "Astro Bunny & the Space Cadets"),
-    (104, "Rocket Ham"),
-    (105, "Estate Peddlers"),
-    (106, "Asgard Racing is the Würst"),
-    (107, "LUCY"),
-    (108, "DragStrip Divas"),
-    (109, "Running on Glory"),
-    (110, "The Rebel Appliance"),
-    (111, "Chitty Chitty Bling Bling"),
-    (112, "Sparky the Magnificent"),
-    (114, "Hot Dawg and the Glory Hunters"),
-    (115, "Cowbus"),
-    (116, "Glory as the Magic School Bus"),
-    (117, "Kinetic Gyro Copter"),
-    (118, "Bikin' Fool"),
-    (119, "Four Norsemen of the Apocalypse"),
-    (120, "Coho Cowboys"),
-    (121, "Hobart's Duangels"),
-    (122, "OH Mickey (You're So Fine)"),
-    (123, "License to Grill"),
-    (124, "Cycle-Delic Rock Fish"),
-    (125, "The Oregon Fail"),
-    (126, "Megoosa"),
-    (127, "Bob Moss and the Happy Little Bees"),
-    (128, "Trooth Decay"),
-    (129, "Wheely Wonka"),
-    (130, "The Shoe Shine & the Heel n Soles"),
-    (131, "cac-TIE: Dressed to the Spines"),
-    (132, "Rolling Thunder"),
-    (133, "SLUG Life"),
-    (134, "Ravens in the Machine"),
-    (135, "Ravens Against The Machine"),
-    (136, "Home Base"),
-    (137, "Helen Wheels"),
-    (138, "Yeastie Boys - Brass Monkey"),
-    (139, "The 'Ccino Machino"),
-    (140, "E.T. Phone Humboldt"),
-    (141, "KPS Tools of Liberté"),
-    (143, "Pretty Sketchy and the Kewl Doodz"),
-    (420, "Hippie-potamus"),
+    (101, "Pa Pa Smurf's Coach", "Team Pa Pa"),
+    (102, "HMS Sea Cow", "Team Needs More Cowbell"),
+    (103, "Astro Bunny & the Space Cadets", "Team Goddess Racing"),
+    (104, "Rocket Ham", "Team Hamtastic Glory"),
+    (105, "Estate Peddlers", None),
+    (106, "Asgard Racing is the Würst", "Team Asgard Racing"),
+    (107, "LUCY", "The Peppers"),
+    (108, "DragStrip Divas", "Team Formerly Known As"),
+    (109, "Running on Glory", "Colfax High School Engineering Art"),
+    (110, "The Rebel Appliance", "Team Pineapple"),
+    (111, "Chitty Chitty Bling Bling", "Team For Shifts and Giggles"),
+    (112, "Sparky the Magnificent", None),
+    (114, "Hot Dawg and the Glory Hunters", "Asgard Presents: Patric and the Other Jacklegs"),
+    (115, "Cowbus", None),
+    (116, "Glory as the Magic School Bus", None),
+    (117, "Kinetic Gyro Copter", None),
+    (118, "Bikin' Fool", None),
+    (119, "Four Norsemen of the Apocalypse", "Team Tempus Fugitives"),
+    (120, "Coho Cowboys", "Team Coho Cowboys"),
+    (121, "Hobart's Duangels", None),
+    (122, "OH Mickey (You're So Fine)", None),
+    (123, "License to Grill", "Team Picante"),
+    (124, "Cycle-Delic Rock Fish", None),
+    (125, "The Oregon Fail", "Team Pedal Snappers Youth Kinetics"),
+    (126, "Megoosa", "The Kinetic A-Team"),
+    (127, "Bob Moss and the Happy Little Bees", "Team PLAN BEE"),
+    (128, "Trooth Decay", "The Apple Pedalers"),
+    (129, "Wheely Wonka", "Team Half-Fast"),
+    (130, "The Shoe Shine & the Heel n Soles", None),
+    (131, "cac-TIE: Dressed to the Spines", "Cooper Family Team"),
+    (132, "Rolling Thunder", "Kinetic Dream Team"),
+    (133, "SLUG Life", None),
+    (134, "Ravens in the Machine", "Team Subneutral"),
+    (135, "Ravens Against The Machine", "Team Subneutral"),
+    (136, "Home Base", "The Sequoia Humane Society Rescues!"),
+    (137, "Helen Wheels", None),
+    (138, "Yeastie Boys - Brass Monkey", "Team Waggle Kinetics"),
+    (139, "The 'Ccino Machino", None),
+    (140, "E.T. Phone Humboldt", "Team K3D"),
+    (141, "KPS Tools of Liberté", "The Kinetic Paranormal Society"),
+    (143, "Pretty Sketchy and the Kewl Doodz", "Team Royal Pain Inc"),
+    (420, "Hippie-potamus", None),
 ]
 
 def make_color(index: int, total: int) -> str:
@@ -61,12 +62,16 @@ init_db()
 db = SessionLocal()
 
 added = skipped = 0
-for i, (number, name) in enumerate(RACERS):
-    display = f"#{number} {name}"
+for i, (number, sculpture, team_name) in enumerate(RACERS):
+    display = f"#{number} {sculpture}" + (f" — {team_name}" if team_name else "")
     existing = db.query(Team).filter(Team.name == display).first()
     if existing:
         skipped += 1
         continue
+    # Remove old entry without team name if present
+    old = db.query(Team).filter(Team.name == f"#{number} {sculpture}").first()
+    if old:
+        db.delete(old)
     team = Team(name=display, color=make_color(i, len(RACERS)))
     db.add(team)
     added += 1
