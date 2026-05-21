@@ -43,3 +43,11 @@ def serve_photo(submission_id: str, filename: str):
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/api/config")
+def public_config():
+    """Public runtime config — frontend fetches this to know what features are enabled."""
+    return {
+        "hcaptcha_sitekey": os.getenv("HCAPTCHA_SITEKEY", "") or None,
+    }

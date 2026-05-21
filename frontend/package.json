@@ -13,7 +13,8 @@
     "zustand": "^4.4.1",
     "leaflet": "^1.9.4",
     "react-leaflet": "^4.2.1",
-    "react-leaflet-cluster": "^2.1.0"
+    "react-leaflet-cluster": "^2.1.0",
+    "@hcaptcha/react-hcaptcha": "^1.11.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.37",

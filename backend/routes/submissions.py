@@ -5,6 +5,7 @@ from database import get_db
 from limiter import limiter
 from models import Submission, Photo, Team
 from utils.exif import extract_exif
+from utils.captcha import verify_captcha
 from config import PHOTOS_DIR
 from PIL import Image
 import os, uuid, shutil
@@ -23,8 +24,14 @@ async def create_submission(
     image: UploadFile = File(...),
     note: str = Form(None),
     team_name: str = Form(None),
+    captcha_token: str = Form(None),
     db: Session = Depends(get_db),
 ):
+    # hCaptcha — if HCAPTCHA_SECRET is set on the server, require a valid token
+    client_ip = request.client.host if request.client else None
+    if not await verify_captcha(captcha_token, client_ip):
+        raise HTTPException(status_code=400, detail="Captcha verification failed")
+
     # Early reject if Content-Length header says it's too big (cheap upfront check)
     content_length = request.headers.get("content-length")
     if content_length and int(content_length) > MAX_UPLOAD_BYTES + 1_000_000:

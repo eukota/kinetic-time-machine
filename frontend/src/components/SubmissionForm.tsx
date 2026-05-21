@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import HCaptcha from '@hcaptcha/react-hcaptcha'
 import { useSubmissions } from '../hooks/useSubmissions'
 import { useStore } from '../store'
 
@@ -15,7 +16,17 @@ export const SubmissionForm = ({ onClose }: Props) => {
   const [note, setNote] = useState('')
   const [uploading, setUploading] = useState(false)
   const [preview, setPreview] = useState<string | null>(null)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [hcaptchaSitekey, setHcaptchaSitekey] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  const captchaRef = useRef<HCaptcha>(null)
+
+  useEffect(() => {
+    fetch('/api/config')
+      .then((r) => r.json())
+      .then((cfg) => setHcaptchaSitekey(cfg.hcaptcha_sitekey || null))
+      .catch(() => {})
+  }, [])
 
   const filteredTeams = teamSearch.trim()
     ? teams.filter((t) =>
@@ -45,12 +56,17 @@ export const SubmissionForm = ({ onClose }: Props) => {
     e.preventDefault()
     const file = fileRef.current?.files?.[0]
     if (!file) return
+    if (hcaptchaSitekey && !captchaToken) {
+      alert('Please complete the captcha first')
+      return
+    }
     setUploading(true)
     setSuccessMsg(null)
     const formData = new FormData()
     formData.append('image', file)
     if (note) formData.append('note', note)
     if (teamName) formData.append('team_name', teamName)
+    if (captchaToken) formData.append('captcha_token', captchaToken)
     const result = await createSubmission(formData)
     setUploading(false)
     if (result) {
@@ -58,6 +74,8 @@ export const SubmissionForm = ({ onClose }: Props) => {
       setTeamSearch('')
       setNote('')
       setPreview(null)
+      setCaptchaToken(null)
+      captchaRef.current?.resetCaptcha()
       if (fileRef.current) fileRef.current.value = ''
       setSuccessMsg(
         result.pending_review
@@ -65,8 +83,9 @@ export const SubmissionForm = ({ onClose }: Props) => {
           : '✓ Submitted'
       )
       setTimeout(() => setSuccessMsg(null), 6000)
-      // Don't auto-close on success — keep the message visible briefly
     } else {
+      captchaRef.current?.resetCaptcha()
+      setCaptchaToken(null)
       alert('Upload failed — please try again')
     }
   }
@@ -148,9 +167,23 @@ export const SubmissionForm = ({ onClose }: Props) => {
           placeholder="Anything worth noting..."
         />
       </div>
+      {hcaptchaSitekey && (
+        <div>
+          <HCaptcha
+            ref={captchaRef}
+            sitekey={hcaptchaSitekey}
+            onVerify={(token) => setCaptchaToken(token)}
+            onExpire={() => setCaptchaToken(null)}
+            onError={() => setCaptchaToken(null)}
+            theme="light"
+            size="normal"
+          />
+        </div>
+      )}
+
       <button
         type="submit"
-        disabled={uploading}
+        disabled={uploading || (!!hcaptchaSitekey && !captchaToken)}
         className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors"
       >
         {uploading ? 'Uploading...' : 'Submit Photo'}
