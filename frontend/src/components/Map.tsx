@@ -26,7 +26,7 @@ const RaceCourseOverlay = () => {
       .then((r) => r.json())
       .then((geojson) => {
         const layer = L.geoJSON(geojson, {
-          style: { color: '#e63946', weight: 3, opacity: 0.8 },
+          style: { color: '#e63946', weight: 3, opacity: 0.8, fill: false },
         }).addTo(map)
         return () => { map.removeLayer(layer) }
       })
