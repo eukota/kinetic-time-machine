@@ -2,36 +2,62 @@ from PIL import Image
 from PIL.ExifTags import TAGS, GPSTAGS
 from datetime import datetime
 
+try:
+    import pillow_heif
+    pillow_heif.register_heif_opener()
+except ImportError:
+    pass
+
+GPS_IFD_TAG = 0x8825       # GPS info IFD pointer
+DATETIME_ORIGINAL = 0x9003  # DateTimeOriginal tag
+
+
 def extract_exif(image_path: str) -> dict:
     result = {"latitude": None, "longitude": None, "timestamp": None}
     try:
         image = Image.open(image_path)
-        raw_exif = image._getexif()
-        if not raw_exif:
+        exif = image.getexif()
+        if not exif:
             return result
-        exif = {TAGS.get(k, k): v for k, v in raw_exif.items()}
-        if "DateTime" in exif:
+
+        # Prefer DateTimeOriginal (shutter time), fall back to DateTime
+        dt_str = exif.get(DATETIME_ORIGINAL)
+        if not dt_str:
+            dt_str = next(
+                (exif[k] for k, v in TAGS.items() if v == "DateTime" and k in exif),
+                None,
+            )
+        if dt_str:
             try:
-                result["timestamp"] = datetime.strptime(exif["DateTime"], "%Y:%m:%d %H:%M:%S")
-            except ValueError:
+                result["timestamp"] = datetime.strptime(dt_str, "%Y:%m:%d %H:%M:%S")
+            except (ValueError, TypeError):
                 pass
-        if "GPSInfo" in exif:
-            gps_raw = {GPSTAGS.get(k, k): v for k, v in exif["GPSInfo"].items()}
-            lat = _to_degrees(gps_raw.get("GPSLatitude"))
-            lon = _to_degrees(gps_raw.get("GPSLongitude"))
+
+        # GPS from the dedicated GPS IFD (works for JPEG and HEIC)
+        gps_ifd = exif.get_ifd(GPS_IFD_TAG)
+        if gps_ifd:
+            gps = {GPSTAGS.get(k, k): v for k, v in gps_ifd.items()}
+            lat = _to_degrees(gps.get("GPSLatitude"))
+            lon = _to_degrees(gps.get("GPSLongitude"))
             if lat is not None and lon is not None:
-                if gps_raw.get("GPSLatitudeRef") == "S":
+                if gps.get("GPSLatitudeRef") == "S":
                     lat = -lat
-                if gps_raw.get("GPSLongitudeRef") == "W":
+                if gps.get("GPSLongitudeRef") == "W":
                     lon = -lon
                 result["latitude"] = lat
                 result["longitude"] = lon
+
     except Exception as e:
         print(f"EXIF extraction error: {e}")
+
     return result
 
+
 def _to_degrees(value) -> float | None:
-    if value is None or len(value) != 3:
+    if value is None:
         return None
-    d, m, s = value
-    return float(d) + float(m) / 60.0 + float(s) / 3600.0
+    try:
+        d, m, s = value
+        return float(d) + float(m) / 60.0 + float(s) / 3600.0
+    except Exception:
+        return None
