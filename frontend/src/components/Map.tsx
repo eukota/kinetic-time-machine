@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet'
 import MarkerClusterGroup from 'react-leaflet-cluster'
 import L from 'leaflet'
@@ -21,17 +21,33 @@ const MapZoomTracker = () => {
 
 const RaceCourseOverlay = () => {
   const map = useMap()
+  const { selectedDay } = useStore()
+  const layersRef = useRef<L.GeoJSON[]>([])
+
   useEffect(() => {
+    let cancelled = false
     fetch('/static/race-course.geojson')
       .then((r) => r.json())
       .then((geojson) => {
-        const layer = L.geoJSON(geojson, {
-          style: { color: '#e63946', weight: 3, opacity: 0.8, fill: false },
-        }).addTo(map)
-        return () => { map.removeLayer(layer) }
+        if (cancelled) return
+        layersRef.current.forEach((l) => map.removeLayer(l))
+        layersRef.current = []
+
+        geojson.features.forEach((feature: any) => {
+          const { day, color } = feature.properties
+          if (selectedDay !== null && day !== selectedDay) return
+          const opacity = selectedDay === null ? 0.75 : 1.0
+          const weight = selectedDay === null ? 3 : 4
+          const layer = L.geoJSON(feature, {
+            style: { color, weight, opacity, fill: false },
+          }).addTo(map)
+          layersRef.current.push(layer)
+        })
       })
       .catch(() => {})
-  }, [map])
+    return () => { cancelled = true }
+  }, [map, selectedDay])
+
   return null
 }
 
@@ -58,8 +74,8 @@ export const Map = () => {
   useSubmissions()
   return (
     <MapContainer
-      center={[40.83, -124.16]}
-      zoom={12}
+      center={[40.72, -124.18]}
+      zoom={11}
       style={{ height: '100%', width: '100%' }}
     >
       <TileLayer

@@ -4,6 +4,7 @@ import { Map } from './components/Map'
 import { SubmissionForm } from './components/SubmissionForm'
 import { SubmissionModal } from './components/SubmissionModal'
 import { TeamFilter } from './components/TeamFilter'
+import { CourseFilter } from './components/CourseFilter'
 
 export default function App() {
   const { selectedSubmission } = useStore()
@@ -41,7 +42,8 @@ export default function App() {
         {showTeams && (
           <div className="md:hidden fixed inset-0 z-[998] flex flex-col justify-end">
             <div className="bg-black/40 absolute inset-0" onClick={() => setShowTeams(false)} />
-            <div className="relative bg-white rounded-t-2xl p-4 max-h-[60vh] overflow-y-auto shadow-2xl">
+            <div className="relative bg-white rounded-t-2xl p-4 max-h-[60vh] overflow-y-auto shadow-2xl space-y-4">
+              <CourseFilter />
               <TeamFilter />
             </div>
           </div>
@@ -54,6 +56,9 @@ export default function App() {
         </div>
         <div className="p-4 border-b">
           <SubmissionForm />
+        </div>
+        <div className="p-4 border-b">
+          <CourseFilter />
         </div>
         <div className="p-4">
           <TeamFilter />
