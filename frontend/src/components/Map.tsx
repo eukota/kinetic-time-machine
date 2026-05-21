@@ -59,20 +59,43 @@ const RaceCourseOverlay = () => {
 }
 
 const SubmissionMarkers = () => {
-  const { submissions, selectSubmission } = useStore()
+  const { submissions, selectSubmission, selectSubmissions } = useStore()
+
+  const located = submissions.filter(
+    (s): s is Submission & { latitude: number; longitude: number } =>
+      s.latitude !== null && s.longitude !== null
+  )
+
+  const handleClusterClick = (e: any) => {
+    e.originalEvent?.preventDefault()
+    const childMarkers: L.Marker[] = e.layer.getAllChildMarkers()
+    const keys = new Set(
+      childMarkers.map((m) => {
+        const ll = m.getLatLng()
+        return `${ll.lat},${ll.lng}`
+      })
+    )
+    const found = located.filter((s) => keys.has(`${s.latitude},${s.longitude}`))
+    if (found.length === 1) {
+      selectSubmission(found[0])
+    } else {
+      selectSubmissions(found)
+    }
+  }
+
   return (
-    <MarkerClusterGroup chunkedLoading>
-      {submissions
-        .filter((s): s is Submission & { latitude: number; longitude: number } =>
-          s.latitude !== null && s.longitude !== null
-        )
-        .map((s) => (
-          <Marker
-            key={s.id}
-            position={[s.latitude, s.longitude]}
-            eventHandlers={{ click: () => selectSubmission(s) }}
-          />
-        ))}
+    <MarkerClusterGroup
+      chunkedLoading
+      zoomToBoundsOnClick={false}
+      eventHandlers={{ clusterclick: handleClusterClick } as any}
+    >
+      {located.map((s) => (
+        <Marker
+          key={s.id}
+          position={[s.latitude, s.longitude]}
+          eventHandlers={{ click: () => selectSubmission(s) }}
+        />
+      ))}
     </MarkerClusterGroup>
   )
 }

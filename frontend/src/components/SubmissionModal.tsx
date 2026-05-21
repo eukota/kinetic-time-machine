@@ -2,40 +2,83 @@ import { useEffect, useState } from 'react'
 import { useStore, Submission } from '../store'
 import { useSubmissions } from '../hooks/useSubmissions'
 
-export const SubmissionModal = () => {
-  const { selectedSubmission, selectSubmission, setSubmissions, submissions } = useStore()
+interface DetailedSubmission extends Submission {
+  photos?: { id: string; file_path: string; mime_type: string | null; uploaded_at: string }[]
+}
+
+const SubmissionCard = ({
+  submission,
+  onDelete,
+}: {
+  submission: DetailedSubmission
+  onDelete: (id: string) => void
+}) => {
   const { getSubmissionDetails } = useSubmissions()
-  const [details, setDetails] = useState<Submission | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [deleting, setDeleting] = useState(false)
+  const [details, setDetails] = useState<DetailedSubmission | null>(null)
 
   useEffect(() => {
-    if (!selectedSubmission) {
-      setDetails(null)
-      return
-    }
-    setLoading(true)
-    getSubmissionDetails(selectedSubmission.id).then((d) => {
-      setDetails(d)
-      setLoading(false)
-    })
-  }, [selectedSubmission])
-
-  if (!selectedSubmission) return null
-
-  const close = () => selectSubmission(null)
+    getSubmissionDetails(submission.id).then((d) => setDetails(d as DetailedSubmission))
+  }, [submission.id])
 
   const handleDelete = async () => {
     if (!confirm('Delete this submission and its photos?')) return
-    setDeleting(true)
-    try {
-      const r = await fetch(`/api/submissions/${selectedSubmission.id}`, { method: 'DELETE' })
-      if (r.ok) {
-        setSubmissions(submissions.filter((s) => s.id !== selectedSubmission.id))
-        selectSubmission(null)
-      }
-    } finally {
-      setDeleting(false)
+    const r = await fetch(`/api/submissions/${submission.id}`, { method: 'DELETE' })
+    if (r.ok) onDelete(submission.id)
+  }
+
+  return (
+    <div className="border rounded-lg overflow-hidden">
+      {details?.photos?.map((photo) => (
+        <img
+          key={photo.id}
+          src={`/photos/${photo.file_path}`}
+          alt="submission"
+          className="w-full object-contain max-h-72"
+        />
+      ))}
+      <div className="p-3 text-sm text-gray-600 space-y-1">
+        {submission.latitude != null && submission.longitude != null && (
+          <p><span className="font-medium">Location:</span> {submission.latitude.toFixed(5)}, {submission.longitude.toFixed(5)}</p>
+        )}
+        {submission.timestamp && (
+          <p><span className="font-medium">Time:</span> {new Date(submission.timestamp).toLocaleString()}</p>
+        )}
+        {submission.note && (
+          <p><span className="font-medium">Note:</span> {submission.note}</p>
+        )}
+        {details?.photos?.[0]?.mime_type && (
+          <p className="text-xs text-gray-400">Format: {details.photos[0].mime_type}</p>
+        )}
+        <button
+          onClick={handleDelete}
+          className="text-xs text-red-400 hover:text-red-600 pt-1"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  )
+}
+
+export const SubmissionModal = () => {
+  const { selectedSubmission, selectSubmission, selectedSubmissions, selectSubmissions, setSubmissions, submissions } = useStore()
+
+  const isOpen = selectedSubmission !== null || selectedSubmissions.length > 0
+  if (!isOpen) return null
+
+  const items: Submission[] = selectedSubmission ? [selectedSubmission] : selectedSubmissions
+  const close = () => {
+    selectSubmission(null)
+    selectSubmissions([])
+  }
+
+  const handleDelete = (id: string) => {
+    setSubmissions(submissions.filter((s) => s.id !== id))
+    const remaining = items.filter((s) => s.id !== id)
+    if (remaining.length === 0) {
+      close()
+    } else if (remaining.length === 1 && selectedSubmissions.length > 0) {
+      selectSubmissions(remaining)
     }
   }
 
@@ -45,54 +88,19 @@ export const SubmissionModal = () => {
       onClick={close}
     >
       <div
-        className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto"
+        className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="text-lg font-bold">Submission Photos</h2>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleDelete}
-              disabled={deleting}
-              className="text-sm text-red-500 hover:text-red-700 disabled:opacity-50"
-            >
-              {deleting ? 'Deleting…' : 'Delete'}
-            </button>
-            <button onClick={close} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
-          </div>
+        <div className="flex items-center justify-between p-4 border-b flex-shrink-0">
+          <h2 className="text-lg font-bold">
+            {items.length === 1 ? 'Submission' : `${items.length} Submissions`}
+          </h2>
+          <button onClick={close} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
         </div>
-        <div className="p-4">
-          {loading && <p className="text-center py-8 text-gray-400">Loading...</p>}
-          {!loading && details?.photos?.length ? (
-            <div className="grid grid-cols-1 gap-3">
-              {details.photos.map((photo) => (
-                <img
-                  key={photo.id}
-                  src={`/photos/${photo.file_path}`}
-                  alt="submission"
-                  className="w-full rounded-lg object-contain max-h-80"
-                />
-              ))}
-            </div>
-          ) : (
-            !loading && <p className="text-gray-400 text-sm">No photos found.</p>
-          )}
-          {details && (
-            <div className="mt-4 pt-4 border-t text-sm text-gray-600 space-y-1">
-              {details.latitude != null && details.longitude != null && (
-                <p><span className="font-medium">Location: </span>{details.latitude.toFixed(5)}, {details.longitude.toFixed(5)}</p>
-              )}
-              {details.timestamp && (
-                <p><span className="font-medium">Time: </span>{new Date(details.timestamp).toLocaleString()}</p>
-              )}
-              {details.note && (
-                <p><span className="font-medium">Note: </span>{details.note}</p>
-              )}
-              {!details.latitude && !details.note && (
-                <p className="text-gray-400 italic">No location or notes for this submission.</p>
-              )}
-            </div>
-          )}
+        <div className="overflow-y-auto p-4 space-y-4">
+          {items.map((s) => (
+            <SubmissionCard key={s.id} submission={s} onDelete={handleDelete} />
+          ))}
         </div>
       </div>
     </div>
