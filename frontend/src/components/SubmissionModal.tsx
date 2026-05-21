@@ -19,6 +19,7 @@ export const SubmissionModal = () => {
     selectedSubmission, selectSubmission,
     selectedSubmissions, selectSubmissions,
     setSubmissions, submissions, teams,
+    initialIndex,
   } = useStore()
   const { getSubmissionDetails } = useSubmissions()
 
@@ -36,7 +37,7 @@ export const SubmissionModal = () => {
     setDetail(null)
   }, [selectSubmission, selectSubmissions])
 
-  useEffect(() => { if (isOpen) setIndex(0) }, [isOpen])
+  useEffect(() => { if (isOpen) setIndex(initialIndex) }, [isOpen, initialIndex])
 
   useEffect(() => {
     if (!isOpen || items.length === 0) return
