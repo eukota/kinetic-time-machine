@@ -42,7 +42,7 @@ async def create_submission(
     dest_dir = os.path.join(PHOTOS_DIR, submission.id)
     os.makedirs(dest_dir, exist_ok=True)
     dest_path = os.path.join(dest_dir, f"{photo_id}{suffix}")
-    os.rename(temp_path, dest_path)
+    shutil.move(temp_path, dest_path)
 
     rel_path = f"{submission.id}/{photo_id}{suffix}"
     photo = Photo(submission_id=submission.id, file_path=rel_path)
