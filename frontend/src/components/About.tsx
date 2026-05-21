@@ -25,6 +25,17 @@ export const About = () => (
         in real time, filterable by team.
       </p>
 
+      <div className="bg-blue-950/40 border border-blue-500/20 text-blue-100/90 text-sm leading-relaxed rounded-lg px-4 py-3 space-y-1">
+        <p className="font-medium flex items-center gap-1.5">
+          <span aria-hidden>🛡️</span> A note on safety
+        </p>
+        <p className="text-blue-200/70">
+          Submitted photos go through a brief manual review before appearing publicly.
+          This keeps the map family-friendly and protects against accidental or malicious uploads.
+          Most submissions are approved within minutes during the race.
+        </p>
+      </div>
+
       <div className="border-t border-white/10 pt-8">
         <h2 className="text-lg font-semibold mb-3">About the builder</h2>
         <p className="text-white/70 leading-relaxed">

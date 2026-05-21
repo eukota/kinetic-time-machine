@@ -93,9 +93,25 @@ export const SubmissionForm = ({ onClose }: Props) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <h2 className="text-xl font-bold">Submit Photo</h2>
-      {successMsg && (
-        <div className="bg-green-50 border border-green-200 text-green-700 text-xs px-3 py-2 rounded">
-          {successMsg}
+
+      {successMsg ? (
+        <div className="bg-green-50 border border-green-300 text-green-900 px-3 py-3 rounded space-y-1">
+          <p className="font-medium text-sm flex items-center gap-1.5">
+            <span>✓</span> Thanks — your photo was submitted!
+          </p>
+          <p className="text-xs text-green-700 leading-relaxed">
+            It'll appear on the map and gallery after a quick safety review
+            (usually just a few minutes during the race).
+          </p>
+        </div>
+      ) : (
+        <div className="bg-blue-50 border border-blue-200 text-blue-900 text-xs px-3 py-2 rounded leading-relaxed">
+          <p className="font-medium flex items-center gap-1.5 mb-0.5">
+            <span aria-hidden>🛡️</span> Photos are reviewed before going public
+          </p>
+          <p className="text-blue-700">
+            A quick safety check keeps the map family-friendly. Most submissions are approved within minutes.
+          </p>
         </div>
       )}
       <div>

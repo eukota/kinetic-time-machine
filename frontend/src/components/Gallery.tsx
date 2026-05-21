@@ -194,8 +194,9 @@ export const Gallery = () => {
         onClick={() => setShowTeamPanel(false)}
       >
         {filtered.length === 0 && (
-          <div className="flex items-center justify-center h-48 text-white/30 text-sm">
-            No photos yet
+          <div className="flex flex-col items-center justify-center h-48 text-white/40 text-sm text-center px-4 space-y-1">
+            <p>No approved photos yet</p>
+            <p className="text-xs text-white/30">Submissions appear here after a brief safety review.</p>
           </div>
         )}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5">
