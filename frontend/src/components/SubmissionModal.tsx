@@ -3,10 +3,11 @@ import { useStore, Submission } from '../store'
 import { useSubmissions } from '../hooks/useSubmissions'
 
 export const SubmissionModal = () => {
-  const { selectedSubmission, selectSubmission } = useStore()
+  const { selectedSubmission, selectSubmission, setSubmissions, submissions } = useStore()
   const { getSubmissionDetails } = useSubmissions()
   const [details, setDetails] = useState<Submission | null>(null)
   const [loading, setLoading] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     if (!selectedSubmission) {
@@ -24,6 +25,20 @@ export const SubmissionModal = () => {
 
   const close = () => selectSubmission(null)
 
+  const handleDelete = async () => {
+    if (!confirm('Delete this submission and its photos?')) return
+    setDeleting(true)
+    try {
+      const r = await fetch(`/api/submissions/${selectedSubmission.id}`, { method: 'DELETE' })
+      if (r.ok) {
+        setSubmissions(submissions.filter((s) => s.id !== selectedSubmission.id))
+        selectSubmission(null)
+      }
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   return (
     <div
       className="fixed inset-0 bg-black/60 flex items-center justify-center z-[1000] p-4"
@@ -35,7 +50,16 @@ export const SubmissionModal = () => {
       >
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-lg font-bold">Submission Photos</h2>
-          <button onClick={close} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="text-sm text-red-500 hover:text-red-700 disabled:opacity-50"
+            >
+              {deleting ? 'Deleting…' : 'Delete'}
+            </button>
+            <button onClick={close} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+          </div>
         </div>
         <div className="p-4">
           {loading && <p className="text-center py-8 text-gray-400">Loading...</p>}

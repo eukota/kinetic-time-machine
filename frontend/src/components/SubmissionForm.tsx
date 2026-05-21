@@ -51,7 +51,6 @@ export const SubmissionForm = ({ onClose }: Props) => {
           ref={fileRef}
           type="file"
           accept="image/*"
-          capture="environment"
           onChange={handleFileChange}
           required
           className="w-full text-sm border rounded px-2 py-1"

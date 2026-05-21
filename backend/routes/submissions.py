@@ -96,3 +96,14 @@ def get_submission(submission_id: str, db: Session = Depends(get_db)):
             for p in sub.photos
         ],
     }
+
+@router.delete("/{submission_id}", status_code=204)
+def delete_submission(submission_id: str, db: Session = Depends(get_db)):
+    sub = db.query(Submission).filter(Submission.id == submission_id).first()
+    if not sub:
+        raise HTTPException(status_code=404, detail="Submission not found")
+    photo_dir = os.path.join(PHOTOS_DIR, submission_id)
+    if os.path.exists(photo_dir):
+        shutil.rmtree(photo_dir)
+    db.delete(sub)
+    db.commit()
