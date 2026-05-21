@@ -31,6 +31,15 @@ export const About = () => (
           I lived in Arcata from 2004–2009 and have been fascinated by the kinetic race ever since.
           Participating in it in some fashion has been a dream for a long time.
           I moved back to the area in September 2025 — this app is part of making that happen.
+          This year I'm playing trombone in the Kinetic Madness Band.
+        </p>
+      </div>
+
+      <div className="border-t border-white/10 pt-8">
+        <h2 className="text-lg font-semibold mb-3">A note on the code</h2>
+        <p className="text-white/70 leading-relaxed">
+          This app was written in a feverish sprint with AI just 48 hours before the 2026 race.
+          Pardon the mess.
         </p>
       </div>
 
