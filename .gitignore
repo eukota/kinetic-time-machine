@@ -1,0 +1,29 @@
+# Backend
+backend/__pycache__/
+backend/*.pyc
+backend/.env
+backend/.venv
+backend/venv/
+backend/kgc_race.db
+
+# Photos (user data, not committed)
+data/photos/*
+!data/photos/.gitkeep
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+
+# Claude Code local settings (may contain personal permissions)
+.claude/settings.local.json
