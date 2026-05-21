@@ -6,6 +6,8 @@ services:
     volumes:
       - ./backend:/app
       - ./data:/data
+    env_file:
+      - .env
     environment:
       PHOTOS_DIR: /data/photos
       DATABASE_URL: sqlite:////data/kgc_race.db
