@@ -1,0 +1,26 @@
+kinetic.eukota.com {
+    # API routes go to the FastAPI backend
+    handle /api/* {
+        reverse_proxy backend:8000
+    }
+
+    # Photo storage and static files (race-course.geojson) also from backend
+    handle /photos/* {
+        reverse_proxy backend:8000
+    }
+    handle /static/* {
+        reverse_proxy backend:8000
+    }
+
+    # Everything else: the React static bundle from nginx
+    handle {
+        reverse_proxy frontend:80
+    }
+
+    # Sensible defaults
+    encode gzip zstd
+    log {
+        output stdout
+        format console
+    }
+}
