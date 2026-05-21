@@ -39,7 +39,7 @@ export const About = () => (
         <h2 className="text-lg font-semibold mb-3">A note on the code</h2>
         <p className="text-white/70 leading-relaxed">
           This app was written in a feverish sprint with AI just 48 hours before the 2026 race.
-          Pardon the mess.
+          Pardon the mess. If it turns out to be useful, I'll keep building on it after the race.
         </p>
       </div>
 
