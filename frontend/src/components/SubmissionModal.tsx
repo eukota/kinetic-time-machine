@@ -1,115 +1,145 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useStore, Submission } from '../store'
 import { useSubmissions } from '../hooks/useSubmissions'
 
-interface DetailedSubmission extends Submission {
-  photos?: { id: string; file_path: string; mime_type: string | null; uploaded_at: string }[]
+interface DetailPhoto {
+  id: string
+  file_path: string
+  mime_type: string | null
+  uploaded_at: string
 }
 
-const SubmissionCard = ({
-  submission,
-  onDelete,
-}: {
-  submission: DetailedSubmission
-  onDelete: (id: string) => void
-}) => {
-  const { getSubmissionDetails } = useSubmissions()
-  const [details, setDetails] = useState<DetailedSubmission | null>(null)
-
-  useEffect(() => {
-    getSubmissionDetails(submission.id).then((d) => setDetails(d as DetailedSubmission))
-  }, [submission.id])
-
-  const handleDelete = async () => {
-    if (!confirm('Delete this submission and its photos?')) return
-    const r = await fetch(`/api/submissions/${submission.id}`, { method: 'DELETE' })
-    if (r.ok) onDelete(submission.id)
-  }
-
-  return (
-    <div className="border rounded-lg overflow-hidden">
-      {details?.photos?.map((photo) => (
-        <img
-          key={photo.id}
-          src={`/photos/${photo.file_path}`}
-          alt="submission"
-          className="w-full object-contain max-h-72"
-        />
-      ))}
-      <div className="p-3 text-sm text-gray-600 space-y-1">
-        {submission.latitude != null && submission.longitude != null && (
-          <p><span className="font-medium">Location:</span> {submission.latitude.toFixed(5)}, {submission.longitude.toFixed(5)}</p>
-        )}
-        {submission.timestamp && (
-          <p><span className="font-medium">Time:</span> {new Date(submission.timestamp).toLocaleString()}</p>
-        )}
-        {submission.note && (
-          <p><span className="font-medium">Note:</span> {submission.note}</p>
-        )}
-        {details?.photos?.[0]?.mime_type && (
-          <p className="text-xs text-gray-400">Format: {details.photos[0].mime_type}</p>
-        )}
-        <button
-          onClick={handleDelete}
-          className="text-xs text-red-400 hover:text-red-600 pt-1"
-        >
-          Delete
-        </button>
-      </div>
-    </div>
-  )
+interface Detail extends Submission {
+  photos?: DetailPhoto[]
 }
 
 export const SubmissionModal = () => {
-  const { selectedSubmission, selectSubmission, selectedSubmissions, selectSubmissions, setSubmissions, submissions } = useStore()
+  const {
+    selectedSubmission, selectSubmission,
+    selectedSubmissions, selectSubmissions,
+    setSubmissions, submissions, teams,
+  } = useStore()
+  const { getSubmissionDetails } = useSubmissions()
 
   const isOpen = selectedSubmission !== null || selectedSubmissions.length > 0
+  const items: Submission[] = selectedSubmission ? [selectedSubmission] : selectedSubmissions
 
-  const close = () => {
+  const [index, setIndex] = useState(0)
+  const [detail, setDetail] = useState<Detail | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  const close = useCallback(() => {
     selectSubmission(null)
     selectSubmissions([])
-  }
+    setIndex(0)
+    setDetail(null)
+  }, [selectSubmission, selectSubmissions])
+
+  useEffect(() => { if (isOpen) setIndex(0) }, [isOpen])
+
+  useEffect(() => {
+    if (!isOpen || items.length === 0) return
+    const item = items[index]
+    if (!item) return
+    setDetail(null)
+    setLoading(true)
+    getSubmissionDetails(item.id).then((d) => {
+      setDetail(d as Detail)
+      setLoading(false)
+    })
+  }, [index, isOpen])
+
+  const prev = useCallback(() => setIndex((i) => (i - 1 + items.length) % items.length), [items.length])
+  const next = useCallback(() => setIndex((i) => (i + 1) % items.length), [items.length])
 
   useEffect(() => {
     if (!isOpen) return
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') close() }
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close()
+      else if (e.key === 'ArrowLeft') prev()
+      else if (e.key === 'ArrowRight') next()
+    }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
-  }, [isOpen])
+  }, [isOpen, close, prev, next])
+
+  const handleDelete = async () => {
+    if (!detail || !confirm('Delete this submission and its photos?')) return
+    const r = await fetch(`/api/submissions/${detail.id}`, { method: 'DELETE' })
+    if (!r.ok) return
+    setSubmissions(submissions.filter((s) => s.id !== detail.id))
+    const remaining = items.filter((s) => s.id !== detail.id)
+    if (remaining.length === 0) { close(); return }
+    selectSubmissions(remaining)
+    setIndex(Math.min(index, remaining.length - 1))
+  }
 
   if (!isOpen) return null
 
-  const items: Submission[] = selectedSubmission ? [selectedSubmission] : selectedSubmissions
-
-  const handleDelete = (id: string) => {
-    setSubmissions(submissions.filter((s) => s.id !== id))
-    const remaining = items.filter((s) => s.id !== id)
-    if (remaining.length === 0) {
-      close()
-    } else if (remaining.length === 1 && selectedSubmissions.length > 0) {
-      selectSubmissions(remaining)
-    }
-  }
+  const current = items[index]
+  const photo = detail?.photos?.[0]
+  const teamName = current?.team_id ? teams.find((t) => t.id === current.team_id)?.name : null
+  const multi = items.length > 1
 
   return (
-    <div
-      className="fixed inset-0 bg-black/60 flex items-center justify-center z-[1000] p-4"
-      onClick={close}
-    >
-      <div
-        className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between p-4 border-b flex-shrink-0">
-          <h2 className="text-lg font-bold">
-            {items.length === 1 ? 'Submission' : `${items.length} Submissions`}
-          </h2>
-          <button onClick={close} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+    <div className="fixed inset-0 bg-black/92 z-[1000] flex flex-col select-none" onClick={close}>
+
+      {/* Top bar */}
+      <div className="flex items-center justify-between px-4 pt-3 pb-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+        <span className="text-white/50 text-sm">{multi ? `${index + 1} / ${items.length}` : ''}</span>
+        <button onClick={close} className="text-white/60 hover:text-white text-xl w-8 h-8 flex items-center justify-center">✕</button>
+      </div>
+
+      {/* Image + side arrows */}
+      <div className="flex-1 flex items-stretch min-h-0 relative" onClick={(e) => e.stopPropagation()}>
+
+        {/* Left arrow */}
+        <button
+          onClick={prev}
+          className={`flex-shrink-0 w-14 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/5 transition-colors text-4xl ${!multi ? 'invisible' : ''}`}
+        >
+          ‹
+        </button>
+
+        {/* Photo */}
+        <div className="flex-1 flex items-center justify-center min-w-0 py-2">
+          {loading && <div className="text-white/30 text-sm">Loading…</div>}
+          {!loading && photo && (
+            <img
+              src={`/photos/${photo.file_path}`}
+              alt="submission"
+              className="max-w-full max-h-full object-contain rounded-sm"
+            />
+          )}
+          {!loading && !photo && <div className="text-white/30 text-sm">No photo</div>}
         </div>
-        <div className="overflow-y-auto p-4 space-y-4">
-          {items.map((s) => (
-            <SubmissionCard key={s.id} submission={s} onDelete={handleDelete} />
-          ))}
+
+        {/* Right arrow */}
+        <button
+          onClick={next}
+          className={`flex-shrink-0 w-14 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/5 transition-colors text-4xl ${!multi ? 'invisible' : ''}`}
+        >
+          ›
+        </button>
+      </div>
+
+      {/* Footer metadata */}
+      <div className="flex-shrink-0 px-4 py-3 text-sm space-y-0.5" onClick={(e) => e.stopPropagation()}>
+        {teamName && <p className="text-white font-medium">{teamName}</p>}
+        {current?.timestamp && <p className="text-white/60">{new Date(current.timestamp).toLocaleString()}</p>}
+        {current?.latitude != null && <p className="text-white/40 text-xs">{current.latitude.toFixed(5)}, {current.longitude.toFixed(5)}</p>}
+        {current?.note && <p className="text-white/60 italic">{current.note}</p>}
+        {photo?.mime_type && <p className="text-white/30 text-xs">{photo.mime_type}</p>}
+
+        <div className="flex items-center justify-between pt-2">
+          <div className="flex gap-1.5">
+            {multi && items.map((_, i) => (
+              <button key={i} onClick={() => setIndex(i)}
+                className={`w-1.5 h-1.5 rounded-full transition-colors ${i === index ? 'bg-white' : 'bg-white/25'}`}
+              />
+            ))}
+          </div>
+          <button onClick={handleDelete} className="text-xs text-red-400/70 hover:text-red-300">Delete</button>
         </div>
       </div>
     </div>
