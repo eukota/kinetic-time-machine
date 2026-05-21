@@ -84,7 +84,7 @@ export const SubmissionModal = () => {
   const multi = items.length > 1
 
   return createPortal(
-    <div className="fixed inset-0 bg-black/92 z-[9999] flex flex-col select-none" onClick={close}>
+    <div className="fixed inset-0 z-[9999] flex flex-col select-none" style={{ backgroundColor: 'rgba(0,0,0,0.92)' }} onClick={close}>
 
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 pt-3 pb-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
