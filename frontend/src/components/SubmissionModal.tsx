@@ -64,13 +64,22 @@ export const SubmissionModal = () => {
   const { selectedSubmission, selectSubmission, selectedSubmissions, selectSubmissions, setSubmissions, submissions } = useStore()
 
   const isOpen = selectedSubmission !== null || selectedSubmissions.length > 0
-  if (!isOpen) return null
 
-  const items: Submission[] = selectedSubmission ? [selectedSubmission] : selectedSubmissions
   const close = () => {
     selectSubmission(null)
     selectSubmissions([])
   }
+
+  useEffect(() => {
+    if (!isOpen) return
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') close() }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [isOpen])
+
+  if (!isOpen) return null
+
+  const items: Submission[] = selectedSubmission ? [selectedSubmission] : selectedSubmissions
 
   const handleDelete = (id: string) => {
     setSubmissions(submissions.filter((s) => s.id !== id))
