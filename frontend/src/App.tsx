@@ -20,8 +20,8 @@ export default function App() {
         {/* Desktop sidebar toggle — tab on left edge of sidebar */}
         <button
           onClick={() => setSidebarOpen((o) => !o)}
-          className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-[500] items-center justify-center
-                     bg-white border border-gray-200 shadow-md rounded-l-md w-5 h-12 text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors"
+          className="hidden md:flex absolute top-3 z-[500] items-center justify-center
+                     bg-white border border-gray-200 shadow-md rounded-l-md w-5 h-10 text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors"
           style={{ right: sidebarOpen ? '320px' : '0' }}
           title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
         >
