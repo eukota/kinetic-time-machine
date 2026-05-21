@@ -60,34 +60,44 @@ const RaceCourseOverlay = () => {
 
 const SubmissionMarkers = () => {
   const { submissions, selectSubmission, selectSubmissions } = useStore()
+  const clusterRef = useRef<any>(null)
 
   const located = submissions.filter(
     (s): s is Submission & { latitude: number; longitude: number } =>
       s.latitude !== null && s.longitude !== null
   )
 
-  const handleClusterClick = (e: any) => {
-    e.originalEvent?.preventDefault()
-    const childMarkers: L.Marker[] = e.layer.getAllChildMarkers()
-    const keys = new Set(
-      childMarkers.map((m) => {
-        const ll = m.getLatLng()
-        return `${ll.lat},${ll.lng}`
-      })
-    )
-    const found = located.filter((s) => keys.has(`${s.latitude},${s.longitude}`))
-    if (found.length === 1) {
-      selectSubmission(found[0])
-    } else {
-      selectSubmissions(found)
+  // Attach clusterclick directly on the Leaflet instance — more reliable than eventHandlers
+  useEffect(() => {
+    const group = clusterRef.current
+    if (!group) return
+
+    const handler = (e: any) => {
+      const childMarkers: L.Marker[] = e.layer.getAllChildMarkers()
+      const keys = new Set(
+        childMarkers.map((m) => {
+          const ll = m.getLatLng()
+          return `${ll.lat},${ll.lng}`
+        })
+      )
+      const found = located.filter((s) => keys.has(`${s.latitude},${s.longitude}`))
+      if (found.length === 1) {
+        selectSubmission(found[0])
+      } else {
+        selectSubmissions(found)
+      }
     }
-  }
+
+    group.on('clusterclick', handler)
+    return () => group.off('clusterclick', handler)
+  }, [located, selectSubmission, selectSubmissions])
 
   return (
     <MarkerClusterGroup
+      ref={clusterRef}
       chunkedLoading
       zoomToBoundsOnClick={false}
-      eventHandlers={{ clusterclick: handleClusterClick } as any}
+      spiderfyOnMaxZoom={false}
     >
       {located.map((s) => (
         <Marker
