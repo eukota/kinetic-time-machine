@@ -89,7 +89,7 @@ export const SubmissionModal = () => {
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 pt-3 pb-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
         <span className="text-white/50 text-sm">{multi ? `${index + 1} / ${items.length}` : ''}</span>
-        <button onClick={close} className="text-white/60 hover:text-white text-xl w-8 h-8 flex items-center justify-center">✕</button>
+        <button onClick={close} className="text-white/70 hover:text-white text-2xl w-11 h-11 flex items-center justify-center rounded-full hover:bg-white/10 active:bg-white/20 transition-colors">✕</button>
       </div>
 
       {/* Image + side arrows */}

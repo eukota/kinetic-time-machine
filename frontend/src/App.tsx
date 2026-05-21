@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useStore } from './store'
 import { Map } from './components/Map'
 import { SubmissionForm } from './components/SubmissionForm'
 import { SubmissionModal } from './components/SubmissionModal'
@@ -7,30 +6,41 @@ import { TeamFilter } from './components/TeamFilter'
 import { CourseFilter } from './components/CourseFilter'
 
 export default function App() {
-  const { selectedSubmission } = useStore()
   const [showForm, setShowForm] = useState(false)
   const [showTeams, setShowTeams] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
 
   return (
     <div className="h-screen flex flex-col md:flex-row overflow-hidden">
+
+      {/* Map area */}
       <div className="flex-1 relative">
         <Map />
+
+        {/* Desktop sidebar toggle — tab on left edge of sidebar */}
+        <button
+          onClick={() => setSidebarOpen((o) => !o)}
+          className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-[500] items-center justify-center
+                     bg-white border border-gray-200 shadow-md rounded-l-md w-5 h-12 text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors"
+          style={{ right: sidebarOpen ? '320px' : '0' }}
+          title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
+        >
+          {sidebarOpen ? '›' : '‹'}
+        </button>
+
+        {/* Mobile FABs */}
         <div className="md:hidden fixed bottom-6 right-4 flex flex-col gap-3 z-[999]">
           <button
             onClick={() => { setShowForm(true); setShowTeams(false) }}
             className="bg-blue-600 text-white rounded-full w-14 h-14 text-2xl shadow-lg flex items-center justify-center"
-            title="Submit photo"
-          >
-            +
-          </button>
+          >+</button>
           <button
             onClick={() => { setShowTeams(true); setShowForm(false) }}
             className="bg-white text-gray-700 rounded-full w-14 h-14 shadow-lg flex items-center justify-center text-sm font-bold border"
-            title="Filter teams"
-          >
-            &#9776;
-          </button>
+          >&#9776;</button>
         </div>
+
+        {/* Mobile: submission form bottom sheet */}
         {showForm && (
           <div className="md:hidden fixed inset-0 z-[998] flex flex-col justify-end">
             <div className="bg-black/40 absolute inset-0" onClick={() => setShowForm(false)} />
@@ -39,6 +49,8 @@ export default function App() {
             </div>
           </div>
         )}
+
+        {/* Mobile: filters bottom sheet */}
         {showTeams && (
           <div className="md:hidden fixed inset-0 z-[998] flex flex-col justify-end">
             <div className="bg-black/40 absolute inset-0" onClick={() => setShowTeams(false)} />
@@ -49,21 +61,28 @@ export default function App() {
           </div>
         )}
       </div>
-      <aside className="hidden md:flex md:flex-col md:w-80 bg-gray-50 border-l overflow-y-auto">
-        <div className="p-4 border-b">
+
+      {/* Desktop sidebar */}
+      <aside
+        className={`hidden md:flex flex-col bg-gray-50 border-l overflow-y-auto transition-all duration-200 flex-shrink-0 ${
+          sidebarOpen ? 'w-80' : 'w-0 border-l-0 overflow-hidden'
+        }`}
+      >
+        <div className="p-4 border-b min-w-[320px]">
           <h1 className="text-lg font-bold text-gray-800">KGC Race Tracker</h1>
           <p className="text-xs text-gray-500">Kinetic Grand Championship 2026</p>
         </div>
-        <div className="p-4 border-b">
+        <div className="p-4 border-b min-w-[320px]">
           <SubmissionForm />
         </div>
-        <div className="p-4 border-b">
+        <div className="p-4 border-b min-w-[320px]">
           <CourseFilter />
         </div>
-        <div className="p-4">
+        <div className="p-4 min-w-[320px]">
           <TeamFilter />
         </div>
       </aside>
+
       <SubmissionModal />
     </div>
   )
