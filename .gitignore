@@ -27,3 +27,7 @@ frontend/.env.local
 
 # Claude Code local settings (may contain personal permissions)
 .claude/settings.local.json
+
+# Implementation notes live in ~/Projects/ktm
+docs/
+resources/
