@@ -1,5 +1,5 @@
 export const About = () => (
-  <div className="flex-1 overflow-y-auto bg-gray-950 text-white">
+  <div className="h-full overflow-y-auto bg-gray-950 text-white">
     <div className="max-w-2xl mx-auto px-6 py-12 space-y-8">
 
       <div>

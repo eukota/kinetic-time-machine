@@ -114,7 +114,19 @@ export const SubmissionModal = () => {
               className="max-w-full max-h-full object-contain rounded-sm"
             />
           )}
-          {!loading && !photo && <div className="text-white/30 text-sm">No photo</div>}
+          {!loading && !photo && current?.pending_review && (
+            <div className="max-w-sm mx-6 px-6 py-8 border border-yellow-400/30 bg-yellow-500/5 rounded-lg text-center space-y-2">
+              <div className="text-3xl" aria-hidden>🕒</div>
+              <p className="text-yellow-200 font-medium text-base">Pending approval</p>
+              <p className="text-yellow-100/60 text-sm leading-relaxed">
+                Your photo was submitted successfully. It'll appear here for everyone
+                once it passes a quick safety review.
+              </p>
+            </div>
+          )}
+          {!loading && !photo && !current?.pending_review && (
+            <div className="text-white/30 text-sm">No photo</div>
+          )}
         </div>
 
         {/* Right arrow */}

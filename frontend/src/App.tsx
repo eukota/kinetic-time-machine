@@ -56,21 +56,21 @@ export default function App() {
 
           {/* Gallery */}
           {view === 'gallery' && (
-            <div className="absolute inset-0">
+            <div className="absolute inset-0 flex flex-col">
               <Gallery />
             </div>
           )}
 
           {/* About */}
           {view === 'about' && (
-            <div className="absolute inset-0">
+            <div className="absolute inset-0 flex flex-col">
               <About />
             </div>
           )}
 
           {/* Admin */}
           {view === 'admin' && (
-            <div className="absolute inset-0">
+            <div className="absolute inset-0 flex flex-col">
               <Admin />
             </div>
           )}
