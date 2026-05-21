@@ -33,6 +33,7 @@ const RaceCourseOverlay = () => {
         layersRef.current.forEach((l) => map.removeLayer(l))
         layersRef.current = []
 
+        const visibleLayers: L.GeoJSON[] = []
         geojson.features.forEach((feature: any) => {
           const { day, color } = feature.properties
           if (selectedDay !== null && day !== selectedDay) return
@@ -42,7 +43,13 @@ const RaceCourseOverlay = () => {
             style: { color, weight, opacity, fill: false },
           }).addTo(map)
           layersRef.current.push(layer)
+          visibleLayers.push(layer)
         })
+
+        if (visibleLayers.length > 0) {
+          const group = L.featureGroup(visibleLayers)
+          map.fitBounds(group.getBounds(), { padding: [40, 40], maxZoom: 13 })
+        }
       })
       .catch(() => {})
     return () => { cancelled = true }
