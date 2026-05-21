@@ -1,0 +1,24 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "KGC Race Course 2026",
+        "stroke": "#e63946",
+        "stroke-width": 3,
+        "fill": "none"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-124.1600, 40.7900],
+          [-124.1800, 40.8000],
+          [-124.2000, 40.8200],
+          [-124.1900, 40.8500],
+          [-124.1700, 40.8700]
+        ]
+      }
+    }
+  ]
+}
