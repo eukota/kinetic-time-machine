@@ -29,5 +29,6 @@ class Photo(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     submission_id = Column(String, ForeignKey("submissions.id"), nullable=False)
     file_path = Column(String)
+    mime_type = Column(String, nullable=True)
     uploaded_at = Column(DateTime, default=datetime.utcnow)
     submission = relationship("Submission", back_populates="photos")

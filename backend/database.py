@@ -15,3 +15,21 @@ def get_db():
 
 def init_db():
     Base.metadata.create_all(bind=engine)
+    _migrate()
+
+def _migrate():
+    with engine.connect() as conn:
+        cols = [r[1] for r in conn.exec_driver_sql("PRAGMA table_info(photos)")]
+        if "mime_type" not in cols:
+            conn.exec_driver_sql("ALTER TABLE photos ADD COLUMN mime_type TEXT")
+            conn.commit()
+        # Backfill mime_type from file extension for existing rows
+        _EXT_MAP = {".heic": "image/heic", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp"}
+        rows = conn.exec_driver_sql("SELECT id, file_path FROM photos WHERE mime_type IS NULL").fetchall()
+        for photo_id, file_path in rows:
+            if file_path:
+                ext = file_path[file_path.rfind("."):].lower()
+                mime = _EXT_MAP.get(ext)
+                if mime:
+                    conn.exec_driver_sql("UPDATE photos SET mime_type=? WHERE id=?", (mime, photo_id))
+        conn.commit()

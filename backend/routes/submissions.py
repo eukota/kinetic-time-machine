@@ -45,7 +45,7 @@ async def create_submission(
     shutil.move(temp_path, dest_path)
 
     rel_path = f"{submission.id}/{photo_id}{suffix}"
-    photo = Photo(submission_id=submission.id, file_path=rel_path)
+    photo = Photo(submission_id=submission.id, file_path=rel_path, mime_type=image.content_type)
     db.add(photo)
     db.commit()
     db.refresh(submission)
@@ -92,7 +92,7 @@ def get_submission(submission_id: str, db: Session = Depends(get_db)):
         "team_id": sub.team_id,
         "note": sub.note,
         "photos": [
-            {"id": p.id, "file_path": p.file_path, "uploaded_at": p.uploaded_at}
+            {"id": p.id, "file_path": p.file_path, "mime_type": p.mime_type, "uploaded_at": p.uploaded_at}
             for p in sub.photos
         ],
     }
