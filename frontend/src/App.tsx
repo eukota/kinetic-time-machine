@@ -1,12 +1,19 @@
 import { useState } from 'react'
 import { Map } from './components/Map'
 import { Gallery } from './components/Gallery'
+import { About } from './components/About'
 import { SubmissionForm } from './components/SubmissionForm'
 import { SubmissionModal } from './components/SubmissionModal'
 import { TeamFilter } from './components/TeamFilter'
 import { CourseFilter } from './components/CourseFilter'
 
-type View = 'map' | 'gallery'
+type View = 'map' | 'gallery' | 'about'
+
+const TAB_LABELS: Record<View, string> = {
+  map: '🗺 Map',
+  gallery: '📷 Gallery',
+  about: 'ℹ About',
+}
 
 export default function App() {
   const [showForm, setShowForm] = useState(false)
@@ -19,7 +26,7 @@ export default function App() {
 
       {/* Tab bar */}
       <div className="flex items-center bg-white border-b flex-shrink-0 px-2 gap-0">
-        {(['map', 'gallery'] as View[]).map((v) => (
+        {(['map', 'gallery', 'about'] as View[]).map((v) => (
           <button
             key={v}
             onClick={() => setView(v)}
@@ -29,7 +36,7 @@ export default function App() {
                 : 'border-transparent text-gray-500 hover:text-gray-800'
             }`}
           >
-            {v === 'map' ? '🗺 Map' : '📷 Gallery'}
+            {TAB_LABELS[v]}
           </button>
         ))}
       </div>
@@ -49,6 +56,13 @@ export default function App() {
           {view === 'gallery' && (
             <div className="absolute inset-0">
               <Gallery />
+            </div>
+          )}
+
+          {/* About */}
+          {view === 'about' && (
+            <div className="absolute inset-0">
+              <About />
             </div>
           )}
 
