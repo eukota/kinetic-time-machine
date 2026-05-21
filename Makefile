@@ -1,6 +1,9 @@
 IMAGE = kgc-backend
+# Override at call time: make pull-data HOST=root@1.2.3.4
+HOST  ?= root@kinetic.eukota.com
+LOCAL_BACKUP ?= ~/Backups/kinetic-data
 
-.PHONY: help build up down test
+.PHONY: help build up down test seed pull-data push-data
 
 help: ## Show available commands
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -20,3 +23,10 @@ test: ## Run backend tests inside container
 
 seed: ## Seed database with 2026 KGC racers
 	docker compose run --rm backend python seed_teams.py
+
+pull-data: ## Backup data/ from production host to local (override: HOST=user@ip)
+	mkdir -p $(LOCAL_BACKUP)
+	rsync -avz --info=progress2 $(HOST):~/kinetic-time-machine/data/ $(LOCAL_BACKUP)/
+
+push-data: ## Restore local data/ back up to production host
+	rsync -avz --info=progress2 $(LOCAL_BACKUP)/ $(HOST):~/kinetic-time-machine/data/
