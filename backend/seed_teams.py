@@ -60,7 +60,7 @@ NON_RACERS = [
     ("#6b7280", "Volunteer"),
     ("#6b7280", "Pit Crew"),
     ("#6b7280", "Course / Scenery"),
-    ("#fbbf24", "Kinetic Madness Band"),  # gold — the band stands out
+    ("#fbbf24", "Royal Kinetic Madness Band"),  # gold — the band stands out
 ]
 
 def make_color(index: int, total: int) -> str:

@@ -31,7 +31,7 @@ export const About = () => (
           I lived in Arcata from 2004–2009 and have been fascinated by the kinetic race ever since.
           Participating in it in some fashion has been a dream for a long time.
           I moved back to the area in September 2025 — this app is part of making that happen.
-          This year I'm playing trombone in the Kinetic Madness Band.
+          This year I'm playing trombone in the Royal Kinetic Madness Band.
         </p>
       </div>
 
