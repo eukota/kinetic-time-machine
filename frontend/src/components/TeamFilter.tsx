@@ -1,6 +1,5 @@
 import { useStore } from '../store'
 import { useTeams } from '../hooks/useTeams'
-import { trackEvent } from '../lib/analytics'
 
 export const TeamFilter = () => {
   const { selectedTeam, selectTeam } = useStore()
@@ -8,14 +7,18 @@ export const TeamFilter = () => {
   const { teams } = useStore()
 
   return (
-    <div>
+    <div
+      data-component="team-filter"
+      data-component-version="1.0"
+      data-component-category="filter"
+    >
       <h3 className="font-semibold text-sm mb-2 text-gray-700">Filter by Team</h3>
       <div className="space-y-1">
         <button
-          onClick={() => {
-            selectTeam(null)
-            trackEvent('map-filter-team', { team_id: 'all' })
-          }}
+          type="button"
+          onClick={() => selectTeam(null)}
+          data-cta-action="filter-team"
+          data-cta-label="All teams"
           className={`w-full text-left px-3 py-1.5 rounded text-sm transition-colors ${
             !selectedTeam ? 'bg-blue-100 text-blue-800 font-medium' : 'hover:bg-gray-100'
           }`}
@@ -25,10 +28,12 @@ export const TeamFilter = () => {
         {teams.map((team) => (
           <button
             key={team.id}
-            onClick={() => {
-              selectTeam(team.id)
-              trackEvent('map-filter-team', { team_id: team.id })
-            }}
+            type="button"
+            onClick={() => selectTeam(team.id)}
+            data-cta-action="filter-team"
+            data-cta-label={team.name}
+            data-entity-type="team"
+            data-entity-id={`team_${team.id}`}
             className={`w-full text-left px-3 py-1.5 rounded text-sm flex items-center gap-2 transition-colors ${
               selectedTeam === team.id ? 'bg-blue-100 text-blue-800 font-medium' : 'hover:bg-gray-100'
             }`}

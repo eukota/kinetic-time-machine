@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { useStore, Submission } from '../store'
 import { useSubmissions } from '../hooks/useSubmissions'
-import { trackEvent } from '../lib/analytics'
 
 interface DetailPhoto {
   id: string
@@ -49,26 +48,11 @@ export const SubmissionModal = () => {
     getSubmissionDetails(item.id).then((d) => {
       setDetail(d as Detail)
       setLoading(false)
-      if (d?.photos?.[0]) {
-        const source = window.location.pathname.startsWith('/gallery') ? 'gallery' : 'map'
-        trackEvent('photo-view', {
-          source,
-          submission_id: item.id,
-          team_id: item.team_id ?? 'none',
-          multi: items.length > 1,
-        })
-      }
     })
   }, [index, isOpen, items, getSubmissionDetails])
 
-  const prev = useCallback(() => {
-    trackEvent('photo-nav', { direction: 'prev' })
-    setIndex((i) => (i - 1 + items.length) % items.length)
-  }, [items.length])
-  const next = useCallback(() => {
-    trackEvent('photo-nav', { direction: 'next' })
-    setIndex((i) => (i + 1) % items.length)
-  }, [items.length])
+  const prev = useCallback(() => setIndex((i) => (i - 1 + items.length) % items.length), [items.length])
+  const next = useCallback(() => setIndex((i) => (i + 1) % items.length), [items.length])
 
   useEffect(() => {
     if (!isOpen) return
@@ -106,7 +90,17 @@ export const SubmissionModal = () => {
   const multi = items.length > 1
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex flex-col select-none" style={{ backgroundColor: 'rgba(0,0,0,0.92)' }} onClick={close}>
+    <div
+      data-component="submission-modal"
+      data-component-version="1.0"
+      data-component-category="content"
+      data-entity-type="content"
+      data-entity-id={current ? `sub_${current.id}` : 'sub_unknown'}
+      data-analytics-impression-dwell="300"
+      className="fixed inset-0 z-[9999] flex flex-col select-none"
+      style={{ backgroundColor: 'rgba(0,0,0,0.92)' }}
+      onClick={close}
+    >
 
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 pt-3 pb-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
@@ -119,7 +113,10 @@ export const SubmissionModal = () => {
 
         {/* Left arrow */}
         <button
+          type="button"
           onClick={prev}
+          data-cta-action="photo-prev"
+          data-cta-label="Previous photo"
           className={`flex-shrink-0 w-14 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/5 transition-colors text-4xl ${!multi ? 'invisible' : ''}`}
         >
           ‹
@@ -152,7 +149,10 @@ export const SubmissionModal = () => {
 
         {/* Right arrow */}
         <button
+          type="button"
           onClick={next}
+          data-cta-action="photo-next"
+          data-cta-label="Next photo"
           className={`flex-shrink-0 w-14 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/5 transition-colors text-4xl ${!multi ? 'invisible' : ''}`}
         >
           ›
