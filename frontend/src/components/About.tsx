@@ -94,16 +94,13 @@ export const About = () => (
           </svg>
           GitHub
         </a>
-        <a
-          href="mailto:eukota@gmail.com?subject=Kinetic%20Time%20Machine"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded border border-white/20 text-white/70 hover:text-white hover:border-white/40 transition-colors text-sm"
-        >
+        <span className="inline-flex items-center gap-2 px-4 py-2 rounded border border-white/20 text-white/70 text-sm select-all">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="2" y="4" width="20" height="16" rx="2"/>
             <path d="m22 6-10 7L2 6"/>
           </svg>
-          Email me
-        </a>
+          eukota@gmail.com
+        </span>
       </div>
 
     </div>
