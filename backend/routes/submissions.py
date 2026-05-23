@@ -1,4 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException, Request
+from starlette.concurrency import run_in_threadpool
 from sqlalchemy.orm import Session
 from sqlalchemy import desc, extract, func
 from database import get_db
@@ -86,7 +87,7 @@ async def create_submission(
     os.makedirs(dest_dir, exist_ok=True)
     dest_path = os.path.join(dest_dir, f"{photo_id}{suffix}")
     shutil.move(temp_path, dest_path)
-    generate_variants(dest_path, dest_dir, photo_id)
+    await run_in_threadpool(generate_variants, dest_path, dest_dir, photo_id)
 
     mod = moderate_image(
         dest_path,
