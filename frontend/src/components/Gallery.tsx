@@ -90,7 +90,15 @@ export const Gallery = () => {
   }
 
   return (
-    <div className="flex flex-col h-full text-white overflow-hidden" style={{ background: '#0a0a0a' }}>
+    <div
+      data-component="gallery"
+      data-component-version="1.0"
+      data-component-category="content"
+      data-entity-type="page"
+      data-entity-id="page_gallery"
+      className="flex flex-col h-full text-white overflow-hidden"
+      style={{ background: '#0a0a0a' }}
+    >
 
       {/* Controls bar */}
       <div className="flex items-center gap-3 px-4 py-2 border-b border-white/10 flex-shrink-0">
@@ -98,7 +106,10 @@ export const Gallery = () => {
         {/* Team filter */}
         <div className="relative">
           <button
+            type="button"
             onClick={() => setShowTeamPanel((v) => !v)}
+            data-cta-action="toggle-team-filter"
+            data-cta-label="Team filter"
             className={`text-sm px-3 py-1.5 rounded border transition-colors ${
               selectedTeamIds.size > 0
                 ? 'bg-blue-600 border-blue-500 text-white'
@@ -126,14 +137,20 @@ export const Gallery = () => {
               </div>
               <div className="flex gap-2 px-3 py-1.5 text-xs border-b border-white/10">
                 <button
+                  type="button"
                   onClick={() => setSelectedTeamIds(new Set(teams.map((t) => t.id)))}
+                  data-cta-action="select-all-teams"
+                  data-cta-label="Select all teams"
                   className="text-blue-400 hover:text-blue-300"
                 >
                   Select all
                 </button>
                 <span className="text-white/20">·</span>
                 <button
+                  type="button"
                   onClick={() => setSelectedTeamIds(new Set())}
+                  data-cta-action="clear-team-filter"
+                  data-cta-label="Clear team filter"
                   className="text-white/50 hover:text-white"
                 >
                   Clear
@@ -142,7 +159,11 @@ export const Gallery = () => {
               <ul className="max-h-60 overflow-y-auto py-1">
                 {filteredTeams.map((t) => (
                   <li key={t.id}>
-                    <label className="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm">
+                    <label
+                      className="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm"
+                      data-cta-action="toggle-team-filter"
+                      data-cta-label={t.name}
+                    >
                       <input
                         type="checkbox"
                         checked={selectedTeamIds.has(t.id)}
@@ -167,7 +188,10 @@ export const Gallery = () => {
 
         {/* Sort */}
         <button
+          type="button"
           onClick={cycleSort}
+          data-cta-action="cycle-sort"
+          data-cta-label={SORT_LABELS[sortMode]}
           className="text-sm px-3 py-1.5 rounded border border-white/15 bg-white/5 text-white/70 hover:bg-white/10 transition-colors"
         >
           {SORT_LABELS[sortMode]}
@@ -199,6 +223,7 @@ export const Gallery = () => {
           {filtered.map((s, i) => (
             <GalleryTile
               key={s.id}
+              index={i}
               submission={s}
               team={teams.find((t) => t.id === s.team_id)}
               onClick={() => handleTileClick(i)}

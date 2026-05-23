@@ -117,7 +117,14 @@ export const Admin = () => {
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-gray-950 text-white overflow-hidden">
+    <div
+      data-component="admin-panel"
+      data-component-version="1.0"
+      data-component-category="admin"
+      data-entity-type="page"
+      data-entity-id="page_admin"
+      className="flex-1 flex flex-col bg-gray-950 text-white overflow-hidden"
+    >
 
       <div className="flex items-center gap-3 px-4 py-2 border-b border-white/10 flex-shrink-0 text-sm">
         <span className="font-medium">Pending review</span>
@@ -154,15 +161,25 @@ export const Admin = () => {
                   {s.first_photo_mime && <p className="text-white/30">{s.first_photo_mime}</p>}
                   <div className="flex gap-2 pt-2">
                     <button
+                      type="button"
                       onClick={() => act(s.id, 'approve')}
                       disabled={busy}
+                      data-cta-action="approve-submission"
+                      data-cta-label="Approve"
+                      data-entity-type="content"
+                      data-entity-id={`sub_${s.id}`}
                       className="flex-1 bg-green-700 hover:bg-green-600 disabled:opacity-50 py-1.5 rounded text-xs font-medium"
                     >
                       ✓ Approve
                     </button>
                     <button
+                      type="button"
                       onClick={() => act(s.id, 'reject')}
                       disabled={busy}
+                      data-cta-action="reject-submission"
+                      data-cta-label="Reject"
+                      data-entity-type="content"
+                      data-entity-id={`sub_${s.id}`}
                       className="flex-1 bg-red-900 hover:bg-red-800 disabled:opacity-50 py-1.5 rounded text-xs font-medium"
                     >
                       ✕ Reject

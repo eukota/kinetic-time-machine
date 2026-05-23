@@ -7,6 +7,12 @@ interface Props {
   onClose?: () => void
 }
 
+type SubmitOutcome = {
+  team: string
+  pendingReview: boolean
+  hasNote: boolean
+}
+
 export const SubmissionForm = ({ onClose }: Props) => {
   const { createSubmission } = useSubmissions()
   const { teams } = useStore()
@@ -51,6 +57,7 @@ export const SubmissionForm = ({ onClose }: Props) => {
   }
 
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
+  const [submitOutcome, setSubmitOutcome] = useState<SubmitOutcome | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -62,6 +69,7 @@ export const SubmissionForm = ({ onClose }: Props) => {
     }
     setUploading(true)
     setSuccessMsg(null)
+    setSubmitOutcome(null)
     const formData = new FormData()
     formData.append('image', file)
     if (note) formData.append('note', note)
@@ -71,10 +79,11 @@ export const SubmissionForm = ({ onClose }: Props) => {
       const result = await createSubmission(formData)
       setUploading(false)
       if (result) {
-        ;(window as { umami?: { track: (e: string, data?: Record<string, unknown>) => void } }).umami?.track(
-          'submission-created',
-          { team: teamName || 'none', pending_review: result.pending_review },
-        )
+        setSubmitOutcome({
+          team: teamName || 'none',
+          pendingReview: Boolean(result.pending_review),
+          hasNote: Boolean(note),
+        })
         setTeamName('')
         setTeamSearch('')
         setNote('')
@@ -98,7 +107,24 @@ export const SubmissionForm = ({ onClose }: Props) => {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4"
+      data-component="submission-form"
+      data-component-version="1.0"
+      data-component-category="conversion"
+      data-entity-type="page"
+      data-entity-id="page_map"
+    >
+      {submitOutcome && (
+        <span
+          className="sr-only"
+          data-analytics-outcome="submission-created"
+          data-outcome-team={submitOutcome.team}
+          data-outcome-pending-review={String(submitOutcome.pendingReview)}
+          data-outcome-has-note={String(submitOutcome.hasNote)}
+        />
+      )}
       <h2 className="text-xl font-bold">Submit Photo</h2>
 
       {successMsg ? (

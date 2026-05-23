@@ -5,6 +5,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useStore, Submission } from '../store'
 import { useSubmissions } from '../hooks/useSubmissions'
+import { markAnalyticsOutcome } from '../analytics/analytics-core'
 
 delete (L.Icon.Default.prototype as any)._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -103,7 +104,20 @@ const SubmissionMarkers = () => {
         <Marker
           key={s.id}
           position={[s.latitude, s.longitude]}
-          eventHandlers={{ click: () => selectSubmission(s) }}
+          eventHandlers={{
+            click: () => {
+              markAnalyticsOutcome(
+                document.getElementById('ktm-analytics-sink'),
+                'photo-view',
+                {
+                  source: 'map',
+                  entity_id: `sub_${s.id}`,
+                  team_id: s.team_id ?? 'none',
+                },
+              )
+              selectSubmission(s)
+            },
+          }}
         />
       ))}
     </MarkerClusterGroup>

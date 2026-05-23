@@ -10,11 +10,18 @@ export const CourseFilter = () => {
   const { selectedDay, selectDay } = useStore()
 
   return (
-    <div>
+    <div
+      data-component="course-filter"
+      data-component-version="1.0"
+      data-component-category="filter"
+    >
       <h3 className="font-semibold text-sm mb-2 text-gray-700">Course Day</h3>
       <div className="space-y-1">
         <button
+          type="button"
           onClick={() => selectDay(null)}
+          data-cta-action="filter-day"
+          data-cta-label="All days"
           className={`w-full text-left px-3 py-1.5 rounded text-sm transition-colors ${
             selectedDay === null
               ? 'bg-gray-200 text-gray-900 font-medium'
@@ -26,7 +33,10 @@ export const CourseFilter = () => {
         {DAYS.map(({ day, label, sublabel, color }) => (
           <button
             key={day}
+            type="button"
             onClick={() => selectDay(selectedDay === day ? null : day)}
+            data-cta-action="filter-day"
+            data-cta-label={label}
             className={`w-full text-left px-3 py-1.5 rounded text-sm flex items-center gap-2 transition-colors ${
               selectedDay === day
                 ? 'bg-gray-100 font-medium'
