@@ -1,6 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
-from sqlalchemy import desc
+from sqlalchemy import desc, extract, func
 from database import get_db
 from limiter import limiter
 from models import Submission, Photo, Team
@@ -118,7 +118,7 @@ def _serialize_submission_summary(s):
 
 
 @router.get("/")
-def list_submissions(team_id: str = None, db: Session = Depends(get_db)):
+def list_submissions(team_id: str = None, year: int = None, db: Session = Depends(get_db)):
     # Public list — only approved submissions are visible
     query = (
         db.query(Submission)
@@ -127,6 +127,9 @@ def list_submissions(team_id: str = None, db: Session = Depends(get_db)):
     )
     if team_id:
         query = query.filter(Submission.team_id == team_id)
+    if year is not None:
+        submitted_at = func.coalesce(Submission.timestamp, Submission.created_at)
+        query = query.filter(extract("year", submitted_at) == year)
     return [_serialize_submission_summary(s) for s in query.all()]
 
 @router.get("/{submission_id}")

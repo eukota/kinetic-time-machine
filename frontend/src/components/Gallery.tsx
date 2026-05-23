@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useStore, Submission } from '../store'
 import { useTeams } from '../hooks/useTeams'
 import { GalleryTile } from './GalleryTile'
@@ -15,7 +15,7 @@ const SORT_LABELS: Record<SortMode, string> = {
 const SORT_CYCLE: SortMode[] = ['newest', 'oldest', 'team']
 
 export const Gallery = () => {
-  const { teams, selectSubmissionsAt } = useStore()
+  const { teams, selectedYear, selectSubmissionsAt } = useStore()
   useTeams()
 
   const [allSubmissions, setAllSubmissions] = useState<Submission[]>([])
@@ -25,23 +25,19 @@ export const Gallery = () => {
   const [showTeamPanel, setShowTeamPanel] = useState(false)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
   const [secondsAgo, setSecondsAgo] = useState(0)
-  const knownIdsRef = useRef<Set<string>>(new Set())
 
   const fetchSubmissions = useCallback(async () => {
     try {
-      const r = await fetch('/api/submissions/')
+      const params = new URLSearchParams()
+      if (selectedYear !== null) params.set('year', String(selectedYear))
+      const r = await fetch(`/api/submissions/${params.toString() ? `?${params}` : ''}`)
       const data: Submission[] = await r.json()
       const withPhoto = data.filter((s) => s.first_photo)
-      setAllSubmissions((prev) => {
-        const existingIds = new Set(prev.map((s) => s.id))
-        const newOnes = withPhoto.filter((s) => !existingIds.has(s.id))
-        return newOnes.length > 0 ? [...newOnes, ...prev] : prev.length === 0 ? withPhoto : prev
-      })
-      knownIdsRef.current = new Set(withPhoto.map((s) => s.id))
+      setAllSubmissions(withPhoto)
       setLastUpdated(new Date())
       setSecondsAgo(0)
     } catch (_) {}
-  }, [])
+  }, [selectedYear])
 
   useEffect(() => {
     fetchSubmissions()

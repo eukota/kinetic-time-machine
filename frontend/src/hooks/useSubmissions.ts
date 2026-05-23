@@ -2,17 +2,18 @@ import { useEffect } from 'react'
 import { useStore, Submission } from '../store'
 
 export const useSubmissions = () => {
-  const { selectedTeam, setSubmissions } = useStore()
+  const { selectedTeam, selectedYear, setSubmissions } = useStore()
 
   useEffect(() => {
-    const url = selectedTeam
-      ? `/api/submissions/?team_id=${selectedTeam}`
-      : '/api/submissions/'
+    const params = new URLSearchParams()
+    if (selectedTeam) params.set('team_id', selectedTeam)
+    if (selectedYear !== null) params.set('year', String(selectedYear))
+    const url = `/api/submissions/${params.toString() ? `?${params}` : ''}`
     fetch(url)
       .then((r) => r.json())
       .then(setSubmissions)
       .catch((e) => console.error('Failed to fetch submissions:', e))
-  }, [selectedTeam, setSubmissions])
+  }, [selectedTeam, selectedYear, setSubmissions])
 
   const createSubmission = async (formData: FormData): Promise<Submission | null> => {
     try {

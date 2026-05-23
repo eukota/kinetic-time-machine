@@ -10,7 +10,7 @@ from routes import submissions, teams, admin
 from config import PHOTOS_DIR
 import os
 
-app = FastAPI(title="KGC Race Tracker API")
+app = FastAPI(title="Kinetic Time Machine API")
 
 # Rate limiting (slowapi) — shared limiter, registered for the route decorators to find
 app.state.limiter = limiter

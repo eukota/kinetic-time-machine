@@ -37,6 +37,7 @@ interface Store {
   initialIndex: number
   selectedTeam: string | null
   selectedDay: number | null
+  selectedYear: number | null
   mapZoom: number
   setSubmissions: (submissions: Submission[]) => void
   setTeams: (teams: Team[]) => void
@@ -45,6 +46,7 @@ interface Store {
   selectSubmissionsAt: (submissions: Submission[], index: number) => void
   selectTeam: (teamId: string | null) => void
   selectDay: (day: number | null) => void
+  selectYear: (year: number | null) => void
   setMapZoom: (zoom: number) => void
   addSubmission: (submission: Submission) => void
 }
@@ -57,6 +59,7 @@ export const useStore = create<Store>((set) => ({
   initialIndex: 0,
   selectedTeam: null,
   selectedDay: null,
+  selectedYear: 2026,
   mapZoom: 12,
   setSubmissions: (submissions) => set({ submissions }),
   setTeams: (teams) => set({ teams }),
@@ -65,6 +68,7 @@ export const useStore = create<Store>((set) => ({
   selectSubmissionsAt: (submissions, index) => set({ selectedSubmissions: submissions, selectedSubmission: null, initialIndex: index }),
   selectTeam: (teamId) => set({ selectedTeam: teamId }),
   selectDay: (day) => set({ selectedDay: day }),
+  selectYear: (year) => set({ selectedYear: year }),
   setMapZoom: (zoom) => set({ mapZoom: zoom }),
   addSubmission: (submission) =>
     set((state) => ({ submissions: [submission, ...state.submissions] })),

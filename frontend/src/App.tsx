@@ -7,6 +7,7 @@ import { SubmissionForm } from './components/SubmissionForm'
 import { SubmissionModal } from './components/SubmissionModal'
 import { TeamFilter } from './components/TeamFilter'
 import { CourseFilter } from './components/CourseFilter'
+import { YearFilter } from './components/YearFilter'
 
 type View = 'map' | 'gallery' | 'about' | 'admin'
 
@@ -47,30 +48,38 @@ export default function App() {
       <div className="flex-1 flex flex-row overflow-hidden">
 
         {/* Main panel */}
-        <div className="flex-1 relative overflow-hidden">
+        <div className="flex-1 relative overflow-hidden flex flex-col">
+
+          {/* Mobile map header */}
+          {view === 'map' && (
+            <div className="md:hidden px-4 py-3 border-b bg-white/95 backdrop-blur-sm">
+              <h1 className="text-lg font-bold text-gray-800 leading-tight">Kinetic Time Machine</h1>
+              <p className="text-xs text-gray-500 leading-tight">Kinetic Grand Championship Race Tracker</p>
+            </div>
+          )}
 
           {/* Map — always mounted, hidden when gallery active */}
-          <div className={view === 'map' ? 'absolute inset-0' : 'hidden'}>
+          <div className={view === 'map' ? 'flex-1 min-h-0' : 'hidden'}>
             <Map />
           </div>
 
           {/* Gallery */}
           {view === 'gallery' && (
-            <div className="absolute inset-0 flex flex-col">
+            <div className="flex-1 min-h-0 flex flex-col">
               <Gallery />
             </div>
           )}
 
           {/* About */}
           {view === 'about' && (
-            <div className="absolute inset-0 flex flex-col">
+            <div className="flex-1 min-h-0 flex flex-col">
               <About />
             </div>
           )}
 
           {/* Admin */}
           {view === 'admin' && (
-            <div className="absolute inset-0 flex flex-col">
+            <div className="flex-1 min-h-0 flex flex-col">
               <Admin />
             </div>
           )}
@@ -115,6 +124,7 @@ export default function App() {
             <div className="md:hidden fixed inset-0 z-[998] flex flex-col justify-end">
               <div className="bg-black/40 absolute inset-0" onClick={() => setShowTeams(false)} />
               <div className="relative bg-white rounded-t-2xl p-4 max-h-[60vh] overflow-y-auto shadow-2xl space-y-4">
+                <YearFilter />
                 <CourseFilter />
                 <TeamFilter />
               </div>
@@ -130,11 +140,14 @@ export default function App() {
             }`}
           >
             <div className="p-4 border-b min-w-[320px]">
-              <h1 className="text-lg font-bold text-gray-800">KGC Race Tracker</h1>
-              <p className="text-xs text-gray-500">Kinetic Grand Championship 2026</p>
+              <h1 className="text-lg font-bold text-gray-800">Kinetic Time Machine</h1>
+              <p className="text-xs text-gray-500">Kinetic Grand Championship Race Tracker</p>
             </div>
             <div className="p-4 border-b min-w-[320px]">
               <SubmissionForm />
+            </div>
+            <div className="p-4 border-b min-w-[320px]">
+              <YearFilter />
             </div>
             <div className="p-4 border-b min-w-[320px]">
               <CourseFilter />
