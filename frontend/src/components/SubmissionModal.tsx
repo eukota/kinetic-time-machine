@@ -65,9 +65,14 @@ export const SubmissionModal = () => {
     return () => document.removeEventListener('keydown', handler)
   }, [isOpen, close, prev, next])
 
+  const adminToken = localStorage.getItem('ktm.admin.token')
+
   const handleDelete = async () => {
-    if (!detail || !confirm('Delete this submission and its photos?')) return
-    const r = await fetch(`/api/submissions/${detail.id}`, { method: 'DELETE' })
+    if (!detail || !adminToken || !confirm('Delete this submission and its photos?')) return
+    const r = await fetch(`/api/admin/submissions/${detail.id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${adminToken}` },
+    })
     if (!r.ok) return
     setSubmissions(submissions.filter((s) => s.id !== detail.id))
     const remaining = items.filter((s) => s.id !== detail.id)
@@ -154,7 +159,9 @@ export const SubmissionModal = () => {
               />
             ))}
           </div>
-          <button onClick={handleDelete} className="text-xs text-red-400/70 hover:text-red-300">Delete</button>
+          {adminToken && (
+            <button onClick={handleDelete} className="text-xs text-red-400/70 hover:text-red-300">Delete</button>
+          )}
         </div>
       </div>
     </div>,
