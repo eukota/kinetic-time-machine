@@ -1,4 +1,5 @@
 import { useStore } from '../store'
+import { trackEvent } from '../lib/analytics'
 
 const DAYS = [
   { day: 1, label: 'Day 1', sublabel: 'Arcata → Eureka', color: '#2563eb' },
@@ -14,7 +15,10 @@ export const CourseFilter = () => {
       <h3 className="font-semibold text-sm mb-2 text-gray-700">Course Day</h3>
       <div className="space-y-1">
         <button
-          onClick={() => selectDay(null)}
+          onClick={() => {
+            selectDay(null)
+            trackEvent('map-filter-day', { day: 'all' })
+          }}
           className={`w-full text-left px-3 py-1.5 rounded text-sm transition-colors ${
             selectedDay === null
               ? 'bg-gray-200 text-gray-900 font-medium'
@@ -26,7 +30,11 @@ export const CourseFilter = () => {
         {DAYS.map(({ day, label, sublabel, color }) => (
           <button
             key={day}
-            onClick={() => selectDay(selectedDay === day ? null : day)}
+            onClick={() => {
+              const next = selectedDay === day ? null : day
+              selectDay(next)
+              trackEvent('map-filter-day', { day: next ?? 'all' })
+            }}
             className={`w-full text-left px-3 py-1.5 rounded text-sm flex items-center gap-2 transition-colors ${
               selectedDay === day
                 ? 'bg-gray-100 font-medium'

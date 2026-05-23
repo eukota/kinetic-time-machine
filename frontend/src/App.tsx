@@ -8,10 +8,10 @@ import { SubmissionModal } from './components/SubmissionModal'
 import { TeamFilter } from './components/TeamFilter'
 import { CourseFilter } from './components/CourseFilter'
 import { YearFilter } from './components/YearFilter'
+import { trackEvent, type AppView } from './lib/analytics'
+import { useViewRoute, viewToPath } from './hooks/useViewRoute'
 
-type View = 'map' | 'gallery' | 'about' | 'admin'
-
-const TAB_LABELS: Record<View, string> = {
+const TAB_LABELS: Record<AppView, string> = {
   map: '🗺 Map',
   gallery: '📷 Gallery',
   about: 'ℹ About',
@@ -22,25 +22,42 @@ export default function App() {
   const [showForm, setShowForm] = useState(false)
   const [showTeams, setShowTeams] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [view, setView] = useState<View>('map')
+  const { view, setView } = useViewRoute()
+
+  const openSubmitForm = () => {
+    trackEvent('submit-form-open', { source: 'mobile' })
+    setShowForm(true)
+    setShowTeams(false)
+  }
+
+  const openFiltersPanel = () => {
+    trackEvent('filters-panel-open', { source: 'mobile' })
+    setShowTeams(true)
+    setShowForm(false)
+  }
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
 
       {/* Tab bar */}
       <div className="flex items-center bg-white border-b flex-shrink-0 px-2 gap-0">
-        {(['map', 'gallery', 'about', 'admin'] as View[]).map((v) => (
-          <button
+        {(['map', 'gallery', 'about', 'admin'] as AppView[]).map((v) => (
+          <a
             key={v}
-            onClick={() => setView(v)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+            href={viewToPath(v)}
+            onClick={(e) => {
+              e.preventDefault()
+              setView(v)
+            }}
+            aria-current={view === v ? 'page' : undefined}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors no-underline ${
               view === v
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-gray-500 hover:text-gray-800'
             }`}
           >
             {TAB_LABELS[v]}
-          </button>
+          </a>
         ))}
       </div>
 
@@ -101,11 +118,11 @@ export default function App() {
           {view === 'map' && (
             <div className="md:hidden fixed bottom-6 right-4 flex flex-col gap-3 z-[999]">
               <button
-                onClick={() => { setShowForm(true); setShowTeams(false) }}
+                onClick={openSubmitForm}
                 className="bg-blue-600 text-white rounded-full w-14 h-14 text-2xl shadow-lg flex items-center justify-center"
               >+</button>
               <button
-                onClick={() => { setShowTeams(true); setShowForm(false) }}
+                onClick={openFiltersPanel}
                 className="bg-white text-gray-700 rounded-full w-14 h-14 shadow-lg flex items-center justify-center text-sm font-bold border"
               >&#9776;</button>
             </div>

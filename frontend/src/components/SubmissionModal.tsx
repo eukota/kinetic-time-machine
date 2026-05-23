@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { useStore, Submission } from '../store'
 import { useSubmissions } from '../hooks/useSubmissions'
+import { trackEvent } from '../lib/analytics'
 
 interface DetailPhoto {
   id: string
@@ -48,11 +49,26 @@ export const SubmissionModal = () => {
     getSubmissionDetails(item.id).then((d) => {
       setDetail(d as Detail)
       setLoading(false)
+      if (d?.photos?.[0]) {
+        const source = window.location.pathname.startsWith('/gallery') ? 'gallery' : 'map'
+        trackEvent('photo-view', {
+          source,
+          submission_id: item.id,
+          team_id: item.team_id ?? 'none',
+          multi: items.length > 1,
+        })
+      }
     })
-  }, [index, isOpen])
+  }, [index, isOpen, items, getSubmissionDetails])
 
-  const prev = useCallback(() => setIndex((i) => (i - 1 + items.length) % items.length), [items.length])
-  const next = useCallback(() => setIndex((i) => (i + 1) % items.length), [items.length])
+  const prev = useCallback(() => {
+    trackEvent('photo-nav', { direction: 'prev' })
+    setIndex((i) => (i - 1 + items.length) % items.length)
+  }, [items.length])
+  const next = useCallback(() => {
+    trackEvent('photo-nav', { direction: 'next' })
+    setIndex((i) => (i + 1) % items.length)
+  }, [items.length])
 
   useEffect(() => {
     if (!isOpen) return

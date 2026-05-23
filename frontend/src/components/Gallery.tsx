@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useStore, Submission } from '../store'
 import { useTeams } from '../hooks/useTeams'
 import { GalleryTile } from './GalleryTile'
+import { trackEvent } from '../lib/analytics'
 
 const REFRESH_MS = 30_000
 
@@ -54,13 +55,18 @@ export const Gallery = () => {
   }, [lastUpdated])
 
   const cycleSort = () => {
-    setSortMode((m) => SORT_CYCLE[(SORT_CYCLE.indexOf(m) + 1) % SORT_CYCLE.length])
+    setSortMode((m) => {
+      const next = SORT_CYCLE[(SORT_CYCLE.indexOf(m) + 1) % SORT_CYCLE.length]
+      trackEvent('gallery-sort', { mode: next })
+      return next
+    })
   }
 
   const toggleTeam = (id: string) => {
     setSelectedTeamIds((prev) => {
       const next = new Set(prev)
       next.has(id) ? next.delete(id) : next.add(id)
+      trackEvent('gallery-filter-teams', { count: next.size })
       return next
     })
   }
@@ -126,14 +132,20 @@ export const Gallery = () => {
               </div>
               <div className="flex gap-2 px-3 py-1.5 text-xs border-b border-white/10">
                 <button
-                  onClick={() => setSelectedTeamIds(new Set(teams.map((t) => t.id)))}
+                  onClick={() => {
+                    setSelectedTeamIds(new Set(teams.map((t) => t.id)))
+                    trackEvent('gallery-filter-teams', { count: teams.length })
+                  }}
                   className="text-blue-400 hover:text-blue-300"
                 >
                   Select all
                 </button>
                 <span className="text-white/20">·</span>
                 <button
-                  onClick={() => setSelectedTeamIds(new Set())}
+                  onClick={() => {
+                    setSelectedTeamIds(new Set())
+                    trackEvent('gallery-filter-teams', { count: 0 })
+                  }}
                   className="text-white/50 hover:text-white"
                 >
                   Clear

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import HCaptcha from '@hcaptcha/react-hcaptcha'
 import { useSubmissions } from '../hooks/useSubmissions'
 import { useStore } from '../store'
+import { trackEvent } from '../lib/analytics'
 
 interface Props {
   onClose?: () => void
@@ -70,10 +71,11 @@ export const SubmissionForm = ({ onClose }: Props) => {
     const result = await createSubmission(formData)
     setUploading(false)
     if (result) {
-      ;(window as { umami?: { track: (e: string, data?: Record<string, unknown>) => void } }).umami?.track(
-        'submission-created',
-        { team: teamName || 'none', pending_review: result.pending_review },
-      )
+      trackEvent('submission-created', {
+        team: teamName || 'none',
+        pending_review: result.pending_review,
+        has_note: Boolean(note),
+      })
       setTeamName('')
       setTeamSearch('')
       setNote('')

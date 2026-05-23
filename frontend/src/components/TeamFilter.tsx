@@ -1,5 +1,6 @@
 import { useStore } from '../store'
 import { useTeams } from '../hooks/useTeams'
+import { trackEvent } from '../lib/analytics'
 
 export const TeamFilter = () => {
   const { selectedTeam, selectTeam } = useStore()
@@ -11,7 +12,10 @@ export const TeamFilter = () => {
       <h3 className="font-semibold text-sm mb-2 text-gray-700">Filter by Team</h3>
       <div className="space-y-1">
         <button
-          onClick={() => selectTeam(null)}
+          onClick={() => {
+            selectTeam(null)
+            trackEvent('map-filter-team', { team_id: 'all' })
+          }}
           className={`w-full text-left px-3 py-1.5 rounded text-sm transition-colors ${
             !selectedTeam ? 'bg-blue-100 text-blue-800 font-medium' : 'hover:bg-gray-100'
           }`}
@@ -21,7 +25,10 @@ export const TeamFilter = () => {
         {teams.map((team) => (
           <button
             key={team.id}
-            onClick={() => selectTeam(team.id)}
+            onClick={() => {
+              selectTeam(team.id)
+              trackEvent('map-filter-team', { team_id: team.id })
+            }}
             className={`w-full text-left px-3 py-1.5 rounded text-sm flex items-center gap-2 transition-colors ${
               selectedTeam === team.id ? 'bg-blue-100 text-blue-800 font-medium' : 'hover:bg-gray-100'
             }`}

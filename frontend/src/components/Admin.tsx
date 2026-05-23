@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { trackEvent } from '../lib/analytics'
 
 interface PendingSubmission {
   id: string
@@ -85,6 +86,7 @@ export const Admin = () => {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (r.ok) {
+        trackEvent(kind === 'approve' ? 'admin-approve' : 'admin-reject', { submission_id: id })
         setPending((prev) => prev.filter((s) => s.id !== id))
       }
     } finally {
