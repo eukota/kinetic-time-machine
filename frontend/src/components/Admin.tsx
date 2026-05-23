@@ -11,6 +11,7 @@ interface PendingSubmission {
   first_photo: string | null
   first_photo_thumb: string | null
   first_photo_mime: string | null
+  moderation_note?: string | null
 }
 
 const TOKEN_KEY = 'ktm.admin.token'
@@ -147,6 +148,9 @@ export const Admin = () => {
                   {s.timestamp && <p>{new Date(s.timestamp).toLocaleString()}</p>}
                   {s.latitude != null && <p className="text-white/40">{s.latitude.toFixed(5)}, {s.longitude!.toFixed(5)}</p>}
                   {s.note && <p className="italic text-white/60">"{s.note}"</p>}
+                  {s.moderation_note && (
+                    <p className="text-blue-300/80 text-[10px] leading-snug">{s.moderation_note}</p>
+                  )}
                   {s.first_photo_mime && <p className="text-white/30">{s.first_photo_mime}</p>}
                   <div className="flex gap-2 pt-2">
                     <button

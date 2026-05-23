@@ -37,7 +37,7 @@ export const GalleryTile = ({ submission, team, onClick }: Props) => {
     >
       {submission.first_photo && (
         <img
-          src={`/photos/${submission.first_photo_thumb ?? submission.first_photo}`}
+          src={`/photos/${submission.first_photo}`}
           srcSet={
             submission.first_photo_thumb
               ? [

@@ -25,11 +25,15 @@ export const useSubmissions = () => {
   const createSubmission = async (formData: FormData): Promise<Submission | null> => {
     try {
       const r = await fetch('/api/submissions/', { method: 'POST', body: formData })
-      if (!r.ok) throw new Error('Upload failed')
+      if (!r.ok) {
+        const body = await r.json().catch(() => ({}))
+        const msg = body.detail || 'Upload failed'
+        throw new Error(typeof msg === 'string' ? msg : 'Upload failed')
+      }
       return r.json()
     } catch (e) {
       console.error('Failed to create submission:', e)
-      return null
+      throw e
     }
   }
 

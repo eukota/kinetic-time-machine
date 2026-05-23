@@ -6,7 +6,7 @@ from auth import require_admin
 from config import PHOTOS_DIR
 from database import get_db
 from models import Submission
-from utils.images import variant_path
+from utils.images import variant_path_if_exists
 
 import os, shutil
 
@@ -24,10 +24,11 @@ def _serialize(s):
         "team_id": s.team_id,
         "note": s.note,
         "approved": s.approved,
+        "moderation_note": s.moderation_note,
         "photo_count": len(s.photos),
         "created_at": s.created_at,
         "first_photo": first,
-        "first_photo_thumb": variant_path(first, "thumb") if first else None,
+        "first_photo_thumb": variant_path_if_exists(first, "thumb", PHOTOS_DIR),
         "first_photo_mime": s.photos[0].mime_type if s.photos else None,
     }
 

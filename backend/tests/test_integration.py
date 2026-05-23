@@ -30,6 +30,11 @@ Base.metadata.create_all(bind=engine)
 
 client = TestClient(app)
 
+@pytest.fixture(autouse=True)
+def manual_moderation(monkeypatch):
+    monkeypatch.setenv("MODERATION_MODE", "manual")
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+
 def test_health():
     r = client.get("/health")
     assert r.status_code == 200
@@ -46,7 +51,7 @@ def test_list_submissions_empty():
     assert r.json() == []
 
 def _upload_test_jpeg(note: str = "test"):
-    img = Image.new("RGB", (100, 100), color="blue")
+    img = Image.new("RGB", (400, 400), color="blue")
     buf = io.BytesIO()
     img.save(buf, format="JPEG")
     buf.seek(0)
@@ -120,6 +125,16 @@ def test_list_includes_first_photo(monkeypatch):
     assert "first_photo" in item
     assert "first_photo_mime" in item
     assert "created_at" in item
+
+def test_permissive_auto_approves(monkeypatch):
+    monkeypatch.setenv("MODERATION_MODE", "permissive")
+    r = _upload_test_jpeg("auto approved")
+    assert r.status_code == 200
+    data = r.json()
+    assert data["approved"] is True
+    assert data["pending_review"] is False
+    public = client.get("/api/submissions/").json()
+    assert any(s["id"] == data["id"] for s in public)
 
 def test_get_submission_not_found():
     r = client.get("/api/submissions/nonexistent-id")

@@ -24,6 +24,9 @@ test: ## Run backend tests inside container
 seed: ## Seed database with 2026 KGC racers
 	docker compose run --rm backend python seed_teams.py
 
+orient-photos: ## Fix EXIF rotation on disk and regenerate variants
+	docker compose run --rm backend python backfill_orientation.py
+
 pull-data: ## Backup data/ from production host to local (override: HOST=user@ip)
 	mkdir -p $(LOCAL_BACKUP)
 	rsync -avz --info=progress2 $(HOST):~/kinetic-time-machine/data/ $(LOCAL_BACKUP)/
