@@ -33,3 +33,25 @@ analytics.eukota.com {
         format console
     }
 }
+
+# Staging stack — runs from /opt/kinetic-time-machine-staging on the staging branch.
+# Reaches its services via the shared "ktm-proxy" Docker network (see compose files).
+staging.kinetic.eukota.com {
+    handle /api/* {
+        reverse_proxy staging-backend:8000
+    }
+    handle /photos/* {
+        reverse_proxy staging-backend:8000
+    }
+    handle /static/* {
+        reverse_proxy staging-backend:8000
+    }
+    handle {
+        reverse_proxy staging-frontend:80
+    }
+    encode gzip zstd
+    log {
+        output stdout
+        format console
+    }
+}

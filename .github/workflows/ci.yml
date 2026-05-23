@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, staging]
   pull_request:
     branches: [main]
 
@@ -67,10 +67,33 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          #fingerprint: ${{ secrets.DEPLOY_HOST_FINGERPRINT }}
           script: |
             set -e
             cd /opt/kinetic-time-machine
             git pull --ff-only
             docker compose -f docker-compose.prod.yml up -d --build
+            docker image prune -f
+
+  deploy_staging:
+    name: Deploy to staging
+    needs: [backend, frontend]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: staging-deploy
+      cancel-in-progress: false
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/kinetic-time-machine-staging
+            git fetch origin
+            git checkout staging
+            git pull --ff-only origin staging
+            docker compose -f docker-compose.staging.yml up -d --build
             docker image prune -f
