@@ -24,3 +24,12 @@ kinetic.eukota.com {
         format console
     }
 }
+
+analytics.eukota.com {
+    reverse_proxy umami:3000
+    encode gzip zstd
+    log {
+        output stdout
+        format console
+    }
+}

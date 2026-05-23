@@ -8,5 +8,16 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <!-- Umami analytics: injected at build time when VITE_UMAMI_WEBSITE_ID is set -->
+    <script type="module">
+      const id = import.meta.env.VITE_UMAMI_WEBSITE_ID
+      if (id) {
+        const s = document.createElement('script')
+        s.defer = true
+        s.src = 'https://analytics.eukota.com/script.js'
+        s.dataset.websiteId = id
+        document.head.appendChild(s)
+      }
+    </script>
   </body>
 </html>

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Kinetic Time Machine — business cards</title>
+<style>
+  /* ----- Avery 5371 layout: 10 cards/sheet, 2 cols × 5 rows, 3.5" × 2" ----- */
+  @page { size: letter; margin: 0; }
+  html, body { margin: 0; padding: 0; background: #fff; }
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  .sheet {
+    width: 8.5in;
+    height: 11in;
+    padding: 0.5in 0.75in;   /* top/bottom 0.5", left/right 0.75" — matches 5371 */
+    display: grid;
+    grid-template-columns: 3.5in 3.5in;
+    grid-template-rows: repeat(5, 2in);
+    page-break-after: always;
+  }
+
+  .card {
+    width: 3.5in;
+    height: 2in;
+    padding: 0.18in 0.20in;
+    border: 1px dashed #e5e7eb;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-column-gap: 0.14in;
+    align-items: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    color: #0f172a;
+  }
+
+  .text { min-width: 0; }
+
+  .eyebrow {
+    font-size: 6.5pt;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #64748b;
+    font-weight: 600;
+    margin-bottom: 0.04in;
+  }
+  .title {
+    font-size: 13.5pt;
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin: 0 0 0.06in;
+  }
+  .cta {
+    font-size: 9pt;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #1e293b;
+    margin: 0 0 0.08in;
+  }
+  .url {
+    font-size: 8.5pt;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #1e40af;
+    font-weight: 600;
+  }
+
+  .qr {
+    width: 1.5in;
+    height: 1.5in;
+    object-fit: contain;
+    display: block;
+  }
+
+  @media print { .card { border-color: #f1f5f9; } }
+</style>
+</head>
+<body>
+
+<script>
+  const card = `
+    <div class="card">
+      <div class="text">
+        <div class="eyebrow">KGC 2026</div>
+        <h1 class="title">Kinetic Time Machine</h1>
+        <p class="cta">Snap photos. See them on the map.</p>
+        <div class="url">kinetic.eukota.com</div>
+      </div>
+      <img class="qr" src="qr.jpg" alt="QR code to kinetic.eukota.com" />
+    </div>
+  `;
+  document.write('<div class="sheet">' + card.repeat(10) + '</div>');
+</script>
+
+</body>
+</html>

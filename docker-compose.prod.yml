@@ -17,6 +17,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod
+      args:
+        VITE_UMAMI_WEBSITE_ID: ${VITE_UMAMI_WEBSITE_ID:-}
     restart: unless-stopped
     expose:
       - "80"
@@ -36,7 +38,33 @@ services:
     depends_on:
       - backend
       - frontend
+      - umami
+
+  umami-db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: ${UMAMI_DB_PASSWORD}
+    volumes:
+      - umami_db:/var/lib/postgresql/data
+    expose:
+      - "5432"
+
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-v2.13.0
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://umami:${UMAMI_DB_PASSWORD}@umami-db:5432/umami
+      DATABASE_TYPE: postgresql
+      APP_SECRET: ${UMAMI_APP_SECRET}
+    expose:
+      - "3000"
+    depends_on:
+      - umami-db
 
 volumes:
   caddy_data:
   caddy_config:
+  umami_db:
