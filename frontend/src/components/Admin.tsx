@@ -9,6 +9,7 @@ interface PendingSubmission {
   note: string | null
   created_at?: string
   first_photo: string | null
+  first_photo_thumb: string | null
   first_photo_mime: string | null
 }
 
@@ -136,7 +137,11 @@ export const Admin = () => {
             return (
               <div key={s.id} className="bg-gray-900 border border-white/10 rounded overflow-hidden">
                 {s.first_photo && (
-                  <img src={`/photos/${s.first_photo}`} alt="pending" className="w-full aspect-square object-cover" />
+                  <img
+                    src={`/photos/${s.first_photo_thumb ?? s.first_photo}`}
+                    alt="pending"
+                    className="w-full aspect-square object-cover"
+                  />
                 )}
                 <div className="p-3 text-xs space-y-1 text-white/70">
                   {s.timestamp && <p>{new Date(s.timestamp).toLocaleString()}</p>}

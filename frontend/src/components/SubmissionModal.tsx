@@ -6,6 +6,8 @@ import { useSubmissions } from '../hooks/useSubmissions'
 interface DetailPhoto {
   id: string
   file_path: string
+  thumb_path?: string | null
+  medium_path?: string | null
   mime_type: string | null
   uploaded_at: string
 }
@@ -110,6 +112,12 @@ export const SubmissionModal = () => {
           {!loading && photo && (
             <img
               src={`/photos/${photo.file_path}`}
+              srcSet={
+                photo.medium_path
+                  ? `/photos/${photo.medium_path} 900w, /photos/${photo.file_path} 2400w`
+                  : undefined
+              }
+              sizes="(max-width: 900px) calc(100vw - 112px), 900px"
               alt="submission"
               className="max-w-full max-h-full object-contain rounded-sm"
             />

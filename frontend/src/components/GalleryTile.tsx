@@ -37,7 +37,19 @@ export const GalleryTile = ({ submission, team, onClick }: Props) => {
     >
       {submission.first_photo && (
         <img
-          src={`/photos/${submission.first_photo}`}
+          src={`/photos/${submission.first_photo_thumb ?? submission.first_photo}`}
+          srcSet={
+            submission.first_photo_thumb
+              ? [
+                  `/photos/${submission.first_photo_thumb} 400w`,
+                  submission.first_photo_medium ? `/photos/${submission.first_photo_medium} 900w` : null,
+                  `/photos/${submission.first_photo} 1600w`,
+                ]
+                  .filter(Boolean)
+                  .join(', ')
+              : undefined
+          }
+          sizes="(max-width: 640px) calc(50vw - 8px), (max-width: 1024px) calc(33vw - 8px), calc(25vw - 8px)"
           alt="submission"
           className="w-full h-full object-cover"
           loading="lazy"

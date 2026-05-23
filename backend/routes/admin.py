@@ -6,6 +6,7 @@ from auth import require_admin
 from config import PHOTOS_DIR
 from database import get_db
 from models import Submission
+from utils.images import variant_path
 
 import os, shutil
 
@@ -14,6 +15,7 @@ router = APIRouter(prefix="/api/admin", tags=["admin"], dependencies=[Depends(re
 
 
 def _serialize(s):
+    first = s.photos[0].file_path if s.photos else None
     return {
         "id": s.id,
         "latitude": s.latitude,
@@ -24,7 +26,8 @@ def _serialize(s):
         "approved": s.approved,
         "photo_count": len(s.photos),
         "created_at": s.created_at,
-        "first_photo": s.photos[0].file_path if s.photos else None,
+        "first_photo": first,
+        "first_photo_thumb": variant_path(first, "thumb") if first else None,
         "first_photo_mime": s.photos[0].mime_type if s.photos else None,
     }
 

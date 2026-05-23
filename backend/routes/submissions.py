@@ -7,6 +7,7 @@ from models import Submission, Photo, Team
 from utils.exif import extract_exif
 from utils.captcha import verify_captcha
 from config import PHOTOS_DIR
+from utils.images import generate_variants, variant_path
 from PIL import Image
 import os, uuid, shutil
 
@@ -83,6 +84,7 @@ async def create_submission(
     os.makedirs(dest_dir, exist_ok=True)
     dest_path = os.path.join(dest_dir, f"{photo_id}{suffix}")
     shutil.move(temp_path, dest_path)
+    generate_variants(dest_path, dest_dir, photo_id)
 
     rel_path = f"{submission.id}/{photo_id}{suffix}"
     photo = Photo(submission_id=submission.id, file_path=rel_path, mime_type=original_mime)
@@ -103,6 +105,7 @@ async def create_submission(
     }
 
 def _serialize_submission_summary(s):
+    first = s.photos[0].file_path if s.photos else None
     return {
         "id": s.id,
         "latitude": s.latitude,
@@ -112,7 +115,9 @@ def _serialize_submission_summary(s):
         "note": s.note,
         "photo_count": len(s.photos),
         "created_at": s.created_at,
-        "first_photo": s.photos[0].file_path if s.photos else None,
+        "first_photo": first,
+        "first_photo_thumb": variant_path(first, "thumb") if first else None,
+        "first_photo_medium": variant_path(first, "medium") if first else None,
         "first_photo_mime": s.photos[0].mime_type if s.photos else None,
     }
 
@@ -149,7 +154,14 @@ def get_submission(submission_id: str, db: Session = Depends(get_db)):
         "team_id": sub.team_id,
         "note": sub.note,
         "photos": [
-            {"id": p.id, "file_path": p.file_path, "mime_type": p.mime_type, "uploaded_at": p.uploaded_at}
+            {
+                "id": p.id,
+                "file_path": p.file_path,
+                "thumb_path": variant_path(p.file_path, "thumb"),
+                "medium_path": variant_path(p.file_path, "medium"),
+                "mime_type": p.mime_type,
+                "uploaded_at": p.uploaded_at,
+            }
             for p in sub.photos
         ],
     }
