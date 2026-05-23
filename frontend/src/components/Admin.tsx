@@ -9,7 +9,9 @@ interface PendingSubmission {
   note: string | null
   created_at?: string
   first_photo: string | null
+  first_photo_thumb: string | null
   first_photo_mime: string | null
+  moderation_note?: string | null
 }
 
 const TOKEN_KEY = 'ktm.admin.token'
@@ -136,12 +138,19 @@ export const Admin = () => {
             return (
               <div key={s.id} className="bg-gray-900 border border-white/10 rounded overflow-hidden">
                 {s.first_photo && (
-                  <img src={`/photos/${s.first_photo}`} alt="pending" className="w-full aspect-square object-cover" />
+                  <img
+                    src={`/photos/${s.first_photo_thumb ?? s.first_photo}`}
+                    alt="pending"
+                    className="w-full aspect-square object-cover"
+                  />
                 )}
                 <div className="p-3 text-xs space-y-1 text-white/70">
                   {s.timestamp && <p>{new Date(s.timestamp).toLocaleString()}</p>}
                   {s.latitude != null && <p className="text-white/40">{s.latitude.toFixed(5)}, {s.longitude!.toFixed(5)}</p>}
                   {s.note && <p className="italic text-white/60">"{s.note}"</p>}
+                  {s.moderation_note && (
+                    <p className="text-blue-300/80 text-[10px] leading-snug">{s.moderation_note}</p>
+                  )}
                   {s.first_photo_mime && <p className="text-white/30">{s.first_photo_mime}</p>}
                   <div className="flex gap-2 pt-2">
                     <button

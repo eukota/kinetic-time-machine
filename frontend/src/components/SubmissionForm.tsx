@@ -67,30 +67,33 @@ export const SubmissionForm = ({ onClose }: Props) => {
     if (note) formData.append('note', note)
     if (teamName) formData.append('team_name', teamName)
     if (captchaToken) formData.append('captcha_token', captchaToken)
-    const result = await createSubmission(formData)
-    setUploading(false)
-    if (result) {
-      ;(window as { umami?: { track: (e: string, data?: Record<string, unknown>) => void } }).umami?.track(
-        'submission-created',
-        { team: teamName || 'none', pending_review: result.pending_review },
-      )
-      setTeamName('')
-      setTeamSearch('')
-      setNote('')
-      setPreview(null)
-      setCaptchaToken(null)
+    try {
+      const result = await createSubmission(formData)
+      setUploading(false)
+      if (result) {
+        ;(window as { umami?: { track: (e: string, data?: Record<string, unknown>) => void } }).umami?.track(
+          'submission-created',
+          { team: teamName || 'none', pending_review: result.pending_review },
+        )
+        setTeamName('')
+        setTeamSearch('')
+        setNote('')
+        setPreview(null)
+        setCaptchaToken(null)
+        captchaRef.current?.resetCaptcha()
+        if (fileRef.current) fileRef.current.value = ''
+        setSuccessMsg(
+          result.pending_review
+            ? '✓ Submitted — pending review before it appears on the map'
+            : '✓ Submitted — live on the map!'
+        )
+        setTimeout(() => setSuccessMsg(null), 6000)
+      }
+    } catch (e) {
+      setUploading(false)
       captchaRef.current?.resetCaptcha()
-      if (fileRef.current) fileRef.current.value = ''
-      setSuccessMsg(
-        result.pending_review
-          ? '✓ Submitted — pending review before it appears on the map'
-          : '✓ Submitted'
-      )
-      setTimeout(() => setSuccessMsg(null), 6000)
-    } else {
-      captchaRef.current?.resetCaptcha()
       setCaptchaToken(null)
-      alert('Upload failed — please try again')
+      alert(e instanceof Error ? e.message : 'Upload failed — please try again')
     }
   }
 

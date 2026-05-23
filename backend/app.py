@@ -50,4 +50,6 @@ def public_config():
     """Public runtime config — frontend fetches this to know what features are enabled."""
     return {
         "hcaptcha_sitekey": os.getenv("HCAPTCHA_SITEKEY", "") or None,
+        "auto_moderation": os.getenv("MODERATION_MODE", "").strip().lower()
+        not in ("", "manual"),
     }
