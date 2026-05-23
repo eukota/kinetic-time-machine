@@ -48,7 +48,6 @@ interface Store {
   selectDay: (day: number | null) => void
   selectYear: (year: number | null) => void
   setMapZoom: (zoom: number) => void
-  addSubmission: (submission: Submission) => void
 }
 
 export const useStore = create<Store>((set) => ({
@@ -70,6 +69,4 @@ export const useStore = create<Store>((set) => ({
   selectDay: (day) => set({ selectedDay: day }),
   selectYear: (year) => set({ selectedYear: year }),
   setMapZoom: (zoom) => set({ mapZoom: zoom }),
-  addSubmission: (submission) =>
-    set((state) => ({ submissions: [submission, ...state.submissions] })),
 }))
