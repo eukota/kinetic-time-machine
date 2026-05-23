@@ -3,7 +3,7 @@ IMAGE = kgc-backend
 HOST  ?= root@kinetic.eukota.com
 LOCAL_BACKUP ?= ~/Backups/kinetic-data
 
-.PHONY: help build up down test seed pull-data push-data
+.PHONY: help build up down test seed pull-data push-data push
 
 help: ## Show available commands
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -30,3 +30,6 @@ pull-data: ## Backup data/ from production host to local (override: HOST=user@ip
 
 push-data: ## Restore local data/ back up to production host
 	rsync -avz --info=progress2 $(LOCAL_BACKUP)/ $(HOST):~/kinetic-time-machine/data/
+
+push: ## Push current branch to origin
+	git push origin HEAD
