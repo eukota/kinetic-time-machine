@@ -70,6 +70,10 @@ export const SubmissionForm = ({ onClose }: Props) => {
     const result = await createSubmission(formData)
     setUploading(false)
     if (result) {
+      ;(window as { umami?: { track: (e: string, data?: Record<string, unknown>) => void } }).umami?.track(
+        'submission-created',
+        { team: teamName || 'none', pending_review: result.pending_review },
+      )
       setTeamName('')
       setTeamSearch('')
       setNote('')
