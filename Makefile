@@ -3,7 +3,7 @@ IMAGE = kgc-backend
 HOST  ?= root@kinetic.eukota.com
 LOCAL_BACKUP ?= ~/Backups/kinetic-data
 
-.PHONY: help build up down test seed pull-data push-data push
+.PHONY: help build up down test seed pull-data push-data push sync-prod orient-photos
 
 help: ## Show available commands
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -26,6 +26,9 @@ seed: ## Seed database with 2026 KGC racers
 
 orient-photos: ## Fix EXIF rotation on disk and regenerate variants
 	docker compose run --rm backend python backfill_orientation.py
+
+sync-prod: ## Pull approved photos + DB rows from production (HTTPS, no SSH)
+	docker compose run --rm backend python sync_from_prod.py
 
 pull-data: ## Backup data/ from production host to local (override: HOST=user@ip)
 	mkdir -p $(LOCAL_BACKUP)

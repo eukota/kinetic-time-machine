@@ -2,5 +2,93 @@
 @tailwind components;
 @tailwind utilities;
 
-* { box-sizing: border-box; }
-body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+  background: #1B263B;
+  color: #1B263B;
+}
+
+@layer components {
+  .kinetic-title {
+    @apply font-display text-kinetic-navy tracking-wide;
+    text-shadow: 2px 2px 0 rgba(252, 191, 73, 0.5);
+  }
+
+  .kinetic-tab {
+    @apply px-3.5 py-1.5 text-base font-extrabold rounded-t-lg transition-all duration-150 leading-none;
+  }
+
+  .kinetic-tab-active {
+    @apply bg-kinetic-cream text-kinetic-navy shadow-kinetic-sm;
+  }
+
+  .kinetic-tab-inactive {
+    @apply text-white hover:text-kinetic-gold hover:bg-white/10;
+  }
+
+  .kinetic-panel {
+    @apply bg-kinetic-cream border-2 border-kinetic-navy rounded-xl shadow-kinetic-sm;
+  }
+
+  .kinetic-btn-primary {
+    @apply bg-kinetic-red text-white font-bold py-2.5 px-4 rounded-lg
+           border-2 border-kinetic-navy shadow-kinetic
+           hover:bg-kinetic-orange active:translate-y-0.5 active:shadow-kinetic-sm
+           disabled:opacity-50 disabled:translate-y-0 disabled:shadow-kinetic
+           transition-all;
+  }
+
+  .kinetic-btn-secondary {
+    @apply bg-kinetic-gold text-kinetic-navy font-bold py-2.5 px-4 rounded-lg
+           border-2 border-kinetic-navy shadow-kinetic-sm
+           hover:bg-kinetic-orange hover:text-white
+           active:translate-y-0.5 active:shadow-none
+           transition-all;
+  }
+
+  .kinetic-input {
+    @apply w-full border-2 border-kinetic-navy/20 rounded-lg px-3 py-2 text-sm
+           bg-white focus:border-kinetic-teal focus:outline-none focus:ring-2 focus:ring-kinetic-teal/30;
+  }
+
+  .kinetic-filter-heading {
+    @apply font-display text-base text-kinetic-navy tracking-wide mb-2;
+  }
+
+  .kinetic-filter-btn {
+    @apply w-full text-left px-3 py-2 rounded-lg text-sm transition-all border-2 border-transparent;
+  }
+
+  .kinetic-filter-btn-active {
+    @apply bg-kinetic-gold/40 border-kinetic-navy/30 font-bold text-kinetic-navy;
+  }
+
+  .kinetic-filter-btn-inactive {
+    @apply hover:bg-kinetic-parchment text-kinetic-navy/80;
+  }
+
+  .kinetic-badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold
+           bg-kinetic-gold/30 text-kinetic-navy border border-kinetic-navy/20;
+  }
+
+  .kinetic-callout {
+    @apply bg-kinetic-teal/10 border-2 border-kinetic-teal/30 text-kinetic-navy
+           text-xs px-3 py-2 rounded-lg leading-relaxed;
+  }
+
+  .kinetic-callout-success {
+    @apply bg-green-50 border-2 border-green-400 text-green-900 rounded-lg px-3 py-3;
+  }
+
+  .kinetic-gallery-tile {
+    @apply relative aspect-square overflow-hidden cursor-pointer
+           border-2 border-kinetic-navy rounded-lg shadow-kinetic-sm
+           hover:shadow-kinetic hover:-translate-y-0.5 transition-all duration-150;
+  }
+}

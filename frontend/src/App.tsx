@@ -8,14 +8,40 @@ import { SubmissionModal } from './components/SubmissionModal'
 import { TeamFilter } from './components/TeamFilter'
 import { CourseFilter } from './components/CourseFilter'
 import { YearFilter } from './components/YearFilter'
+import { KineticLogo } from './components/KineticLogo'
+import { TabIcon } from './components/TabIcons'
 import { useViewRoute, viewToPath, type AppView } from './hooks/useViewRoute'
 
-const TAB_LABELS: Record<AppView, string> = {
-  map: '🗺 Map',
-  gallery: '📷 Gallery',
-  about: 'ℹ About',
-  admin: '🔒 Admin',
-}
+const TABS: { id: AppView; label: string }[] = [
+  { id: 'map', label: 'Map' },
+  { id: 'gallery', label: 'Gallery' },
+  { id: 'about', label: 'About' },
+  { id: 'admin', label: 'Admin' },
+]
+
+const NavTab = ({ id, label, active, onClick, className = '' }: {
+  id: AppView
+  label: string
+  active: boolean
+  onClick: () => void
+  className?: string
+}) => (
+  <a
+    href={viewToPath(id)}
+    onClick={(e) => {
+      e.preventDefault()
+      onClick()
+    }}
+    data-cta-action="switch-tab"
+    data-cta-label={label}
+    data-cta-destination={viewToPath(id)}
+    aria-current={active ? 'page' : undefined}
+    className={`kinetic-tab inline-flex items-center gap-2 no-underline ${active ? 'kinetic-tab-active' : 'kinetic-tab-inactive'} ${className}`}
+  >
+    <TabIcon id={id} active={active} />
+    {label}
+  </a>
+)
 
 export default function App() {
   const [showForm, setShowForm] = useState(false)
@@ -24,47 +50,59 @@ export default function App() {
   const { view, setView } = useViewRoute()
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
+    <div className="h-screen flex flex-col overflow-hidden font-body">
       <div id="ktm-analytics-sink" aria-hidden className="sr-only" />
 
-      {/* Tab bar */}
-      <nav
-        data-component="tab-nav"
-        data-component-version="1.0"
-        data-component-category="navigation"
-        data-analytics-persistent="true"
-        className="flex items-center bg-white border-b flex-shrink-0 px-2 gap-0"
-      >
-        {(['map', 'gallery', 'about', 'admin'] as AppView[]).map((v) => (
-          <a
-            key={v}
-            href={viewToPath(v)}
-            onClick={(e) => {
-              e.preventDefault()
-              setView(v)
-            }}
-            data-cta-action="switch-tab"
-            data-cta-label={TAB_LABELS[v]}
-            data-cta-destination={viewToPath(v)}
-            aria-current={view === v ? 'page' : undefined}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors no-underline ${
-              view === v
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-800'
-            }`}
-          >
-            {TAB_LABELS[v]}
-          </a>
-        ))}
-      </nav>
+      <div className="h-2 flex-shrink-0 bg-kinetic-stripes" aria-hidden />
 
-      <div className="flex-1 flex flex-row overflow-hidden">
+      <div className="flex-shrink-0 bg-kinetic-navy border-b-4 border-kinetic-gold">
+        <div className="hidden md:flex items-end justify-between px-4 pt-1 pb-0">
+          <KineticLogo theme="dark" />
+          <nav
+            data-component="tab-nav"
+            data-component-version="1.0"
+            data-component-category="navigation"
+            data-analytics-persistent="true"
+            className="flex gap-0.5 pb-0"
+          >
+            {TABS.map(({ id, label }) => (
+              <NavTab
+                key={id}
+                id={id}
+                label={label}
+                active={view === id}
+                onClick={() => setView(id)}
+              />
+            ))}
+          </nav>
+        </div>
+
+        <nav
+          data-component="tab-nav"
+          data-component-version="1.0"
+          data-component-category="navigation"
+          data-analytics-persistent="true"
+          className="md:hidden flex overflow-x-auto px-2 pt-1 pb-0 gap-0.5"
+        >
+          {TABS.map(({ id, label }) => (
+            <NavTab
+              key={id}
+              id={id}
+              label={label}
+              active={view === id}
+              onClick={() => setView(id)}
+              className="flex-shrink-0"
+            />
+          ))}
+        </nav>
+      </div>
+
+      <div className="flex-1 flex flex-row overflow-hidden bg-kinetic-navy">
         <div className="flex-1 relative overflow-hidden flex flex-col">
 
           {view === 'map' && (
-            <div className="md:hidden px-4 py-3 border-b bg-white/95 backdrop-blur-sm">
-              <h1 className="text-lg font-bold text-gray-800 leading-tight">Kinetic Time Machine</h1>
-              <p className="text-xs text-gray-500 leading-tight">Kinetic Grand Championship Race Tracker</p>
+            <div className="md:hidden bg-kinetic-cream border-b-2 border-kinetic-navy/20 px-4 py-2">
+              <KineticLogo compact theme="light" />
             </div>
           )}
 
@@ -107,9 +145,9 @@ export default function App() {
           {view === 'map' && (
             <button
               onClick={() => setSidebarOpen((o) => !o)}
-              className="hidden md:flex absolute top-0 z-[500] items-center justify-center
-                         bg-white border border-gray-200 border-t-0 shadow-md rounded-b-md w-7 h-7 text-gray-500 hover:text-gray-800 hover:bg-gray-50 transition-colors text-sm"
-              style={{ right: sidebarOpen ? '320px' : '0' }}
+              className="hidden md:flex absolute top-0 right-0 z-[500] items-center justify-center
+                         bg-kinetic-gold border-2 border-kinetic-navy shadow-kinetic-sm rounded-b-lg
+                         w-8 h-8 text-kinetic-navy font-bold hover:bg-kinetic-orange hover:text-white transition-colors"
               title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
             >
               {sidebarOpen ? '›' : '‹'}
@@ -128,30 +166,36 @@ export default function App() {
                 onClick={() => { setShowForm(true); setShowTeams(false) }}
                 data-cta-action="open-submit-form"
                 data-cta-label="Submit photo"
-                className="bg-blue-600 text-white rounded-full w-14 h-14 text-2xl shadow-lg flex items-center justify-center"
-              >+</button>
+                className="kinetic-btn-primary rounded-full w-14 h-14 text-3xl flex items-center justify-center !p-0"
+                aria-label="Submit photo"
+              >
+                +
+              </button>
               <button
                 type="button"
                 onClick={() => { setShowTeams(true); setShowForm(false) }}
                 data-cta-action="open-filters-panel"
                 data-cta-label="Filters"
-                className="bg-white text-gray-700 rounded-full w-14 h-14 shadow-lg flex items-center justify-center text-sm font-bold border"
-              >&#9776;</button>
+                className="kinetic-btn-secondary rounded-full w-14 h-14 flex items-center justify-center text-lg !p-0"
+                aria-label="Filters"
+              >
+                ☰
+              </button>
             </div>
           )}
 
           {showForm && view === 'map' && (
             <div className="md:hidden fixed inset-0 z-[998] flex flex-col justify-end">
-              <div className="bg-black/40 absolute inset-0" onClick={() => setShowForm(false)} />
-              <div className="relative bg-white rounded-t-2xl p-4 max-h-[80vh] overflow-y-auto shadow-2xl">
+              <div className="bg-kinetic-navy/60 absolute inset-0" onClick={() => setShowForm(false)} />
+              <div className="relative bg-kinetic-cream border-t-4 border-kinetic-gold rounded-t-2xl p-4 max-h-[80vh] overflow-y-auto shadow-2xl">
                 <SubmissionForm onClose={() => setShowForm(false)} />
               </div>
             </div>
           )}
           {showTeams && view === 'map' && (
             <div className="md:hidden fixed inset-0 z-[998] flex flex-col justify-end">
-              <div className="bg-black/40 absolute inset-0" onClick={() => setShowTeams(false)} />
-              <div className="relative bg-white rounded-t-2xl p-4 max-h-[60vh] overflow-y-auto shadow-2xl space-y-4">
+              <div className="bg-kinetic-navy/60 absolute inset-0" onClick={() => setShowTeams(false)} />
+              <div className="relative bg-kinetic-cream border-t-4 border-kinetic-gold rounded-t-2xl p-4 max-h-[60vh] overflow-y-auto shadow-2xl space-y-4">
                 <YearFilter />
                 <CourseFilter />
                 <TeamFilter />
@@ -162,25 +206,26 @@ export default function App() {
 
         {view === 'map' && (
           <aside
-            className={`hidden md:flex flex-col bg-gray-50 border-l overflow-y-auto transition-all duration-200 flex-shrink-0 ${
+            className={`hidden md:flex flex-col bg-kinetic-cream border-l-4 border-kinetic-gold overflow-y-auto transition-all duration-200 flex-shrink-0 ${
               sidebarOpen ? 'w-80' : 'w-0 border-l-0 overflow-hidden'
             }`}
           >
-            <div className="p-4 border-b min-w-[320px]">
-              <h1 className="text-lg font-bold text-gray-800">Kinetic Time Machine</h1>
-              <p className="text-xs text-gray-500">Kinetic Grand Championship Race Tracker</p>
-            </div>
-            <div className="p-4 border-b min-w-[320px]">
+            <div className="p-4 border-b-2 border-kinetic-navy/10 min-w-[320px] bg-kinetic-parchment/50">
               <SubmissionForm />
             </div>
-            <div className="p-4 border-b min-w-[320px]">
+            <div className="p-4 border-b-2 border-kinetic-navy/10 min-w-[320px]">
               <YearFilter />
             </div>
-            <div className="p-4 border-b min-w-[320px]">
+            <div className="p-4 border-b-2 border-kinetic-navy/10 min-w-[320px]">
               <CourseFilter />
             </div>
-            <div className="p-4 min-w-[320px]">
+            <div className="p-4 min-w-[320px] flex-1">
               <TeamFilter />
+            </div>
+            <div className="p-3 min-w-[320px] border-t-2 border-dashed border-kinetic-duct text-center">
+              <p className="text-[10px] font-bold text-kinetic-navy/40 uppercase tracking-widest">
+                Unofficial fan tracker · Not affiliated with Kinetic Universe
+              </p>
             </div>
           </aside>
         )}

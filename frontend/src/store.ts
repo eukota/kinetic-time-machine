@@ -20,6 +20,7 @@ export interface Submission {
   created_at?: string
   first_photo?: string | null
   first_photo_thumb?: string | null
+  first_photo_display?: string | null
   first_photo_medium?: string | null
   first_photo_mime?: string | null
   photos?: Photo[]

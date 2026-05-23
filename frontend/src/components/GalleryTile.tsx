@@ -40,19 +40,18 @@ export const GalleryTile = ({ submission, team, index, onClick }: Props) => {
       data-component-context={`list:gallery|position:${index}`}
       data-cta-action="open-photo"
       data-cta-label={team?.name ?? 'Race photo'}
-      className="relative aspect-square overflow-hidden rounded cursor-pointer group bg-gray-800"
+      className="kinetic-gallery-tile group bg-kinetic-navy"
       onClick={onClick}
       onTouchEnd={handleTouchEnd}
     >
       {submission.first_photo && (
         <img
-          src={`/photos/${submission.first_photo}`}
+          src={`/photos/${submission.first_photo_thumb ?? submission.first_photo}`}
           srcSet={
             submission.first_photo_thumb
               ? [
                   `/photos/${submission.first_photo_thumb} 400w`,
                   submission.first_photo_medium ? `/photos/${submission.first_photo_medium} 900w` : null,
-                  `/photos/${submission.first_photo} 1600w`,
                 ]
                   .filter(Boolean)
                   .join(', ')
@@ -62,15 +61,17 @@ export const GalleryTile = ({ submission, team, index, onClick }: Props) => {
           alt="submission"
           className="w-full h-full object-cover"
           loading="lazy"
+          decoding="async"
+          fetchPriority="low"
         />
       )}
       <div
-        className={`absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent
+        className={`absolute inset-x-0 bottom-0 bg-gradient-to-t from-kinetic-navy via-kinetic-navy/60 to-transparent
           px-2 pb-2 pt-6 transition-opacity duration-150
           ${overlayVisible ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
       >
         {team && (
-          <p className="text-white text-xs font-medium truncate leading-tight">{team.name}</p>
+          <p className="text-kinetic-gold text-xs font-bold truncate leading-tight">{team.name}</p>
         )}
         {timeStr && (
           <p className="text-white/70 text-xs leading-tight">{timeStr}</p>

@@ -3,6 +3,7 @@ from PIL import Image, ImageOps
 
 VARIANTS = [
     ("thumb", 400),
+    ("display", 640),
     ("medium", 900),
 ]
 
@@ -29,7 +30,7 @@ def normalize_image(path: str, *, quality: int = 88) -> None:
 
 
 def generate_variants(src_path: str, dest_dir: str, photo_id: str) -> None:
-    """Generate thumb (400px) and medium (900px) JPEG variants from src_path."""
+    """Generate thumb (400px), display (640px), and medium (900px) JPEG variants from src_path."""
     img = open_oriented(src_path).convert("RGB")
     for name, max_width in VARIANTS:
         if img.width > max_width:

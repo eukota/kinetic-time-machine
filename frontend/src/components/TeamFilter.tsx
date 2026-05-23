@@ -12,15 +12,15 @@ export const TeamFilter = () => {
       data-component-version="1.0"
       data-component-category="filter"
     >
-      <h3 className="font-semibold text-sm mb-2 text-gray-700">Filter by Team</h3>
+      <h3 className="kinetic-filter-heading">🏁 Filter by Team</h3>
       <div className="space-y-1">
         <button
           type="button"
           onClick={() => selectTeam(null)}
           data-cta-action="filter-team"
           data-cta-label="All teams"
-          className={`w-full text-left px-3 py-1.5 rounded text-sm transition-colors ${
-            !selectedTeam ? 'bg-blue-100 text-blue-800 font-medium' : 'hover:bg-gray-100'
+          className={`kinetic-filter-btn ${
+            !selectedTeam ? 'kinetic-filter-btn-active' : 'kinetic-filter-btn-inactive'
           }`}
         >
           All Teams
@@ -32,21 +32,19 @@ export const TeamFilter = () => {
             onClick={() => selectTeam(team.id)}
             data-cta-action="filter-team"
             data-cta-label={team.name}
-            data-entity-type="team"
-            data-entity-id={`team_${team.id}`}
-            className={`w-full text-left px-3 py-1.5 rounded text-sm flex items-center gap-2 transition-colors ${
-              selectedTeam === team.id ? 'bg-blue-100 text-blue-800 font-medium' : 'hover:bg-gray-100'
+            className={`kinetic-filter-btn flex items-center gap-2 ${
+              selectedTeam === team.id ? 'kinetic-filter-btn-active' : 'kinetic-filter-btn-inactive'
             }`}
           >
             <span
-              className="inline-block w-3 h-3 rounded-full flex-shrink-0"
+              className="inline-block w-3 h-3 rounded-full flex-shrink-0 border border-kinetic-navy/20"
               style={{ backgroundColor: team.color }}
             />
             {team.name}
           </button>
         ))}
         {teams.length === 0 && (
-          <p className="text-xs text-gray-400 px-3">No teams yet</p>
+          <p className="text-xs text-kinetic-navy/40 px-3">No teams yet</p>
         )}
       </div>
     </div>

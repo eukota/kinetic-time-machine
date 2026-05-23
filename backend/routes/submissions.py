@@ -137,6 +137,7 @@ def _serialize_submission_summary(s):
         "created_at": s.created_at,
         "first_photo": first,
         "first_photo_thumb": variant_path_if_exists(first, "thumb", PHOTOS_DIR),
+        "first_photo_display": variant_path_if_exists(first, "display", PHOTOS_DIR),
         "first_photo_medium": variant_path_if_exists(first, "medium", PHOTOS_DIR),
         "first_photo_mime": s.photos[0].mime_type if s.photos else None,
     }
@@ -178,6 +179,7 @@ def get_submission(submission_id: str, db: Session = Depends(get_db)):
                 "id": p.id,
                 "file_path": p.file_path,
                 "thumb_path": variant_path_if_exists(p.file_path, "thumb", PHOTOS_DIR),
+                "display_path": variant_path_if_exists(p.file_path, "display", PHOTOS_DIR),
                 "medium_path": variant_path_if_exists(p.file_path, "medium", PHOTOS_DIR),
                 "mime_type": p.mime_type,
                 "uploaded_at": p.uploaded_at,

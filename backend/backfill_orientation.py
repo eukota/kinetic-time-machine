@@ -15,7 +15,7 @@ for submission_id in sorted(os.listdir(PHOTOS_DIR)):
     if not os.path.isdir(sub_dir):
         continue
     for fname in sorted(os.listdir(sub_dir)):
-        if "_thumb" in fname or "_medium" in fname:
+        if "_thumb" in fname or "_display" in fname or "_medium" in fname:
             continue
         src = os.path.join(sub_dir, fname)
         photo_id = os.path.splitext(fname)[0]

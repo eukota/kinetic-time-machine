@@ -7,6 +7,7 @@ interface DetailPhoto {
   id: string
   file_path: string
   thumb_path?: string | null
+  display_path?: string | null
   medium_path?: string | null
   mime_type: string | null
   uploaded_at: string
@@ -15,6 +16,8 @@ interface DetailPhoto {
 interface Detail extends Submission {
   photos?: DetailPhoto[]
 }
+
+const ADMIN_TOKEN_KEY = 'ktm.admin.token'
 
 export const SubmissionModal = () => {
   const {
@@ -41,17 +44,26 @@ export const SubmissionModal = () => {
 
   useEffect(() => { if (isOpen) setIndex(initialIndex) }, [isOpen, initialIndex])
 
+  const activeId = items[index]?.id
+
   useEffect(() => {
-    if (!isOpen || items.length === 0) return
-    const item = items[index]
-    if (!item) return
-    setDetail(null)
-    setLoading(true)
-    getSubmissionDetails(item.id).then((d) => {
-      setDetail(d as Detail)
+    if (!isOpen || !activeId) {
+      setDetail(null)
       setLoading(false)
-    })
-  }, [index, isOpen, items, getSubmissionDetails])
+      return
+    }
+    let cancelled = false
+    setLoading(true)
+    getSubmissionDetails(activeId)
+      .then((d) => {
+        if (cancelled) return
+        setDetail(d as Detail)
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => { cancelled = true }
+  }, [isOpen, activeId, getSubmissionDetails])
 
   const prev = useCallback(() => setIndex((i) => (i - 1 + items.length) % items.length), [items.length])
   const next = useCallback(() => setIndex((i) => (i + 1) % items.length), [items.length])
@@ -67,16 +79,28 @@ export const SubmissionModal = () => {
     return () => document.removeEventListener('keydown', handler)
   }, [isOpen, close, prev, next])
 
-  const adminToken = localStorage.getItem('ktm.admin.token')
-
   const handleDelete = async () => {
-    if (!detail || !adminToken || !confirm('Delete this submission and its photos?')) return
+    if (!detail || !confirm('Delete this submission and its photos?')) return
+    const token = localStorage.getItem(ADMIN_TOKEN_KEY)
+    if (!token) {
+      alert('Sign in on the Admin tab first — delete requires an admin token.')
+      return
+    }
     const r = await fetch(`/api/admin/submissions/${detail.id}`, {
       method: 'DELETE',
-      headers: { Authorization: `Bearer ${adminToken}` },
+      headers: { Authorization: `Bearer ${token}` },
     })
-    if (!r.ok) return
+    if (!r.ok) {
+      const msg = r.status === 503
+        ? 'Delete unavailable — server has no ADMIN_TOKEN configured.'
+        : r.status === 401
+          ? 'Invalid admin token — sign in again on the Admin tab.'
+          : `Delete failed (${r.status})`
+      alert(msg)
+      return
+    }
     setSubmissions(submissions.filter((s) => s.id !== detail.id))
+    window.dispatchEvent(new CustomEvent('ktm:submission-deleted', { detail: { id: detail.id } }))
     const remaining = items.filter((s) => s.id !== detail.id)
     if (remaining.length === 0) { close(); return }
     selectSubmissions(remaining)
@@ -86,10 +110,36 @@ export const SubmissionModal = () => {
   if (!isOpen) return null
 
   const current = items[index]
-  // Portal renders into document.body — escapes any parent stacking context
-  const photo = detail?.photos?.[0]
+  const detailPhoto = detail?.id === current?.id ? detail?.photos?.[0] : undefined
+  const listPhoto = current?.first_photo
+    ? {
+        file_path: current.first_photo,
+        thumb_path: current.first_photo_thumb,
+        display_path: current.first_photo_display,
+        medium_path: current.first_photo_medium,
+      }
+    : undefined
+  const photo = detailPhoto ?? listPhoto
   const teamName = current?.team_id ? teams.find((t) => t.id === current.team_id)?.name : null
   const multi = items.length > 1
+
+  const renderPhoto = () => {
+    if (!photo) return null
+    const isWide = typeof window !== 'undefined' && window.matchMedia('(min-width: 641px)').matches
+    const src = isWide
+      ? (photo.medium_path ?? photo.display_path ?? photo.thumb_path ?? photo.file_path)
+      : (photo.display_path ?? photo.thumb_path ?? photo.medium_path ?? photo.file_path)
+
+    return (
+      <img
+        key={`${current?.id}-${src}`}
+        src={`/photos/${src}`}
+        alt="submission"
+        className="max-w-full max-h-full object-contain rounded-sm"
+        decoding="async"
+      />
+    )
+  }
 
   return createPortal(
     <div
@@ -104,16 +154,13 @@ export const SubmissionModal = () => {
       onClick={close}
     >
 
-      {/* Top bar */}
       <div className="flex items-center justify-between px-4 pt-3 pb-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
         <span className="text-white/50 text-sm">{multi ? `${index + 1} / ${items.length}` : ''}</span>
         <button onClick={close} className="text-white/70 hover:text-white text-2xl w-11 h-11 flex items-center justify-center rounded-full hover:bg-white/10 active:bg-white/20 transition-colors">✕</button>
       </div>
 
-      {/* Image + side arrows */}
       <div className="flex-1 flex items-stretch min-h-0 relative" onClick={(e) => e.stopPropagation()}>
 
-        {/* Left arrow */}
         <button
           type="button"
           onClick={prev}
@@ -124,22 +171,10 @@ export const SubmissionModal = () => {
           ‹
         </button>
 
-        {/* Photo */}
         <div className="flex-1 flex items-center justify-center min-w-0 py-2">
-          {loading && <div className="text-white/30 text-sm">Loading…</div>}
-          {!loading && photo && (
-            <img
-              src={`/photos/${photo.file_path}`}
-              srcSet={
-                photo.medium_path
-                  ? `/photos/${photo.medium_path} 900w, /photos/${photo.file_path} 2400w`
-                  : undefined
-              }
-              sizes="(max-width: 900px) calc(100vw - 112px), 900px"
-              alt="submission"
-              className="max-w-full max-h-full object-contain rounded-sm"
-            />
-          )}
+          {photo ? renderPhoto() : loading ? (
+            <div className="text-white/30 text-sm">Loading…</div>
+          ) : null}
           {!loading && !photo && current?.pending_review && (
             <div className="max-w-sm mx-6 px-6 py-8 border border-yellow-400/30 bg-yellow-500/5 rounded-lg text-center space-y-2">
               <div className="text-3xl" aria-hidden>🕒</div>
@@ -155,7 +190,6 @@ export const SubmissionModal = () => {
           )}
         </div>
 
-        {/* Right arrow */}
         <button
           type="button"
           onClick={next}
@@ -167,7 +201,6 @@ export const SubmissionModal = () => {
         </button>
       </div>
 
-      {/* Footer metadata */}
       <div className="flex-shrink-0 px-4 py-3 text-sm space-y-0.5" onClick={(e) => e.stopPropagation()}>
         {teamName && <p className="text-white font-medium">{teamName}</p>}
         {current?.timestamp && <p className="text-white/60">{new Date(current.timestamp).toLocaleString()}</p>}
@@ -183,9 +216,13 @@ export const SubmissionModal = () => {
               />
             ))}
           </div>
-          {adminToken && (
-            <button onClick={handleDelete} className="text-xs text-red-400/70 hover:text-red-300">Delete</button>
-          )}
+          <button
+            onClick={handleDelete}
+            className="text-xs text-red-400/70 hover:text-red-300 font-bold"
+            title={localStorage.getItem(ADMIN_TOKEN_KEY) ? 'Delete submission' : 'Requires Admin sign-in'}
+          >
+            Delete
+          </button>
         </div>
       </div>
     </div>,
