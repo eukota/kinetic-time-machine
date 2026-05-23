@@ -9,6 +9,7 @@ from models import Team
 
 # (number, sculpture_name, team_name_or_None)
 RACERS = [
+    (1, "Royal Kinetic Madness Band", None),
     (101, "Pa Pa Smurf's Coach", "Team Pa Pa"),
     (102, "HMS Sea Cow", "Team Needs More Cowbell"),
     (103, "Astro Bunny & the Space Cadets", "Team Goddess Racing"),
@@ -60,8 +61,12 @@ NON_RACERS = [
     ("#6b7280", "Volunteer"),
     ("#6b7280", "Pit Crew"),
     ("#6b7280", "Course / Scenery"),
-    ("#fbbf24", "Royal Kinetic Madness Band"),  # gold — the band stands out
 ]
+
+# Colors that override make_color() for specific racer numbers
+RACER_COLOR_OVERRIDES = {
+    1: "#fbbf24",  # gold — the band stands out
+}
 
 def make_color(index: int, total: int) -> str:
     h = index / total
@@ -73,18 +78,26 @@ db = SessionLocal()
 
 added = skipped = 0
 
+# Cleanup: prior band entries (pre-rename / pre-numbering) so the new #001
+# entry isn't a duplicate.
+for stale in ["Kinetic Madness Band", "Royal Kinetic Madness Band"]:
+    old = db.query(Team).filter(Team.name == stale).first()
+    if old:
+        db.delete(old)
+
 # Race teams
 for i, (number, sculpture, team_name) in enumerate(RACERS):
-    display = f"#{number} {sculpture}" + (f" — {team_name}" if team_name else "")
+    display = f"#{number:03d} {sculpture}" + (f" — {team_name}" if team_name else "")
     existing = db.query(Team).filter(Team.name == display).first()
     if existing:
         skipped += 1
         continue
     # Remove old entry without team name if present
-    old = db.query(Team).filter(Team.name == f"#{number} {sculpture}").first()
+    old = db.query(Team).filter(Team.name == f"#{number:03d} {sculpture}").first()
     if old:
         db.delete(old)
-    team = Team(name=display, color=make_color(i, len(RACERS)))
+    color = RACER_COLOR_OVERRIDES.get(number, make_color(i, len(RACERS)))
+    team = Team(name=display, color=color)
     db.add(team)
     added += 1
 
