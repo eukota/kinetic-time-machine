@@ -132,7 +132,7 @@ export const SubmissionForm = ({ onClose }: Props) => {
           <p className="font-bold text-sm flex items-center gap-1.5">
             <span>🏆</span> Thanks — your photo was submitted!
           </p>
-          <p className="text-xs text-green-800 leading-relaxed">
+          <p className="text-xs text-kinetic-navy/70 leading-relaxed">
             It'll appear on the map and gallery after a quick safety review
             (usually just a few minutes during the race).
           </p>

@@ -83,7 +83,64 @@ body {
   }
 
   .kinetic-callout-success {
-    @apply bg-green-50 border-2 border-green-400 text-green-900 rounded-lg px-3 py-3;
+    @apply bg-kinetic-teal/15 border-2 border-kinetic-teal text-kinetic-navy rounded-lg px-3 py-3;
+  }
+
+  .kinetic-callout-pending {
+    @apply bg-kinetic-parchment border-2 border-kinetic-gold text-kinetic-navy rounded-xl px-6 py-8 text-center shadow-kinetic-sm max-w-sm mx-auto;
+  }
+
+  .kinetic-modal-overlay {
+    @apply fixed inset-0 z-[9999] flex flex-col select-none
+           bg-kinetic-navy/95 bg-kinetic-dots bg-dots;
+  }
+
+  .kinetic-modal-header {
+    @apply flex items-center justify-between px-4 py-2 flex-shrink-0
+           border-b-2 border-kinetic-gold/30 bg-kinetic-navy/80;
+  }
+
+  .kinetic-modal-footer {
+    @apply flex-shrink-0 px-4 py-3 text-sm space-y-0.5
+           bg-kinetic-cream border-t-4 border-kinetic-gold text-kinetic-navy;
+  }
+
+  .kinetic-modal-arrow {
+    @apply flex-shrink-0 w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center rounded-full
+           bg-kinetic-gold/15 border-2 border-kinetic-gold/50 text-kinetic-gold font-bold
+           hover:bg-kinetic-gold hover:text-kinetic-navy hover:border-kinetic-navy hover:shadow-kinetic-sm
+           active:translate-y-0.5 transition-all text-3xl leading-none;
+  }
+
+  .kinetic-modal-close {
+    @apply w-10 h-10 flex items-center justify-center rounded-full
+           bg-kinetic-gold text-kinetic-navy border-2 border-kinetic-navy
+           shadow-kinetic-sm hover:bg-kinetic-orange hover:text-white font-bold text-lg leading-none
+           transition-all;
+  }
+
+  .kinetic-modal-counter {
+    @apply kinetic-badge bg-kinetic-gold/40 text-sm;
+  }
+
+  .kinetic-sidebar-section {
+    @apply p-4 border-b-2 border-kinetic-navy/10 min-w-[320px];
+  }
+
+  .kinetic-sidebar-heading {
+    @apply font-display text-sm text-kinetic-navy/60 tracking-wide mb-3 uppercase;
+  }
+
+  .kinetic-loading {
+    @apply text-kinetic-gold/60 text-sm font-bold animate-pulse;
+  }
+
+  .kinetic-dot-active {
+    @apply w-2 h-2 rounded-full bg-kinetic-red border border-kinetic-navy;
+  }
+
+  .kinetic-dot-inactive {
+    @apply w-2 h-2 rounded-full bg-kinetic-navy/20 hover:bg-kinetic-gold/60 transition-colors;
   }
 
   .kinetic-gallery-tile {

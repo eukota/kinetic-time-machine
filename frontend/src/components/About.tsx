@@ -1,4 +1,9 @@
-export const About = () => (
+import { useViewRoute, viewToPath } from '../hooks/useViewRoute'
+
+export const About = () => {
+  const { setView } = useViewRoute()
+
+  return (
   <div className="h-full overflow-y-auto bg-kinetic-navy text-white bg-kinetic-dots bg-dots">
     <div className="h-1 bg-kinetic-stripes flex-shrink-0" aria-hidden />
     <div className="max-w-2xl mx-auto px-6 py-12 space-y-8">
@@ -116,10 +121,27 @@ export const About = () => (
         </a>
       </div>
 
+      <p className="text-center pt-6">
+        <a
+          href={viewToPath('admin')}
+          onClick={(e) => {
+            e.preventDefault()
+            setView('admin')
+          }}
+          data-cta-action="switch-tab"
+          data-cta-label="Admin"
+          data-cta-destination={viewToPath('admin')}
+          className="text-xs font-bold text-white/30 hover:text-kinetic-gold transition-colors"
+        >
+          Admin
+        </a>
+      </p>
+
       <p className="text-center text-[10px] font-bold text-white/25 uppercase tracking-widest pt-4">
         Unofficial fan tracker · Not affiliated with Kinetic Universe
       </p>
 
     </div>
   </div>
-)
+  )
+}

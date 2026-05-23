@@ -7,20 +7,20 @@ import { SubmissionForm } from './components/SubmissionForm'
 import { SubmissionModal } from './components/SubmissionModal'
 import { TeamFilter } from './components/TeamFilter'
 import { CourseFilter } from './components/CourseFilter'
-import { YearFilter } from './components/YearFilter'
 import { KineticLogo } from './components/KineticLogo'
 import { TabIcon } from './components/TabIcons'
 import { useViewRoute, viewToPath, type AppView } from './hooks/useViewRoute'
 
-const TABS: { id: AppView; label: string }[] = [
+type NavTabId = Exclude<AppView, 'admin'>
+
+const TABS: { id: NavTabId; label: string }[] = [
   { id: 'map', label: 'Map' },
   { id: 'gallery', label: 'Gallery' },
   { id: 'about', label: 'About' },
-  { id: 'admin', label: 'Admin' },
 ]
 
 const NavTab = ({ id, label, active, onClick, className = '' }: {
-  id: AppView
+  id: NavTabId
   label: string
   active: boolean
   onClick: () => void
@@ -137,7 +137,14 @@ export default function App() {
           )}
 
           {view === 'admin' && (
-            <div className="flex-1 min-h-0 flex flex-col">
+            <div
+              data-component="admin-panel"
+              data-component-version="1.0"
+              data-component-category="admin"
+              data-entity-type="page"
+              data-entity-id="page_admin"
+              className="flex-1 min-h-0 flex flex-col"
+            >
               <Admin />
             </div>
           )}
@@ -187,18 +194,24 @@ export default function App() {
           {showForm && view === 'map' && (
             <div className="md:hidden fixed inset-0 z-[998] flex flex-col justify-end">
               <div className="bg-kinetic-navy/60 absolute inset-0" onClick={() => setShowForm(false)} />
-              <div className="relative bg-kinetic-cream border-t-4 border-kinetic-gold rounded-t-2xl p-4 max-h-[80vh] overflow-y-auto shadow-2xl">
-                <SubmissionForm onClose={() => setShowForm(false)} />
+              <div className="relative bg-kinetic-cream border-t-4 border-kinetic-gold rounded-t-2xl max-h-[80vh] overflow-hidden shadow-2xl flex flex-col">
+                <div className="h-1 bg-kinetic-stripes flex-shrink-0" aria-hidden />
+                <div className="p-4 overflow-y-auto">
+                  <SubmissionForm onClose={() => setShowForm(false)} />
+                </div>
               </div>
             </div>
           )}
           {showTeams && view === 'map' && (
             <div className="md:hidden fixed inset-0 z-[998] flex flex-col justify-end">
               <div className="bg-kinetic-navy/60 absolute inset-0" onClick={() => setShowTeams(false)} />
-              <div className="relative bg-kinetic-cream border-t-4 border-kinetic-gold rounded-t-2xl p-4 max-h-[60vh] overflow-y-auto shadow-2xl space-y-4">
-                <YearFilter />
-                <CourseFilter />
-                <TeamFilter />
+              <div className="relative bg-kinetic-cream border-t-4 border-kinetic-gold rounded-t-2xl max-h-[60vh] overflow-hidden shadow-2xl flex flex-col">
+                <div className="h-1 bg-kinetic-stripes flex-shrink-0" aria-hidden />
+                <div className="p-4 overflow-y-auto space-y-4">
+                  <p className="kinetic-sidebar-heading !mb-0">Filters</p>
+                  <CourseFilter />
+                  <TeamFilter />
+                </div>
               </div>
             </div>
           )}
@@ -210,16 +223,14 @@ export default function App() {
               sidebarOpen ? 'w-80' : 'w-0 border-l-0 overflow-hidden'
             }`}
           >
-            <div className="p-4 border-b-2 border-kinetic-navy/10 min-w-[320px] bg-kinetic-parchment/50">
+            <div className="kinetic-sidebar-section bg-kinetic-parchment/50">
               <SubmissionForm />
             </div>
-            <div className="p-4 border-b-2 border-kinetic-navy/10 min-w-[320px]">
-              <YearFilter />
-            </div>
-            <div className="p-4 border-b-2 border-kinetic-navy/10 min-w-[320px]">
+            <div className="kinetic-sidebar-section">
+              <p className="kinetic-sidebar-heading">Filters</p>
               <CourseFilter />
             </div>
-            <div className="p-4 min-w-[320px] flex-1">
+            <div className="kinetic-sidebar-section flex-1">
               <TeamFilter />
             </div>
             <div className="p-3 min-w-[320px] border-t-2 border-dashed border-kinetic-duct text-center">
