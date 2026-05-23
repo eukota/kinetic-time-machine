@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document><name>Day 3 — waypoints (renumbered)</name>
+<Style id="line"><LineStyle><color>ffea580c</color><width>4</width></LineStyle></Style>
+<Placemark><name>Day 3 - Start</name><Point><coordinates>-124.3034174,40.6432296,0</coordinates></Point></Placemark>
+<Placemark><name>Day 3 - 2</name><description>orig: Point 123</description><Point><coordinates>-124.2043832,40.6176741,0</coordinates></Point></Placemark>
+<Placemark><name>Day 3 - 3</name><description>orig: Point 124</description><Point><coordinates>-124.191441,40.6117908,0</coordinates></Point></Placemark>
+<Placemark><name>Day 3 - 4</name><description>orig: Point 125</description><Point><coordinates>-124.1913712,40.6116916,0</coordinates></Point></Placemark>
+<Placemark><name>Day 3 - 5</name><description>orig: Point 126</description><Point><coordinates>-124.1915965,40.6114554,0</coordinates></Point></Placemark>
+<Placemark><name>Day 3 - 6</name><description>orig: Point 127</description><Point><coordinates>-124.1884207,40.6091097,0</coordinates></Point></Placemark>
+<Placemark><name>Day 3 - 7</name><description>orig: Point 128</description><Point><coordinates>-124.1905665,40.6075459,0</coordinates></Point></Placemark>
+<Placemark><name>Day 3 - 8</name><description>orig: Point 129</description><Point><coordinates>-124.1933667,40.6081567,0</coordinates></Point></Placemark>
+<Placemark><name>Day 3 - 9</name><description>orig: Point 130</description><Point><coordinates>-124.1965651,40.6083441,0</coordinates></Point></Placemark>
+<Placemark><name>Day 3 - 10</name><description>orig: Point 131</description><Point><coordinates>-124.2003218,40.6090658,0</coordinates></Point></Placemark>
+<Placemark><name>Day 3 - 11</name><description>orig: Point 132</description><Point><coordinates>-124.2024261,40.6095955,0</coordinates></Point></Placemark>
+<Placemark><name>Day 3 - 12</name><description>orig: Point 133</description><Point><coordinates>-124.2056937,40.6127284,0</coordinates></Point></Placemark>
+<Placemark><name>Point 134 - Deflate</name><Point><coordinates>-124.208172,40.6131601,0</coordinates></Point></Placemark>
+<Placemark><name>Day 3 - 14</name><description>orig: Point 135</description><Point><coordinates>-124.2143089,40.6132497,0</coordinates></Point></Placemark>
+<Placemark><name>Day 3 - 15</name><description>orig: Point 136</description><Point><coordinates>-124.218815,40.6141944,0</coordinates></Point></Placemark>
+<Placemark><name>Day 3 - 16</name><description>orig: Point 137</description><Point><coordinates>-124.2223019,40.6143166,0</coordinates></Point></Placemark>
+<Placemark><name>Day 3 - 17</name><description>orig: Point 138</description><Point><coordinates>-124.2221303,40.6125492,0</coordinates></Point></Placemark>
+<Placemark><name>Day 3 - 18</name><description>orig: Point 139</description><Point><coordinates>-124.2223663,40.6121094,0</coordinates></Point></Placemark>
+<Placemark><name>Day 3 - 19</name><description>orig: Point 140</description><Point><coordinates>-124.2235572,40.6114334,0</coordinates></Point></Placemark>
+<Placemark><name>Day 3 - 20</name><description>orig: Point 141</description><Point><coordinates>-124.2244799,40.6109529,0</coordinates></Point></Placemark>
+<Placemark><name>Day 3 - 21</name><description>orig: Point 142</description><Point><coordinates>-124.2260034,40.6103746,0</coordinates></Point></Placemark>
+<Placemark><name>Day 3 - 22</name><description>orig: Point 143</description><Point><coordinates>-124.2267115,40.6097149,0</coordinates></Point></Placemark>
+<Placemark><name>Day 3 - 23</name><description>orig: Point 144</description><Point><coordinates>-124.2329098,40.6063665,0</coordinates></Point></Placemark>
+<Placemark><name>Day 3 - 24</name><description>orig: Point 145</description><Point><coordinates>-124.250217,40.6057413,0</coordinates></Point></Placemark>
+<Placemark><name>Day 3 - 25</name><description>orig: Point 146</description><Point><coordinates>-124.251275,40.5944636,0</coordinates></Point></Placemark>
+<Placemark><name>Day 3 - 26</name><description>orig: Point 147</description><Point><coordinates>-124.2553412,40.5934371,0</coordinates></Point></Placemark>
+<Placemark><name>Day 3 - 27</name><description>orig: Point 148</description><Point><coordinates>-124.2558205,40.5886704,0</coordinates></Point></Placemark>
+<Placemark><name>Day 3 - Finish Line</name><Point><coordinates>-124.2647293,40.5757709,0</coordinates></Point></Placemark>
+</Document></kml>

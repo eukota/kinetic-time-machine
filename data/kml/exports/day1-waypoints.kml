@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document><name>Day 1 — waypoints (renumbered)</name>
+<Style id="line"><LineStyle><color>ff16a34a</color><width>4</width></LineStyle></Style>
+<Placemark><name>Arcata Plaza</name><Point><coordinates>-124.0857988,40.8687948,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 2</name><description>orig: Point 3</description><Point><coordinates>-124.0867854,40.8690207,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 3</name><description>orig: Point 4</description><Point><coordinates>-124.087059,40.8682702,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 4</name><description>orig: Point 5</description><Point><coordinates>-124.0874051,40.8674428,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 5</name><description>orig: Point 6</description><Point><coordinates>-124.0915465,40.8683596,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 6</name><description>orig: Point 7</description><Point><coordinates>-124.0904092,40.8715156,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 7</name><description>orig: Point 8</description><Point><coordinates>-124.101132,40.8738516,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 8</name><description>orig: Point 9</description><Point><coordinates>-124.1005487,40.8810936,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 9</name><description>orig: Point 10</description><Point><coordinates>-124.1299405,40.883188,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 10</name><description>orig: Point 11</description><Point><coordinates>-124.1349801,40.8683204,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 11</name><description>orig: Point 12</description><Point><coordinates>-124.1570716,40.8621296,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 12</name><description>orig: Point 13</description><Point><coordinates>-124.166005,40.8478486,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 13</name><description>orig: Point 14</description><Point><coordinates>-124.1667882,40.8479639,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 14</name><description>orig: Point 15</description><Point><coordinates>-124.1684673,40.8450502,0</coordinates></Point></Placemark>
+<Placemark><name>Community Center</name><Point><coordinates>-124.1686706,40.8451305,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 16</name><description>orig: Point 19</description><Point><coordinates>-124.1696443,40.8455058,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 17</name><description>orig: Point 20</description><Point><coordinates>-124.1700214,40.8460258,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 18</name><description>orig: Point 21</description><Point><coordinates>-124.1707992,40.8461061,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 19</name><description>orig: Point 22</description><Point><coordinates>-124.1715395,40.8465179,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 20</name><description>orig: Point 23</description><Point><coordinates>-124.1744905,40.8476843,0</coordinates></Point></Placemark>
+<Placemark><name>Samoa Beach</name><Point><coordinates>-124.1903607,40.8218842,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 22</name><description>orig: Point 25</description><Point><coordinates>-124.1896169,40.8215926,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 23</name><description>orig: Point 26</description><Point><coordinates>-124.1893581,40.8216058,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 24</name><description>orig: Point 27</description><Point><coordinates>-124.1894806,40.821153,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 25</name><description>orig: Point 28 - Begin OSRM</description><Point><coordinates>-124.1895624,40.8207726,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 26</name><description>orig: Point 29</description><Point><coordinates>-124.1765402,40.8259196,0</coordinates></Point></Placemark>
+<Placemark><name>Eureka</name><Point><coordinates>-124.1582292,40.8124654,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 28</name><description>orig: Point 31</description><Point><coordinates>-124.1536646,40.8051425,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 29</name><description>orig: Point 32</description><Point><coordinates>-124.156925,40.8051574,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 30</name><description>orig: Point 33</description><Point><coordinates>-124.1587577,40.8046692,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 31</name><description>orig: Point 34</description><Point><coordinates>-124.1590053,40.8054894,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 32</name><description>orig: Point 35</description><Point><coordinates>-124.1600085,40.8053351,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 33</name><description>orig: Point 36</description><Point><coordinates>-124.1601265,40.8058508,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 - 34</name><description>orig: Point 37</description><Point><coordinates>-124.1555092,40.8067744,0</coordinates></Point></Placemark>
+<Placemark><name>Day 1 END</name><Point><coordinates>-124.1557935,40.8074404,0</coordinates></Point></Placemark>
+</Document></kml>

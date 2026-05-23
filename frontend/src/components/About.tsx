@@ -47,6 +47,15 @@ export const About = () => (
       </div>
 
       <div className="border-t border-white/10 pt-8">
+        <h2 className="text-lg font-semibold mb-3">A note on the map</h2>
+        <p className="text-white/70 leading-relaxed">
+          The race route shown here was drawn by hand from the KGC Full Map Package PDFs,
+          waypoint by waypoint, as best I could read them. Beach and dune sections in
+          particular are approximations. If you spot a stretch that's wrong, let me know.
+        </p>
+      </div>
+
+      <div className="border-t border-white/10 pt-8">
         <h2 className="text-lg font-semibold mb-3">A note on the code</h2>
         <p className="text-white/70 leading-relaxed">
           This app was written in a feverish sprint with AI just 48 hours before the 2026 race.

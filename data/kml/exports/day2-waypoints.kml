@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document><name>Day 2 — waypoints (renumbered)</name>
+<Style id="line"><LineStyle><color>ff16a34a</color><width>4</width></LineStyle></Style>
+<Placemark><name>Day 2 - Start - Water IN*</name><Point><coordinates>-124.1542707,40.8081277,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - Water*</name><Point><coordinates>-124.15478,40.8085152,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 3</name><description>orig: Point 40*</description><Point><coordinates>-124.156406,40.8079412,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 4</name><description>orig: Point 41*</description><Point><coordinates>-124.1593672,40.8070073,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 5</name><description>orig: Point 42*</description><Point><coordinates>-124.1621013,40.8065523,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 6</name><description>orig: Point 43*</description><Point><coordinates>-124.1652556,40.8064792,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 7</name><description>orig: Point 44*</description><Point><coordinates>-124.168206,40.8063087,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 8</name><description>orig: Point 45*</description><Point><coordinates>-124.1718456,40.805655,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 9</name><description>orig: Point 46*</description><Point><coordinates>-124.1751179,40.8048916,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 10</name><description>orig: Point 47*</description><Point><coordinates>-124.1760611,40.8044253,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - Water OUT*</name><Point><coordinates>-124.1763669,40.8037046,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 12</name><description>orig: Point 49*</description><Point><coordinates>-124.1765239,40.803264,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 13</name><description>orig: Point 50</description><Point><coordinates>-124.1809442,40.799451,0</coordinates></Point></Placemark>
+<Placemark><name>Eureka Natural Foods</name><Point><coordinates>-124.1779644,40.7930573,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 15</name><description>orig: Point 67</description><Point><coordinates>-124.180592,40.7928893,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 16</name><description>orig: Point 68</description><Point><coordinates>-124.1806671,40.7915328,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 17</name><description>orig: Point 69</description><Point><coordinates>-124.1847441,40.7915734,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 18</name><description>orig: Point 70</description><Point><coordinates>-124.1851294,40.7906423,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 19</name><description>orig: Point 71*</description><Point><coordinates>-124.1856389,40.789472,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 20</name><description>orig: Point 72*</description><Point><coordinates>-124.1858427,40.7892182,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 21</name><description>orig: Point 73*</description><Point><coordinates>-124.1860761,40.7883754,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 22</name><description>orig: Point 74*</description><Point><coordinates>-124.1882067,40.7852881,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 23</name><description>orig: Point 75*</description><Point><coordinates>-124.1915592,40.7808408,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 24</name><description>orig: Point 76*</description><Point><coordinates>-124.1917191,40.7805754,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 25</name><description>orig: Point 77*</description><Point><coordinates>-124.192438,40.7805551,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 26</name><description>orig: Point 78*</description><Point><coordinates>-124.1931944,40.7792755,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 27</name><description>orig: Point 79*</description><Point><coordinates>-124.1932426,40.7790277,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 28</name><description>orig: Point 80*</description><Point><coordinates>-124.1933124,40.7787921,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 29</name><description>orig: Point 81*</description><Point><coordinates>-124.1931353,40.7787028,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 30</name><description>orig: Point 82*</description><Point><coordinates>-124.1926418,40.7786621,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 31</name><description>orig: Point 83*</description><Point><coordinates>-124.1925667,40.7785118,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 32</name><description>orig: Point 84*</description><Point><coordinates>-124.1930334,40.7772869,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 33</name><description>orig: Point 85*</description><Point><coordinates>-124.1930618,40.7771693,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 34</name><description>orig: Point 86*</description><Point><coordinates>-124.192976,40.7771206,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 35</name><description>orig: Point 87*</description><Point><coordinates>-124.1933495,40.7761166,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 36</name><description>orig: Point 88*</description><Point><coordinates>-124.193886,40.776203,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 37</name><description>orig: Point 89*</description><Point><coordinates>-124.1941072,40.7760994,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 38</name><description>orig: Point 90*</description><Point><coordinates>-124.1941287,40.7759085,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 39</name><description>orig: Point 91*</description><Point><coordinates>-124.194063,40.7756667,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 40</name><description>orig: Point 92*</description><Point><coordinates>-124.1942494,40.7751,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 41</name><description>orig: Point 93*</description><Point><coordinates>-124.1945883,40.77385,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 42</name><description>orig: Point 94*</description><Point><coordinates>-124.1949326,40.7736055,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 43</name><description>orig: Point 95*</description><Point><coordinates>-124.1952116,40.772789,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 44</name><description>orig: Point 96*</description><Point><coordinates>-124.1957536,40.7701331,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 45</name><description>orig: Point 97*</description><Point><coordinates>-124.1961291,40.7687356,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 46</name><description>orig: Point 98*</description><Point><coordinates>-124.1964429,40.7685609,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 47</name><description>orig: Point 99*</description><Point><coordinates>-124.1966011,40.7677077,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 48</name><description>orig: Point 100*</description><Point><coordinates>-124.1966745,40.7666368,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 49</name><description>orig: Point 101*</description><Point><coordinates>-124.1965672,40.7664824,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 50</name><description>orig: Point 102*</description><Point><coordinates>-124.1962561,40.7661736,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 51</name><description>orig: Point 103*</description><Point><coordinates>-124.1962883,40.7660517,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 52</name><description>orig: Point 104*</description><Point><coordinates>-124.1965672,40.7657836,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 53</name><description>orig: Point 105*</description><Point><coordinates>-124.1965351,40.7648166,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 54</name><description>orig: Point 106*</description><Point><coordinates>-124.1963343,40.7629581,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 55</name><description>orig: Point 107*</description><Point><coordinates>-124.1959695,40.7621454,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 56</name><description>orig: Point 108*</description><Point><coordinates>-124.1958622,40.7614628,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 57</name><description>orig: Point 109*</description><Point><coordinates>-124.1950683,40.7599838,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 58</name><description>orig: Point 110*</description><Point><coordinates>-124.1946391,40.7595125,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 59</name><description>orig: Point 111*</description><Point><coordinates>-124.1942958,40.7593012,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 60</name><description>orig: Point 112*</description><Point><coordinates>-124.1943816,40.7576758,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 61</name><description>orig: Point 113*</description><Point><coordinates>-124.1947679,40.7559204,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 62</name><description>orig: Point 114*</description><Point><coordinates>-124.1959526,40.7539912,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 63</name><description>orig: Point 115*</description><Point><coordinates>-124.1986348,40.750789,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 64</name><description>orig: Point 116*</description><Point><coordinates>-124.200018,40.7489365,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 65</name><description>orig: Point 117*</description><Point><coordinates>-124.202901,40.7458429,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 66</name><description>orig: Point 118*</description><Point><coordinates>-124.2012626,40.7444816,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 67</name><description>orig: Point 119</description><Point><coordinates>-124.200533,40.7450831,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 68</name><description>orig: Point 120</description><Point><coordinates>-124.1989881,40.7476922,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 69</name><description>orig: Point 121</description><Point><coordinates>-124.1987306,40.7473671,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 70</name><description>orig: Point 122</description><Point><coordinates>-124.1997606,40.7451237,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 71</name><description>orig: Point 123</description><Point><coordinates>-124.199027,40.7434097,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 72</name><description>orig: Point 124</description><Point><coordinates>-124.2013694,40.7406188,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 73</name><description>orig: Point 127</description><Point><coordinates>-124.2106578,40.7363282,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 74</name><description>orig: Point 130</description><Point><coordinates>-124.2152745,40.7265699,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 75</name><description>orig: Point 136</description><Point><coordinates>-124.2079214,40.7050302,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 76</name><description>orig: Point 141</description><Point><coordinates>-124.2027004,40.6702426,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - 77</name><description>orig: Point 147</description><Point><coordinates>-124.215502,40.6551115,0</coordinates></Point></Placemark>
+<Placemark><name>Day 2 - END</name><Point><coordinates>-124.3037015,40.643211,0</coordinates></Point></Placemark>
+</Document></kml>
