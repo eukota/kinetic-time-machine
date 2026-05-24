@@ -38,7 +38,10 @@ def serve_photo(submission_id: str, filename: str):
     if not os.path.exists(path):
         from fastapi import HTTPException
         raise HTTPException(status_code=404, detail="Photo not found")
-    return FileResponse(path)
+    headers = {}
+    if "_thumb" in filename or "_display" in filename or "_medium" in filename:
+        headers["Cache-Control"] = "public, max-age=31536000, immutable"
+    return FileResponse(path, headers=headers)
 
 @app.get("/health")
 def health():
@@ -50,4 +53,6 @@ def public_config():
     """Public runtime config — frontend fetches this to know what features are enabled."""
     return {
         "hcaptcha_sitekey": os.getenv("HCAPTCHA_SITEKEY", "") or None,
+        "auto_moderation": os.getenv("MODERATION_MODE", "").strip().lower()
+        not in ("", "manual"),
     }

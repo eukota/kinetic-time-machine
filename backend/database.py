@@ -42,3 +42,8 @@ def _migrate():
             conn.exec_driver_sql("ALTER TABLE submissions ADD COLUMN approved INTEGER NOT NULL DEFAULT 0")
             conn.exec_driver_sql("UPDATE submissions SET approved=1")
             conn.commit()
+
+        sub_cols = [r[1] for r in conn.exec_driver_sql("PRAGMA table_info(submissions)")]
+        if "moderation_note" not in sub_cols:
+            conn.exec_driver_sql("ALTER TABLE submissions ADD COLUMN moderation_note TEXT")
+            conn.commit()

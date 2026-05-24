@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "description": "Component registry for Kinetic Time Machine DOM-driven analytics. Consumed by analytics-core.ts.",
+  "components": [
+    {
+      "component_id": "tab-nav",
+      "display_name": "Primary Tab Navigation",
+      "component_category": "navigation",
+      "current_version": "1.0",
+      "required_root_attrs": ["data-component", "data-component-version", "data-component-category"],
+      "events": [
+        {
+          "event_name": "cta_click",
+          "trigger": "switch-tab",
+          "required_properties": ["component_id", "cta_action", "cta_label"]
+        }
+      ]
+    },
+    {
+      "component_id": "map-view",
+      "display_name": "Race Map",
+      "component_category": "content",
+      "current_version": "1.0",
+      "events": [
+        { "event_name": "component_view", "trigger": "impression" }
+      ]
+    },
+    {
+      "component_id": "gallery",
+      "display_name": "Photo Gallery",
+      "component_category": "content",
+      "current_version": "1.0",
+      "events": [
+        { "event_name": "component_view", "trigger": "impression" },
+        { "event_name": "cta_click", "trigger": "cycle-sort" },
+        { "event_name": "cta_click", "trigger": "toggle-team-filter" },
+        { "event_name": "cta_click", "trigger": "select-all-teams" },
+        { "event_name": "cta_click", "trigger": "clear-team-filter" }
+      ]
+    },
+    {
+      "component_id": "gallery-tile",
+      "display_name": "Gallery Photo Tile",
+      "component_category": "content",
+      "current_version": "1.0",
+      "events": [
+        { "event_name": "cta_click", "trigger": "open-photo", "description": "Opens photo detail modal from gallery" }
+      ]
+    },
+    {
+      "component_id": "submission-form",
+      "display_name": "Photo Submit Form",
+      "component_category": "conversion",
+      "current_version": "1.0",
+      "events": [
+        { "event_name": "component_view", "trigger": "impression" },
+        { "event_name": "submission-created", "trigger": "outcome", "description": "Preserves legacy Umami event name" }
+      ]
+    },
+    {
+      "component_id": "submission-modal",
+      "display_name": "Photo Detail Modal",
+      "component_category": "content",
+      "current_version": "1.0",
+      "events": [
+        { "event_name": "component_view", "trigger": "impression" },
+        { "event_name": "cta_click", "trigger": "photo-prev" },
+        { "event_name": "cta_click", "trigger": "photo-next" },
+        { "event_name": "photo-view", "trigger": "outcome", "description": "Photo opened from map marker" }
+      ]
+    },
+    {
+      "component_id": "course-filter",
+      "display_name": "Course Day Filter",
+      "component_category": "filter",
+      "current_version": "1.0",
+      "events": [
+        { "event_name": "cta_click", "trigger": "filter-day" }
+      ]
+    },
+    {
+      "component_id": "year-filter",
+      "display_name": "Year Filter",
+      "component_category": "filter",
+      "current_version": "1.0",
+      "events": [
+        { "event_name": "cta_click", "trigger": "filter-year" }
+      ]
+    },
+    {
+      "component_id": "team-filter",
+      "display_name": "Map Team Filter",
+      "component_category": "filter",
+      "current_version": "1.0",
+      "events": [
+        { "event_name": "cta_click", "trigger": "filter-team" }
+      ]
+    },
+    {
+      "component_id": "admin-panel",
+      "display_name": "Admin Review Panel",
+      "component_category": "admin",
+      "current_version": "1.0",
+      "events": [
+        { "event_name": "component_view", "trigger": "impression" },
+        { "event_name": "admin-approve", "trigger": "approve-submission" },
+        { "event_name": "admin-reject", "trigger": "reject-submission" }
+      ]
+    },
+    {
+      "component_id": "mobile-fab",
+      "display_name": "Mobile Floating Actions",
+      "component_category": "navigation",
+      "current_version": "1.0",
+      "events": [
+        { "event_name": "cta_click", "trigger": "open-submit-form" },
+        { "event_name": "cta_click", "trigger": "open-filters-panel" }
+      ]
+    }
+  ]
+}

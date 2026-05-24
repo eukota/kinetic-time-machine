@@ -7,6 +7,12 @@ interface Props {
   onClose?: () => void
 }
 
+type SubmitOutcome = {
+  team: string
+  pendingReview: boolean
+  hasNote: boolean
+}
+
 export const SubmissionForm = ({ onClose }: Props) => {
   const { createSubmission } = useSubmissions()
   const { teams } = useStore()
@@ -51,6 +57,7 @@ export const SubmissionForm = ({ onClose }: Props) => {
   }
 
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
+  const [submitOutcome, setSubmitOutcome] = useState<SubmitOutcome | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -62,80 +69,102 @@ export const SubmissionForm = ({ onClose }: Props) => {
     }
     setUploading(true)
     setSuccessMsg(null)
+    setSubmitOutcome(null)
     const formData = new FormData()
     formData.append('image', file)
     if (note) formData.append('note', note)
     if (teamName) formData.append('team_name', teamName)
     if (captchaToken) formData.append('captcha_token', captchaToken)
-    const result = await createSubmission(formData)
-    setUploading(false)
-    if (result) {
-      ;(window as { umami?: { track: (e: string, data?: Record<string, unknown>) => void } }).umami?.track(
-        'submission-created',
-        { team: teamName || 'none', pending_review: result.pending_review },
-      )
-      setTeamName('')
-      setTeamSearch('')
-      setNote('')
-      setPreview(null)
-      setCaptchaToken(null)
+    try {
+      const result = await createSubmission(formData)
+      setUploading(false)
+      if (result) {
+        setSubmitOutcome({
+          team: teamName || 'none',
+          pendingReview: Boolean(result.pending_review),
+          hasNote: Boolean(note),
+        })
+        setTeamName('')
+        setTeamSearch('')
+        setNote('')
+        setPreview(null)
+        setCaptchaToken(null)
+        captchaRef.current?.resetCaptcha()
+        if (fileRef.current) fileRef.current.value = ''
+        setSuccessMsg(
+          result.pending_review
+            ? '✓ Submitted — pending review before it appears on the map'
+            : '✓ Submitted — live on the map!'
+        )
+        setTimeout(() => setSuccessMsg(null), 6000)
+      }
+    } catch (e) {
+      setUploading(false)
       captchaRef.current?.resetCaptcha()
-      if (fileRef.current) fileRef.current.value = ''
-      setSuccessMsg(
-        result.pending_review
-          ? '✓ Submitted — pending review before it appears on the map'
-          : '✓ Submitted'
-      )
-      setTimeout(() => setSuccessMsg(null), 6000)
-    } else {
-      captchaRef.current?.resetCaptcha()
       setCaptchaToken(null)
-      alert('Upload failed — please try again')
+      alert(e instanceof Error ? e.message : 'Upload failed — please try again')
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <h2 className="text-xl font-bold">Submit Photo</h2>
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4"
+      data-component="submission-form"
+      data-component-version="1.0"
+      data-component-category="conversion"
+      data-entity-type="page"
+      data-entity-id="page_map"
+    >
+      {submitOutcome && (
+        <span
+          className="sr-only"
+          data-analytics-outcome="submission-created"
+          data-outcome-team={submitOutcome.team}
+          data-outcome-pending-review={String(submitOutcome.pendingReview)}
+          data-outcome-has-note={String(submitOutcome.hasNote)}
+        />
+      )}
+      <h2 className="kinetic-title text-2xl">Submit Photo</h2>
 
       {successMsg ? (
-        <div className="bg-green-50 border border-green-300 text-green-900 px-3 py-3 rounded space-y-1">
-          <p className="font-medium text-sm flex items-center gap-1.5">
-            <span>✓</span> Thanks — your photo was submitted!
+        <div className="kinetic-callout-success space-y-1">
+          <p className="font-bold text-sm flex items-center gap-1.5">
+            <span>🏆</span> Thanks — your photo was submitted!
           </p>
-          <p className="text-xs text-green-700 leading-relaxed">
+          <p className="text-xs text-kinetic-navy/70 leading-relaxed">
             It'll appear on the map and gallery after a quick safety review
             (usually just a few minutes during the race).
           </p>
         </div>
       ) : (
-        <div className="bg-blue-50 border border-blue-200 text-blue-900 text-xs px-3 py-2 rounded leading-relaxed">
-          <p className="font-medium flex items-center gap-1.5 mb-0.5">
+        <div className="kinetic-callout space-y-0.5">
+          <p className="font-bold flex items-center gap-1.5">
             <span aria-hidden>🛡️</span> Photos are reviewed before going public
           </p>
-          <p className="text-blue-700">
+          <p className="text-kinetic-navy/70">
             A quick safety check keeps the map family-friendly. Most submissions are approved within minutes.
           </p>
         </div>
       )}
       <div>
-        <label className="block text-sm font-medium mb-1">Photo *</label>
+        <label className="block text-sm font-bold mb-1 text-kinetic-navy">Photo *</label>
         <input
           ref={fileRef}
           type="file"
           accept="image/*"
           onChange={handleFileChange}
           required
-          className="w-full text-sm border rounded px-2 py-1"
+          className="kinetic-input file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:bg-kinetic-gold file:font-bold file:text-kinetic-navy"
         />
-        <p className="text-xs text-gray-400 mt-1">GPS &amp; timestamp extracted from photo if available</p>
+        <p className="text-xs text-kinetic-navy/50 mt-1">GPS &amp; timestamp extracted from photo if available</p>
         {preview && (
-          <img src={preview} alt="preview" className="mt-2 w-full max-h-40 object-cover rounded" />
+          <img src={preview} alt="preview" className="mt-2 w-full max-h-40 object-cover rounded-lg border-2 border-kinetic-navy" />
         )}
       </div>
 
       <div className="relative">
-        <label className="block text-sm font-medium mb-1">Team (optional)</label>
+        <label className="block text-sm font-bold mb-1 text-kinetic-navy">Team (optional)</label>
         <div className="flex gap-1">
           <input
             type="text"
@@ -144,16 +173,16 @@ export const SubmissionForm = ({ onClose }: Props) => {
             onFocus={() => setShowTeamList(true)}
             onBlur={() => setTimeout(() => setShowTeamList(false), 150)}
             placeholder="Type number or name…"
-            className="w-full border rounded px-2 py-1 text-sm"
+            className="kinetic-input"
           />
           {teamName && (
-            <button type="button" onClick={clearTeam} className="text-gray-400 hover:text-gray-600 px-1 text-lg leading-none">×</button>
+            <button type="button" onClick={clearTeam} className="text-kinetic-navy/40 hover:text-kinetic-red px-1 text-lg leading-none">×</button>
           )}
         </div>
         {showTeamList && (
-          <ul className="absolute z-50 w-full bg-white border rounded shadow-lg max-h-48 overflow-y-auto text-sm mt-0.5">
+          <ul className="absolute z-50 w-full bg-white border-2 border-kinetic-navy rounded-lg shadow-kinetic max-h-48 overflow-y-auto text-sm mt-1">
             <li
-              className="px-3 py-1.5 text-gray-400 hover:bg-gray-50 cursor-pointer"
+              className="px-3 py-2 text-kinetic-navy/50 hover:bg-kinetic-parchment cursor-pointer"
               onMouseDown={() => selectTeam('')}
             >
               Unknown / No team
@@ -161,29 +190,30 @@ export const SubmissionForm = ({ onClose }: Props) => {
             {filteredTeams.map((t) => (
               <li
                 key={t.id}
-                className="px-3 py-1.5 hover:bg-blue-50 cursor-pointer"
+                className="px-3 py-2 hover:bg-kinetic-gold/30 cursor-pointer flex items-center gap-2"
                 onMouseDown={() => selectTeam(t.name)}
               >
+                <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: t.color }} />
                 {t.name}
               </li>
             ))}
             {filteredTeams.length === 0 && (
-              <li className="px-3 py-2 text-gray-400 italic">No matches</li>
+              <li className="px-3 py-2 text-kinetic-navy/40 italic">No matches</li>
             )}
           </ul>
         )}
         {teamName && (
-          <p className="text-xs text-green-600 mt-0.5">✓ {teamName}</p>
+          <p className="text-xs text-kinetic-teal font-bold mt-0.5">✓ {teamName}</p>
         )}
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Note (optional)</label>
+        <label className="block text-sm font-bold mb-1 text-kinetic-navy">Note (optional)</label>
         <textarea
           value={note}
           onChange={(e) => setNote(e.target.value)}
           rows={2}
-          className="w-full border rounded px-2 py-1 text-sm"
+          className="kinetic-input"
           placeholder="Anything worth noting..."
         />
       </div>
@@ -204,9 +234,9 @@ export const SubmissionForm = ({ onClose }: Props) => {
       <button
         type="submit"
         disabled={uploading || (!!hcaptchaSitekey && !captchaToken)}
-        className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors"
+        className="kinetic-btn-submit"
       >
-        {uploading ? 'Uploading...' : 'Submit Photo'}
+        {uploading ? 'Uploading…' : 'Submit Photo'}
       </button>
     </form>
   )

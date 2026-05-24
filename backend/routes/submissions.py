@@ -1,4 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException, Request
+from starlette.concurrency import run_in_threadpool
 from sqlalchemy.orm import Session
 from sqlalchemy import desc, extract, func
 from database import get_db
@@ -7,7 +8,8 @@ from models import Submission, Photo, Team
 from utils.exif import extract_exif
 from utils.captcha import verify_captcha
 from config import PHOTOS_DIR
-from PIL import Image
+from utils.images import generate_variants, normalize_image, open_oriented, variant_path_if_exists
+from utils.moderation import Verdict, moderate_image
 import os, uuid, shutil
 
 HEIC_SUFFIXES = {".heic", ".heif"}
@@ -58,10 +60,12 @@ async def create_submission(
     original_mime = image.content_type
     if suffix.lower() in HEIC_SUFFIXES:
         jpeg_path = temp_path[: temp_path.rfind(".")] + ".jpg"
-        Image.open(temp_path).convert("RGB").save(jpeg_path, "JPEG", quality=88)
+        open_oriented(temp_path).convert("RGB").save(jpeg_path, "JPEG", quality=88, optimize=True)
         os.unlink(temp_path)
         temp_path = jpeg_path
         suffix = ".jpg"
+    else:
+        normalize_image(temp_path)
 
     submission = Submission(
         latitude=exif_data["latitude"],
@@ -83,6 +87,23 @@ async def create_submission(
     os.makedirs(dest_dir, exist_ok=True)
     dest_path = os.path.join(dest_dir, f"{photo_id}{suffix}")
     shutil.move(temp_path, dest_path)
+    await run_in_threadpool(generate_variants, dest_path, dest_dir, photo_id)
+
+    mod = moderate_image(
+        dest_path,
+        latitude=submission.latitude,
+        longitude=submission.longitude,
+    )
+
+    if mod.verdict == Verdict.REJECT:
+        shutil.rmtree(dest_dir, ignore_errors=True)
+        raise HTTPException(
+            status_code=422,
+            detail="Photo didn't pass safety review. Please submit a family-friendly race photo.",
+        )
+
+    submission.approved = mod.verdict == Verdict.APPROVE
+    submission.moderation_note = f"[{mod.provider}] {mod.reason}"
 
     rel_path = f"{submission.id}/{photo_id}{suffix}"
     photo = Photo(submission_id=submission.id, file_path=rel_path, mime_type=original_mime)
@@ -100,9 +121,11 @@ async def create_submission(
         "photo_count": len(submission.photos),
         "approved": submission.approved,
         "pending_review": not submission.approved,
+        "moderation_note": submission.moderation_note,
     }
 
 def _serialize_submission_summary(s):
+    first = s.photos[0].file_path if s.photos else None
     return {
         "id": s.id,
         "latitude": s.latitude,
@@ -112,7 +135,10 @@ def _serialize_submission_summary(s):
         "note": s.note,
         "photo_count": len(s.photos),
         "created_at": s.created_at,
-        "first_photo": s.photos[0].file_path if s.photos else None,
+        "first_photo": first,
+        "first_photo_thumb": variant_path_if_exists(first, "thumb", PHOTOS_DIR),
+        "first_photo_display": variant_path_if_exists(first, "display", PHOTOS_DIR),
+        "first_photo_medium": variant_path_if_exists(first, "medium", PHOTOS_DIR),
         "first_photo_mime": s.photos[0].mime_type if s.photos else None,
     }
 
@@ -149,7 +175,15 @@ def get_submission(submission_id: str, db: Session = Depends(get_db)):
         "team_id": sub.team_id,
         "note": sub.note,
         "photos": [
-            {"id": p.id, "file_path": p.file_path, "mime_type": p.mime_type, "uploaded_at": p.uploaded_at}
+            {
+                "id": p.id,
+                "file_path": p.file_path,
+                "thumb_path": variant_path_if_exists(p.file_path, "thumb", PHOTOS_DIR),
+                "display_path": variant_path_if_exists(p.file_path, "display", PHOTOS_DIR),
+                "medium_path": variant_path_if_exists(p.file_path, "medium", PHOTOS_DIR),
+                "mime_type": p.mime_type,
+                "uploaded_at": p.uploaded_at,
+            }
             for p in sub.photos
         ],
     }

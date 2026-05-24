@@ -27,7 +27,10 @@ const RaceCourseOverlay = () => {
   useEffect(() => {
     let cancelled = false
     fetch('/static/race-course.geojson')
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`race course fetch failed: ${r.status}`)
+        return r.json()
+      })
       .then((geojson) => {
         if (cancelled) return
         layersRef.current.forEach((l) => map.removeLayer(l))
@@ -51,7 +54,9 @@ const RaceCourseOverlay = () => {
           map.fitBounds(group.getBounds(), { padding: [40, 40], maxZoom: 13 })
         }
       })
-      .catch(() => {})
+      .catch((err) => {
+        if (import.meta.env.DEV) console.warn('[RaceCourseOverlay]', err)
+      })
     return () => { cancelled = true }
   }, [map, selectedDay])
 
