@@ -20,11 +20,11 @@ body {
   }
 
   .kinetic-tab {
-    @apply px-3.5 py-1.5 text-base font-extrabold rounded-t-lg transition-all duration-150 leading-none;
+    @apply px-3.5 py-1.5 text-base font-extrabold rounded-lg transition-all duration-150 leading-none;
   }
 
   .kinetic-tab-active {
-    @apply bg-kinetic-cream text-kinetic-navy shadow-kinetic-sm;
+    @apply bg-kinetic-gold text-kinetic-navy border-2 border-kinetic-navy shadow-kinetic-sm;
   }
 
   .kinetic-tab-inactive {
@@ -152,6 +152,18 @@ body {
 
   .kinetic-sidebar-heading {
     @apply font-display text-sm text-kinetic-navy/60 tracking-wide mb-3 uppercase;
+  }
+
+  .kinetic-sidebar-toggle {
+    @apply hidden md:flex absolute top-1/2 -translate-y-1/2 right-0 z-[500]
+           flex-col items-center justify-center gap-2
+           w-12 min-h-[5.5rem] py-3 px-1 rounded-l-2xl
+           bg-kinetic-cream text-kinetic-navy
+           border-2 border-r-0 border-kinetic-navy
+           shadow-[-6px_0_16px_rgba(27,38,59,0.22)]
+           hover:bg-kinetic-gold hover:text-kinetic-navy hover:shadow-kinetic
+           active:scale-[0.96] active:translate-y-[calc(-50%+1px)]
+           transition-all duration-200 cursor-pointer overflow-hidden;
   }
 
   .kinetic-loading {

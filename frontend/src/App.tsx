@@ -8,7 +8,7 @@ import { SubmissionModal } from './components/SubmissionModal'
 import { TeamFilter } from './components/TeamFilter'
 import { CourseFilter } from './components/CourseFilter'
 import { KineticLogo } from './components/KineticLogo'
-import { TabIcon } from './components/TabIcons'
+import { TabIcon, SidebarToggleIcon, SidebarFiltersIcon } from './components/TabIcons'
 import { useViewRoute, viewToPath, type AppView } from './hooks/useViewRoute'
 
 type NavTabId = Exclude<AppView, 'admin'>
@@ -56,14 +56,14 @@ export default function App() {
       <div className="h-2 flex-shrink-0 bg-kinetic-stripes" aria-hidden />
 
       <div className="flex-shrink-0 bg-kinetic-navy border-b-4 border-kinetic-gold">
-        <div className="hidden md:flex items-end justify-between px-4 pt-1 pb-0">
+        <div className="hidden md:flex items-center justify-between px-5 py-3 gap-4">
           <KineticLogo theme="dark" />
           <nav
             data-component="tab-nav"
             data-component-version="1.0"
             data-component-category="navigation"
             data-analytics-persistent="true"
-            className="flex gap-0.5 pb-0"
+            className="flex gap-1.5"
           >
             {TABS.map(({ id, label }) => (
               <NavTab
@@ -72,6 +72,7 @@ export default function App() {
                 label={label}
                 active={view === id}
                 onClick={() => setView(id)}
+                className="!py-2.5 !px-4"
               />
             ))}
           </nav>
@@ -82,7 +83,7 @@ export default function App() {
           data-component-version="1.0"
           data-component-category="navigation"
           data-analytics-persistent="true"
-          className="md:hidden flex overflow-x-auto px-2 pt-1 pb-0 gap-0.5"
+          className="md:hidden flex overflow-x-auto px-2 py-2 gap-1"
         >
           {TABS.map(({ id, label }) => (
             <NavTab
@@ -151,13 +152,18 @@ export default function App() {
 
           {view === 'map' && (
             <button
+              type="button"
               onClick={() => setSidebarOpen((o) => !o)}
-              className="hidden md:flex absolute top-0 right-0 z-[500] items-center justify-center
-                         bg-kinetic-gold border-2 border-kinetic-navy shadow-kinetic-sm rounded-b-lg
-                         w-8 h-8 text-kinetic-navy font-bold hover:bg-kinetic-orange hover:text-white transition-colors"
+              className="kinetic-sidebar-toggle"
+              data-cta-action="toggle-sidebar"
+              data-cta-label={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
+              aria-expanded={sidebarOpen}
+              aria-controls="map-sidebar"
               title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
             >
-              {sidebarOpen ? '›' : '‹'}
+              <span className="absolute top-0 inset-x-0 h-1.5 bg-kinetic-stripes" aria-hidden />
+              <SidebarFiltersIcon className="mt-1.5 opacity-75" />
+              <SidebarToggleIcon open={sidebarOpen} />
             </button>
           )}
 
@@ -180,11 +186,12 @@ export default function App() {
               </button>
               <button
                 type="button"
-                onClick={() => { setShowTeams(true); setShowForm(false) }}
-                data-cta-action="open-filters-panel"
-                data-cta-label="Filters"
+                onClick={() => { setShowTeams((open) => !open); setShowForm(false) }}
+                data-cta-action="toggle-filters-panel"
+                data-cta-label={showTeams ? 'Close filters' : 'Open filters'}
                 className="kinetic-btn-secondary rounded-full w-14 h-14 flex items-center justify-center text-lg !p-0"
-                aria-label="Filters"
+                aria-label={showTeams ? 'Close filters' : 'Open filters'}
+                aria-expanded={showTeams}
               >
                 ☰
               </button>
@@ -219,6 +226,7 @@ export default function App() {
 
         {view === 'map' && (
           <aside
+            id="map-sidebar"
             className={`hidden md:flex flex-col bg-kinetic-cream border-l-4 border-kinetic-gold overflow-y-auto transition-all duration-200 flex-shrink-0 ${
               sidebarOpen ? 'w-80' : 'w-0 border-l-0 overflow-hidden'
             }`}

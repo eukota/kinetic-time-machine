@@ -192,6 +192,49 @@ export const CourseDayHeadingIcon = ({ size = 34, className = '' }: { size?: num
 
 export type TabId = AppView
 
+/** Bold chevron for the map sidebar open/close tab */
+export const SidebarToggleIcon = ({
+  open,
+  size = 32,
+  className = '',
+}: {
+  open: boolean
+  size?: number
+  className?: string
+}) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden
+    className={`transition-transform duration-200 drop-shadow-[0_1px_0_rgba(27,38,59,0.35)] ${open ? 'rotate-180' : ''} ${className}`}
+  >
+    <path
+      d="M15 5.5 9 12l6 6.5"
+      stroke="currentColor"
+      strokeWidth="3.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+)
+
+/** Sliders hint on the sidebar tab */
+export const SidebarFiltersIcon = ({ size = 18, className = '' }: { size?: number; className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+    <path
+      d="M4 7h16M4 12h10M4 17h13"
+      stroke="currentColor"
+      strokeWidth="2.75"
+      strokeLinecap="round"
+    />
+    <circle cx="17" cy="7" r="2.25" fill="currentColor" />
+    <circle cx="11" cy="12" r="2.25" fill="currentColor" />
+    <circle cx="14" cy="17" r="2.25" fill="currentColor" />
+  </svg>
+)
+
 const ICONS: Record<TabId, TabIconComponent> = {
   map: MapTabIcon,
   gallery: GalleryTabIcon,
