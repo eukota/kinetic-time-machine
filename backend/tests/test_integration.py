@@ -142,7 +142,7 @@ def test_get_submission_not_found():
 
 
 def test_admin_update_submission_team_and_note(monkeypatch):
-    from models import Team
+    from models import Team, Submission
 
     import auth
     monkeypatch.setattr(auth, "ADMIN_TOKEN", "test-secret")
@@ -151,13 +151,13 @@ def test_admin_update_submission_team_and_note(monkeypatch):
     db = TestingSessionLocal()
     team = Team(name="Test Racers", color="#D62828")
     db.add(team)
+    db.flush()
+    sub = Submission(note="original caption", approved=True)
+    db.add(sub)
     db.commit()
     team_id = team.id
+    sid = sub.id
     db.close()
-
-    upload = _upload_test_jpeg("original caption")
-    sid = upload.json()["id"]
-    client.post(f"/api/admin/submissions/{sid}/approve", headers=headers)
 
     r = client.patch(
         f"/api/admin/submissions/{sid}",
