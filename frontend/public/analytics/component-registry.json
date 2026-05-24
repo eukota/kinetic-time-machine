@@ -104,7 +104,8 @@
       "events": [
         { "event_name": "component_view", "trigger": "impression" },
         { "event_name": "admin-approve", "trigger": "approve-submission" },
-        { "event_name": "admin-reject", "trigger": "reject-submission" }
+        { "event_name": "admin-reject", "trigger": "reject-submission" },
+        { "event_name": "cta_click", "trigger": "open-analytics-dashboard" }
       ]
     },
     {

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { submissionDisplayDate } from '../lib/formatDate'
+import { getAnalyticsDashboard } from '../lib/analyticsDashboard'
 
 interface PendingSubmission {
   id: string
@@ -95,6 +96,8 @@ export const Admin = () => {
     }
   }
 
+  const analyticsDashboard = getAnalyticsDashboard()
+
   if (!token) {
     return (
       <div className="flex-1 flex items-center justify-center bg-kinetic-navy bg-kinetic-dots bg-dots">
@@ -131,7 +134,17 @@ export const Admin = () => {
         <span className="kinetic-title text-lg">Pending Review</span>
         <span className="kinetic-badge">{pending.length} item{pending.length === 1 ? '' : 's'}</span>
         {loading && <span className="text-kinetic-navy/40 text-xs font-bold">refreshing…</span>}
-        <button onClick={fetchPending} className="ml-auto text-xs font-bold text-kinetic-teal hover:text-kinetic-navy">Refresh</button>
+        <a
+          href={analyticsDashboard.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-cta-action="open-analytics-dashboard"
+          data-cta-label={analyticsDashboard.label}
+          className="ml-auto text-xs font-bold text-kinetic-teal hover:text-kinetic-navy underline-offset-2 hover:underline"
+        >
+          {analyticsDashboard.label} ↗
+        </a>
+        <button onClick={fetchPending} className="text-xs font-bold text-kinetic-teal hover:text-kinetic-navy">Refresh</button>
         <button onClick={signOut} className="text-xs font-bold text-kinetic-navy/40 hover:text-kinetic-red">Sign out</button>
       </div>
 

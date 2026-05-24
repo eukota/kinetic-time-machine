@@ -19,6 +19,37 @@ const MapZoomTracker = () => {
   return null
 }
 
+/** Leaflet does not auto-detect container resizes (e.g. sidebar toggle). */
+const MapResizeObserver = () => {
+  const map = useMap()
+
+  useEffect(() => {
+    const container = map.getContainer()
+    let settleTimer: ReturnType<typeof setTimeout> | undefined
+
+    const refresh = () => {
+      map.invalidateSize()
+      clearTimeout(settleTimer)
+      // Re-run after sidebar CSS transition (200ms) finishes.
+      settleTimer = setTimeout(() => map.invalidateSize(), 250)
+    }
+
+    const observer = new ResizeObserver(refresh)
+    observer.observe(container)
+    const parent = container.parentElement
+    if (parent) observer.observe(parent)
+
+    refresh()
+
+    return () => {
+      observer.disconnect()
+      clearTimeout(settleTimer)
+    }
+  }, [map])
+
+  return null
+}
+
 const RaceCourseOverlay = () => {
   const map = useMap()
   const { selectedDay } = useStore()
@@ -132,6 +163,7 @@ export const Map = () => {
       <RaceCourseOverlay />
       <SubmissionMarkers />
       <MapZoomTracker />
+      <MapResizeObserver />
     </MapContainer>
   )
 }
