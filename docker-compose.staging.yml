@@ -28,7 +28,10 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod
-      # No Umami tracking on staging (would skew prod analytics)
+      args:
+        # Set VITE_UMAMI_WEBSITE_ID in staging's .env to the *staging* site UUID
+        # in Umami (kept separate from the prod site so analytics don't mingle).
+        VITE_UMAMI_WEBSITE_ID: ${VITE_UMAMI_WEBSITE_ID:-}
     restart: unless-stopped
     expose:
       - "80"
