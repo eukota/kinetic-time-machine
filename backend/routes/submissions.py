@@ -20,7 +20,7 @@ CHUNK_SIZE = 64 * 1024
 router = APIRouter(prefix="/api/submissions", tags=["submissions"])
 
 @router.post("/")
-@limiter.limit("5/hour;30/day")
+@limiter.limit("30/hour;300/day")
 async def create_submission(
     request: Request,
     image: UploadFile = File(...),
