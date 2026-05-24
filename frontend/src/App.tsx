@@ -229,11 +229,12 @@ export default function App() {
         >
           <button
             type="button"
-            onClick={() => { setShowForm(true); setShowTeams(false) }}
-            data-cta-action="open-submit-form"
-            data-cta-label="Submit photo"
+            onClick={() => { setShowForm((open) => !open); setShowTeams(false) }}
+            data-cta-action="toggle-submit-form"
+            data-cta-label={showForm ? 'Close submit form' : 'Submit photo'}
             className="kinetic-btn-primary rounded-full w-14 h-14 text-3xl flex items-center justify-center !p-0"
-            aria-label="Submit photo"
+            aria-label={showForm ? 'Close submit form' : 'Submit photo'}
+            aria-expanded={showForm}
           >
             +
           </button>
