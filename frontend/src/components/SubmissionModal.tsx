@@ -4,6 +4,7 @@ import { useStore, Submission } from '../store'
 import { useSubmissions } from '../hooks/useSubmissions'
 import { useTeams } from '../hooks/useTeams'
 import { submissionDisplayDate } from '../lib/formatDate'
+import { getAdminToken, isAdminSignedIn } from '../lib/adminAuth'
 import { ZoomableImage } from './ZoomableImage'
 
 interface DetailPhoto {
@@ -20,8 +21,6 @@ interface Detail extends Submission {
   photos?: DetailPhoto[]
 }
 
-const ADMIN_TOKEN_KEY = 'ktm.admin.token'
-
 export const SubmissionModal = () => {
   const {
     selectedSubmission, selectSubmission,
@@ -35,7 +34,7 @@ export const SubmissionModal = () => {
   const isOpen = selectedSubmission !== null || selectedSubmissions.length > 0
   const items: Submission[] = selectedSubmission ? [selectedSubmission] : selectedSubmissions
 
-  const [isAdmin, setIsAdmin] = useState(() => Boolean(localStorage.getItem(ADMIN_TOKEN_KEY)))
+  const [isAdmin, setIsAdmin] = useState(() => isAdminSignedIn())
 
   const [index, setIndex] = useState(0)
   const [detail, setDetail] = useState<Detail | null>(null)
@@ -55,8 +54,18 @@ export const SubmissionModal = () => {
   useEffect(() => { if (isOpen) setIndex(initialIndex) }, [isOpen, initialIndex])
 
   useEffect(() => {
-    if (isOpen) setIsAdmin(Boolean(localStorage.getItem(ADMIN_TOKEN_KEY)))
+    if (isOpen) setIsAdmin(isAdminSignedIn())
   }, [isOpen])
+
+  useEffect(() => {
+    const syncAdmin = () => setIsAdmin(isAdminSignedIn())
+    window.addEventListener('ktm:admin-signed-in', syncAdmin)
+    window.addEventListener('ktm:admin-signed-out', syncAdmin)
+    return () => {
+      window.removeEventListener('ktm:admin-signed-in', syncAdmin)
+      window.removeEventListener('ktm:admin-signed-out', syncAdmin)
+    }
+  }, [])
 
   const activeId = items[index]?.id
 
@@ -101,7 +110,7 @@ export const SubmissionModal = () => {
 
   const handleSaveMeta = async () => {
     if (!activeSubmission) return
-    const token = localStorage.getItem(ADMIN_TOKEN_KEY)
+    const token = getAdminToken()
     if (!token) return
     setSaving(true)
     setSaveMsg(null)
@@ -152,7 +161,7 @@ export const SubmissionModal = () => {
 
   const handleDelete = async () => {
     if (!detail || !confirm('Delete this submission and its photos?')) return
-    const token = localStorage.getItem(ADMIN_TOKEN_KEY)
+    const token = getAdminToken()
     if (!token) {
       alert('Sign in on the Admin tab first — delete requires an admin token.')
       return
@@ -355,7 +364,7 @@ export const SubmissionModal = () => {
             type="button"
             onClick={handleDelete}
             className="text-xs text-kinetic-red font-bold hover:text-kinetic-orange transition-colors"
-            title={localStorage.getItem(ADMIN_TOKEN_KEY) ? 'Delete submission' : 'Requires Admin sign-in'}
+            title={isAdminSignedIn() ? 'Delete submission' : 'Requires Admin sign-in'}
           >
             Delete
           </button>

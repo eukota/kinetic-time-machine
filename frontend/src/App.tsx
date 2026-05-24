@@ -168,37 +168,6 @@ export default function App() {
             </button>
           )}
 
-          {view === 'map' && (
-            <div
-              data-component="mobile-fab"
-              data-component-version="1.0"
-              data-component-category="navigation"
-              className="md:hidden fixed bottom-6 right-4 flex flex-col gap-3 z-[1000]"
-            >
-              <button
-                type="button"
-                onClick={() => { setShowForm(true); setShowTeams(false) }}
-                data-cta-action="open-submit-form"
-                data-cta-label="Submit photo"
-                className="kinetic-btn-primary rounded-full w-14 h-14 text-3xl flex items-center justify-center !p-0"
-                aria-label="Submit photo"
-              >
-                +
-              </button>
-              <button
-                type="button"
-                onClick={() => { setShowTeams((open) => !open); setShowForm(false) }}
-                data-cta-action="toggle-filters-panel"
-                data-cta-label={showTeams ? 'Close filters' : 'Open filters'}
-                className="kinetic-btn-secondary rounded-full w-14 h-14 flex items-center justify-center text-lg !p-0"
-                aria-label={showTeams ? 'Close filters' : 'Open filters'}
-                aria-expanded={showTeams}
-              >
-                ☰
-              </button>
-            </div>
-          )}
-
           {showForm && view === 'map' && (
             <div className="md:hidden fixed inset-0 z-[998] flex flex-col justify-end">
               <div className="bg-kinetic-navy/60 absolute inset-0" onClick={() => setShowForm(false)} />
@@ -250,6 +219,37 @@ export default function App() {
           </aside>
         )}
       </div>
+
+      {view === 'map' && (
+        <div
+          data-component="mobile-fab"
+          data-component-version="1.0"
+          data-component-category="navigation"
+          className="md:hidden fixed bottom-8 right-4 flex flex-col gap-3 z-[2000]"
+        >
+          <button
+            type="button"
+            onClick={() => { setShowForm(true); setShowTeams(false) }}
+            data-cta-action="open-submit-form"
+            data-cta-label="Submit photo"
+            className="kinetic-btn-primary rounded-full w-14 h-14 text-3xl flex items-center justify-center !p-0"
+            aria-label="Submit photo"
+          >
+            +
+          </button>
+          <button
+            type="button"
+            onClick={() => { setShowTeams((open) => !open); setShowForm(false) }}
+            data-cta-action="toggle-filters-panel"
+            data-cta-label={showTeams ? 'Close filters' : 'Open filters'}
+            className="kinetic-btn-secondary rounded-full w-14 h-14 flex items-center justify-center text-lg !p-0"
+            aria-label={showTeams ? 'Close filters' : 'Open filters'}
+            aria-expanded={showTeams}
+          >
+            ☰
+          </button>
+        </div>
+      )}
 
       <SubmissionModal />
 

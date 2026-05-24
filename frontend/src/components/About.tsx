@@ -1,10 +1,41 @@
+import { useEffect, useState } from 'react'
 import { viewToPath, type AppView } from '../hooks/useViewRoute'
+import { clearAdminToken, isAdminSignedIn } from '../lib/adminAuth'
+import { clearAnalyticsUser, getAnalyticsUser } from '../lib/analyticsUser'
 
 interface Props {
   onNavigate: (view: AppView) => void
 }
 
 export const About = ({ onNavigate }: Props) => {
+  const [adminSignedIn, setAdminSignedIn] = useState(() => isAdminSignedIn())
+  const [analyticsUser, setAnalyticsUser] = useState<string | null>(() => getAnalyticsUser())
+
+  useEffect(() => {
+    const sync = () => {
+      setAdminSignedIn(isAdminSignedIn())
+      setAnalyticsUser(getAnalyticsUser())
+    }
+    window.addEventListener('ktm:admin-signed-in', sync)
+    window.addEventListener('ktm:admin-signed-out', sync)
+    window.addEventListener('ktm:analytics-user-cleared', sync)
+    return () => {
+      window.removeEventListener('ktm:admin-signed-in', sync)
+      window.removeEventListener('ktm:admin-signed-out', sync)
+      window.removeEventListener('ktm:analytics-user-cleared', sync)
+    }
+  }, [])
+
+  const signOutAdmin = () => {
+    clearAdminToken()
+    setAdminSignedIn(false)
+  }
+
+  const resetAnalyticsUser = () => {
+    clearAnalyticsUser()
+    setAnalyticsUser(null)
+  }
+
   return (
   <div className="h-full overflow-y-auto bg-kinetic-navy text-white bg-kinetic-dots bg-dots">
     <div className="h-1 bg-kinetic-stripes flex-shrink-0" aria-hidden />
@@ -137,20 +168,45 @@ export const About = ({ onNavigate }: Props) => {
         </a>
       </div>
 
-      <p className="text-center pt-6">
-        <a
-          href={viewToPath('admin')}
-          onClick={(e) => {
-            e.preventDefault()
-            onNavigate('admin')
-          }}
-          data-cta-action="switch-tab"
-          data-cta-label="Admin"
-          data-cta-destination={viewToPath('admin')}
-          className="text-xs font-bold text-white/30 hover:text-kinetic-gold transition-colors"
-        >
-          Admin
-        </a>
+      <p className="text-center pt-6 space-y-2">
+        <span className="block">
+          <a
+            href={viewToPath('admin')}
+            onClick={(e) => {
+              e.preventDefault()
+              onNavigate('admin')
+            }}
+            data-cta-action="switch-tab"
+            data-cta-label="Admin"
+            data-cta-destination={viewToPath('admin')}
+            className="text-xs font-bold text-white/30 hover:text-kinetic-gold transition-colors"
+          >
+            Admin
+          </a>
+        </span>
+        {(adminSignedIn || analyticsUser) && (
+          <span className="block text-xs text-white/25 space-x-3">
+            {adminSignedIn && (
+              <button
+                type="button"
+                onClick={signOutAdmin}
+                className="font-bold hover:text-kinetic-gold transition-colors"
+              >
+                Sign out admin
+              </button>
+            )}
+            {analyticsUser && (
+              <button
+                type="button"
+                onClick={resetAnalyticsUser}
+                className="font-bold hover:text-kinetic-gold transition-colors"
+                title={`Stop tagging analytics as "${analyticsUser}"`}
+              >
+                Clear user tag ({analyticsUser})
+              </button>
+            )}
+          </span>
+        )}
       </p>
 
       <p className="text-center text-sm font-bold text-white/25 uppercase tracking-widest pt-4">

@@ -185,19 +185,22 @@ body {
   }
 }
 
-/* Leaflet attribution: full-width strip at map bottom, stacked under mobile FABs (+ / ☰) */
+/* Leaflet attribution below mobile FAB column (+ / ☰) — parent .leaflet-bottom is z-index 1000 by default */
 @media (max-width: 767px) {
+  .leaflet-bottom {
+    z-index: 400 !important;
+  }
+
   .leaflet-bottom.leaflet-right {
     right: 0 !important;
     left: 0 !important;
   }
 
   .leaflet-control-attribution {
-    z-index: 400 !important;
     margin: 0 !important;
     width: 100% !important;
     border-radius: 0 !important;
-    padding-right: 5rem !important; /* keep text left of FAB column */
+    padding-right: 5rem !important; /* text stays left of FAB column */
     font-size: 10px;
     line-height: 1.3;
   }

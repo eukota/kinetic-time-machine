@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { submissionDisplayDate } from '../lib/formatDate'
 import { getAnalyticsDashboard } from '../lib/analyticsDashboard'
+import { clearAdminToken, getAdminToken, setAdminToken } from '../lib/adminAuth'
+import { clearAnalyticsUser, getAnalyticsUser } from '../lib/analyticsUser'
 import { PhotoImg } from './PhotoImg'
 
 interface PendingSubmission {
@@ -17,10 +19,9 @@ interface PendingSubmission {
   moderation_note?: string | null
 }
 
-const TOKEN_KEY = 'ktm.admin.token'
-
 export const Admin = () => {
-  const [token, setToken] = useState<string>(() => localStorage.getItem(TOKEN_KEY) || '')
+  const [token, setToken] = useState<string>(() => getAdminToken() || '')
+  const [analyticsUser, setAnalyticsUser] = useState<string | null>(() => getAnalyticsUser())
   const [tokenInput, setTokenInput] = useState('')
   const [pending, setPending] = useState<PendingSubmission[]>([])
   const [error, setError] = useState<string | null>(null)
@@ -37,7 +38,7 @@ export const Admin = () => {
       })
       if (r.status === 401) {
         setError('Invalid token')
-        localStorage.removeItem(TOKEN_KEY)
+        clearAdminToken()
         setToken('')
         return
       }
@@ -64,19 +65,30 @@ export const Admin = () => {
     return () => clearInterval(poll)
   }, [token, fetchPending])
 
+  useEffect(() => {
+    const onAnalyticsUserCleared = () => setAnalyticsUser(null)
+    window.addEventListener('ktm:analytics-user-cleared', onAnalyticsUserCleared)
+    return () => window.removeEventListener('ktm:analytics-user-cleared', onAnalyticsUserCleared)
+  }, [])
+
   const signIn = (e: React.FormEvent) => {
     e.preventDefault()
     const t = tokenInput.trim()
     if (!t) return
-    localStorage.setItem(TOKEN_KEY, t)
+    setAdminToken(t)
     setToken(t)
     setTokenInput('')
   }
 
   const signOut = () => {
-    localStorage.removeItem(TOKEN_KEY)
+    clearAdminToken()
     setToken('')
     setPending([])
+  }
+
+  const resetAnalyticsUser = () => {
+    clearAnalyticsUser()
+    setAnalyticsUser(null)
   }
 
   const act = async (id: string, kind: 'approve' | 'reject') => {
@@ -113,6 +125,19 @@ export const Admin = () => {
             autoFocus
           />
           {error && <p className="text-sm text-kinetic-red font-bold">{error}</p>}
+          {analyticsUser && (
+            <p className="text-xs text-kinetic-cream/60">
+              Analytics tag: <span className="font-mono text-kinetic-gold">{analyticsUser}</span>
+              {' · '}
+              <button
+                type="button"
+                onClick={resetAnalyticsUser}
+                className="font-bold text-kinetic-gold/80 hover:text-kinetic-gold underline-offset-2 hover:underline"
+              >
+                Clear tag
+              </button>
+            </p>
+          )}
           <button type="submit" className="kinetic-btn-primary w-full">
             Sign in
           </button>
@@ -146,6 +171,16 @@ export const Admin = () => {
           {analyticsDashboard.label} ↗
         </a>
         <button onClick={fetchPending} className="text-xs font-bold text-kinetic-teal hover:text-kinetic-navy">Refresh</button>
+        {analyticsUser && (
+          <button
+            type="button"
+            onClick={resetAnalyticsUser}
+            className="text-xs font-bold text-kinetic-navy/40 hover:text-kinetic-orange"
+            title={`Stop tagging analytics as "${analyticsUser}"`}
+          >
+            Clear user tag ({analyticsUser})
+          </button>
+        )}
         <button onClick={signOut} className="text-xs font-bold text-kinetic-navy/40 hover:text-kinetic-red">Sign out</button>
       </div>
 
