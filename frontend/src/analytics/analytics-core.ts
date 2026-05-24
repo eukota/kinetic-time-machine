@@ -5,6 +5,7 @@
  */
 
 import registryData from './component-registry.json'
+import { analyticsUrlPath, getAnalyticsUser, initAnalyticsUser } from '../lib/analyticsUser'
 
 const CORE_VERSION = '1.0.0'
 const REGISTRY_PATH = '/analytics/component-registry.json'
@@ -34,10 +35,11 @@ declare global {
         event?: string | ((props: Record<string, unknown>) => Record<string, unknown>),
         data?: Record<string, unknown>,
       ) => void
+      identify?: (id: string | Record<string, unknown>, data?: Record<string, unknown>) => void
     }
     __analyticsCtx?: {
       page: Record<string, unknown>
-      session: { interactionCount: number }
+      session: { interactionCount: number; user?: string | null }
     }
   }
 }
@@ -122,6 +124,7 @@ function buildPayload(eventName: string, domContext: Record<string, string>, ove
     page_type: (pageCtx.page_type as string) ?? null,
     page_id: (pageCtx.page_id as string) ?? null,
     brand: (pageCtx.brand as string) ?? null,
+    user: (session.user as string | null | undefined) ?? getAnalyticsUser(),
     component_id: componentId,
     component_version: domContext['component-version'] ?? null,
     component_instance: domContext['component-instance'] ?? null,
@@ -140,12 +143,23 @@ function buildPayload(eventName: string, domContext: Record<string, string>, ove
   return payload
 }
 
+function identifyUmamiUser(user: string) {
+  if (!window.umami?.identify) return
+  try {
+    window.umami.identify(user)
+  } catch (e) {
+    trace('IDENTIFY', `umami.identify error: ${e}`)
+  }
+}
+
 function umamiProps(payload: AnalyticsPayload): Record<string, string | number | boolean> {
   const out: Record<string, string | number | boolean> = {}
   for (const [k, v] of Object.entries(payload)) {
     if (v === null || v === undefined) continue
     if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') out[k] = v
   }
+  const user = getAnalyticsUser()
+  if (user) out.user = user
   return out
 }
 
@@ -165,8 +179,10 @@ const umamiAdapter = {
     if (!window.umami) return
 
     if (eventName === 'page_view') {
-      const path = (payload.page_path as string) || window.location.pathname
+      const path = analyticsUrlPath((payload.page_path as string) || window.location.pathname)
       window.umami.track((props) => ({ ...props, url: path }))
+      const user = getAnalyticsUser()
+      if (user) identifyUmamiUser(user)
       return
     }
 
@@ -363,6 +379,12 @@ export async function initAnalytics() {
   window.__analyticsCtx = window.__analyticsCtx ?? {
     page: { brand: 'kinetic-time-machine', page_type: 'app' },
     session: { interactionCount: 0 },
+  }
+
+  const analyticsUser = initAnalyticsUser()
+  if (analyticsUser) {
+    window.__analyticsCtx.session.user = analyticsUser
+    identifyUmamiUser(analyticsUser)
   }
 
   impressionObserver = new IntersectionObserver(handleImpressions, {

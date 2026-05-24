@@ -1,10 +1,29 @@
 import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
+import { execSync } from 'child_process'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
 const root = path.dirname(fileURLToPath(import.meta.url))
+
+function gitValue(command: string, fallback: string): string {
+  try {
+    return execSync(command, { encoding: 'utf8', cwd: root }).trim()
+  } catch {
+    return fallback
+  }
+}
+
+if (!process.env.VITE_GIT_SHA) {
+  process.env.VITE_GIT_SHA = gitValue('git rev-parse --short HEAD', 'dev')
+}
+if (!process.env.VITE_GIT_BRANCH) {
+  process.env.VITE_GIT_BRANCH = gitValue('git rev-parse --abbrev-ref HEAD', 'local')
+}
+if (!process.env.VITE_APP_ENV) {
+  process.env.VITE_APP_ENV = 'development'
+}
 const backendStatic = path.resolve(root, '../backend/static')
 const backend = process.env.BACKEND_URL || 'http://localhost:8000'
 

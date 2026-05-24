@@ -184,3 +184,21 @@ body {
            hover:shadow-kinetic hover:-translate-y-0.5 transition-all duration-150;
   }
 }
+
+/* Leaflet attribution: full-width strip at map bottom, stacked under mobile FABs (+ / ☰) */
+@media (max-width: 767px) {
+  .leaflet-bottom.leaflet-right {
+    right: 0 !important;
+    left: 0 !important;
+  }
+
+  .leaflet-control-attribution {
+    z-index: 400 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    border-radius: 0 !important;
+    padding-right: 5rem !important; /* keep text left of FAB column */
+    font-size: 10px;
+    line-height: 1.3;
+  }
+}

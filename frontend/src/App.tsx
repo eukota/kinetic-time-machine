@@ -7,6 +7,7 @@ import { SubmissionForm } from './components/SubmissionForm'
 import { SubmissionModal } from './components/SubmissionModal'
 import { TeamFilter } from './components/TeamFilter'
 import { CourseFilter } from './components/CourseFilter'
+import { BuildInfoStamp } from './components/BuildInfoStamp'
 import { KineticLogo } from './components/KineticLogo'
 import { TabIcon, SidebarToggleIcon, SidebarFiltersIcon } from './components/TabIcons'
 import { useViewRoute, viewToPath, type AppView } from './hooks/useViewRoute'
@@ -57,7 +58,7 @@ export default function App() {
 
       <div className="flex-shrink-0 bg-kinetic-navy border-b-4 border-kinetic-gold">
         <div className="hidden md:flex items-center justify-between px-5 py-3 gap-4">
-          <KineticLogo theme="dark" />
+          <KineticLogo theme="dark" href={viewToPath('map')} onNavigate={() => setView('map')} />
           <nav
             data-component="tab-nav"
             data-component-version="1.0"
@@ -103,7 +104,7 @@ export default function App() {
 
           {view === 'map' && (
             <div className="md:hidden bg-kinetic-cream border-b-2 border-kinetic-navy/20 px-4 py-2">
-              <KineticLogo compact theme="light" />
+              <KineticLogo compact theme="light" href={viewToPath('map')} onNavigate={() => setView('map')} />
             </div>
           )}
 
@@ -172,7 +173,7 @@ export default function App() {
               data-component="mobile-fab"
               data-component-version="1.0"
               data-component-category="navigation"
-              className="md:hidden fixed bottom-6 right-4 flex flex-col gap-3 z-[999]"
+              className="md:hidden fixed bottom-6 right-4 flex flex-col gap-3 z-[1000]"
             >
               <button
                 type="button"
@@ -251,6 +252,8 @@ export default function App() {
       </div>
 
       <SubmissionModal />
+
+      <BuildInfoStamp />
     </div>
   )
 }

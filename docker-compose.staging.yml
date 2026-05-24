@@ -34,6 +34,9 @@ services:
         # Set VITE_UMAMI_WEBSITE_ID in staging's .env to the *staging* site UUID
         # in Umami (kept separate from the prod site so analytics don't mingle).
         VITE_UMAMI_WEBSITE_ID: ${VITE_UMAMI_WEBSITE_ID:-}
+        VITE_GIT_SHA: ${VITE_GIT_SHA:-unknown}
+        VITE_GIT_BRANCH: ${VITE_GIT_BRANCH:-unknown}
+        VITE_APP_ENV: ${VITE_APP_ENV:-staging}
     restart: unless-stopped
     expose:
       - "80"

@@ -23,6 +23,9 @@ services:
       dockerfile: Dockerfile.prod
       args:
         VITE_UMAMI_WEBSITE_ID: ${VITE_UMAMI_WEBSITE_ID:-}
+        VITE_GIT_SHA: ${VITE_GIT_SHA:-unknown}
+        VITE_GIT_BRANCH: ${VITE_GIT_BRANCH:-unknown}
+        VITE_APP_ENV: ${VITE_APP_ENV:-production}
     restart: unless-stopped
     expose:
       - "80"

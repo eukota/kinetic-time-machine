@@ -94,17 +94,46 @@ export const KineticWordmark = ({ compact = false, theme = 'dark' }: WordmarkPro
 interface LogoProps {
   compact?: boolean
   theme?: 'dark' | 'light'
+  href?: string
+  onNavigate?: () => void
 }
 
-export const KineticLogo = ({ compact = false, theme = 'dark' }: LogoProps) => (
-  <div className={`flex items-center gap-3 ${compact ? 'py-0' : ''}`}>
-    <div
-      className={`flex-shrink-0 rounded-xl border-[2.5px] border-kinetic-navy shadow-kinetic-sm p-0.5 ${
-        theme === 'dark' ? 'bg-kinetic-cream' : 'bg-white'
-      }`}
+export const KineticLogo = ({ compact = false, theme = 'dark', href, onNavigate }: LogoProps) => {
+  const content = (
+    <>
+      <div
+        className={`flex-shrink-0 rounded-xl border-[2.5px] border-kinetic-navy shadow-kinetic-sm p-0.5 ${
+          theme === 'dark' ? 'bg-kinetic-cream' : 'bg-white'
+        }`}
+      >
+        <KineticLogoMark size={compact ? 36 : 44} />
+      </div>
+      <KineticWordmark compact={compact} theme={theme} />
+    </>
+  )
+
+  const className = `flex items-center gap-3 ${compact ? 'py-0' : ''} ${
+    href ? 'no-underline hover:opacity-90 transition-opacity' : ''
+  }`
+
+  if (!href) {
+    return <div className={className}>{content}</div>
+  }
+
+  return (
+    <a
+      href={href}
+      onClick={(e) => {
+        e.preventDefault()
+        onNavigate?.()
+      }}
+      data-cta-action="switch-tab"
+      data-cta-label="Map"
+      data-cta-destination={href}
+      aria-label="Kinetic Time Machine — go to map"
+      className={className}
     >
-      <KineticLogoMark size={compact ? 36 : 44} />
-    </div>
-    <KineticWordmark compact={compact} theme={theme} />
-  </div>
-)
+      {content}
+    </a>
+  )
+}

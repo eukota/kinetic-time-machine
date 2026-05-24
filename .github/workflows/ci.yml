@@ -71,6 +71,9 @@ jobs:
             set -e
             cd /opt/kinetic-time-machine
             git pull --ff-only
+            export VITE_GIT_SHA="$(git rev-parse --short HEAD)"
+            export VITE_GIT_BRANCH="main"
+            export VITE_APP_ENV="production"
             docker compose -f docker-compose.prod.yml up -d --build
             docker compose -f docker-compose.prod.yml run --rm backend python backfill_variants.py
             docker image prune -f
@@ -96,6 +99,9 @@ jobs:
             git fetch origin
             git checkout staging
             git pull --ff-only origin staging
+            export VITE_GIT_SHA="$(git rev-parse --short HEAD)"
+            export VITE_GIT_BRANCH="staging"
+            export VITE_APP_ENV="staging"
             docker compose -f docker-compose.staging.yml up -d --build
             docker compose -f docker-compose.staging.yml run --rm staging-backend python seed_teams.py
             docker compose -f docker-compose.staging.yml run --rm \
