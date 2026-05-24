@@ -74,12 +74,18 @@ def main():
         db.merge(sub)
 
         for p in detail.get("photos") or []:
-            rel = p["file_path"]
-            dest = os.path.join(PHOTOS_DIR, rel)
-            if download_file(f"{PROD_URL}/photos/{rel}", dest):
-                photos_ok += 1
-            else:
-                photos_skip += 1
+            rel_paths = {p["file_path"]}
+            for key in ("thumb_path", "display_path", "medium_path"):
+                variant = p.get(key)
+                if variant:
+                    rel_paths.add(variant)
+
+            for rel in rel_paths:
+                dest = os.path.join(PHOTOS_DIR, rel)
+                if download_file(f"{PROD_URL}/photos/{rel}", dest):
+                    photos_ok += 1
+                else:
+                    photos_skip += 1
 
             photo = db.get(Photo, p["id"]) or Photo(id=p["id"])
             photo.submission_id = s["id"]
