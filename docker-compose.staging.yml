@@ -1,16 +1,19 @@
 # Staging stack — separate from prod, but shares the prod Caddy via the
 # external "ktm-proxy" Docker network (declared in docker-compose.prod.yml).
 #
+# Services are named with a "staging-" prefix so Docker DNS on the shared
+# proxy network does NOT collide with prod's `backend` / `frontend` (which
+# would cause Caddy to round-robin between stacks).
+#
 # Lives in a separate server checkout (e.g. /opt/kinetic-time-machine-staging)
-# so its ./data is independent of prod. Caddy reaches these services as
-# "staging-backend" / "staging-frontend" via network aliases.
+# so its ./data is independent of prod.
 
 services:
-  backend:
+  staging-backend:
     build: ./backend
     restart: unless-stopped
     volumes:
-      - ./data:/data       # <- this is staging's data, isolated from prod's checkout
+      - ./data:/data       # <- staging's data, isolated from prod's checkout
     env_file:
       - .env
     environment:
@@ -20,11 +23,10 @@ services:
       - "8000"
     command: ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*"]
     networks:
-      proxy:
-        aliases: [staging-backend]
-      default:
+      - proxy
+      - default
 
-  frontend:
+  staging-frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod
@@ -36,11 +38,10 @@ services:
     expose:
       - "80"
     depends_on:
-      - backend
+      - staging-backend
     networks:
-      proxy:
-        aliases: [staging-frontend]
-      default:
+      - proxy
+      - default
 
 networks:
   proxy:
