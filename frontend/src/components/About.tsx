@@ -1,8 +1,10 @@
-import { useViewRoute, viewToPath } from '../hooks/useViewRoute'
+import { viewToPath, type AppView } from '../hooks/useViewRoute'
 
-export const About = () => {
-  const { setView } = useViewRoute()
+interface Props {
+  onNavigate: (view: AppView) => void
+}
 
+export const About = ({ onNavigate }: Props) => {
   return (
   <div className="h-full overflow-y-auto bg-kinetic-navy text-white bg-kinetic-dots bg-dots">
     <div className="h-1 bg-kinetic-stripes flex-shrink-0" aria-hidden />
@@ -126,7 +128,7 @@ export const About = () => {
           href={viewToPath('admin')}
           onClick={(e) => {
             e.preventDefault()
-            setView('admin')
+            onNavigate('admin')
           }}
           data-cta-action="switch-tab"
           data-cta-label="Admin"

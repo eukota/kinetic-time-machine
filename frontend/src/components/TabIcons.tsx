@@ -1,3 +1,5 @@
+import type { AppView } from '../lib/routing'
+
 interface TabIconProps {
   size?: number
   active?: boolean
@@ -130,7 +132,63 @@ export const AdminTabIcon = ({ size = 24, active = false, className = '' }: TabI
   </svg>
 )
 
-import type { AppView } from '../lib/routing'
+/** Rolled three-day map — Course Day filter heading */
+export const CourseDayHeadingIcon = ({ size = 34, className = '' }: { size?: number; className?: string }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 32 32"
+    fill="none"
+    className={`flex-shrink-0 -rotate-6 ${className}`}
+    aria-hidden
+  >
+    <path
+      d="M4 7 14 4v21L4 28V7Z"
+      fill="#FFF9EB"
+      stroke="#1B263B"
+      strokeWidth="2"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M14 4 26 8.5v20L14 24.5V4Z"
+      fill="#FCBF49"
+      stroke="#1B263B"
+      strokeWidth="2"
+      strokeLinejoin="round"
+    />
+    <path d="M14 4v20.5" stroke="#1B263B" strokeWidth="2" />
+    <path
+      d="M7 11.5c2.2-2.2 4.5-1 6 0.8s4 2.2 6.5 0.5"
+      stroke="#2563eb"
+      strokeWidth="3"
+      strokeLinecap="round"
+      fill="none"
+    />
+    <path
+      d="M7 15.5c2.8-1.2 5.2 0.2 7 1.8s4.5 2 7 0.2"
+      stroke="#16a34a"
+      strokeWidth="3"
+      strokeLinecap="round"
+      fill="none"
+    />
+    <path
+      d="M7 19.5c2.2-1.8 4.8-0.5 6.5 1.2s4.8 2.2 7.5 0"
+      stroke="#F77F00"
+      strokeWidth="3"
+      strokeLinecap="round"
+      fill="none"
+    />
+    <circle cx="21.5" cy="10.5" r="3.25" fill="#D62828" stroke="#1B263B" strokeWidth="2" />
+    <circle cx="21.5" cy="10.5" r="1.1" fill="#FFF9EB" />
+    <path
+      d="M24.5 5.5h5.5l-2.75 3.25L30 5.5Z"
+      fill="#2A9D8F"
+      stroke="#1B263B"
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+    />
+  </svg>
+)
 
 export type TabId = AppView
 

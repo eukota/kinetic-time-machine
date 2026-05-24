@@ -234,9 +234,9 @@ export const SubmissionForm = ({ onClose }: Props) => {
       <button
         type="submit"
         disabled={uploading || (!!hcaptchaSitekey && !captchaToken)}
-        className="kinetic-btn-primary w-full"
+        className="kinetic-btn-submit"
       >
-        {uploading ? 'Uploading...' : '📸 Submit Photo'}
+        {uploading ? 'Uploading…' : 'Submit Photo'}
       </button>
     </form>
   )

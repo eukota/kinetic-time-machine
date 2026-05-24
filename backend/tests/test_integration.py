@@ -139,3 +139,41 @@ def test_permissive_auto_approves(monkeypatch):
 def test_get_submission_not_found():
     r = client.get("/api/submissions/nonexistent-id")
     assert r.status_code == 404
+
+
+def test_admin_update_submission_team_and_note(monkeypatch):
+    from models import Team
+
+    import auth
+    monkeypatch.setattr(auth, "ADMIN_TOKEN", "test-secret")
+    headers = {"Authorization": "Bearer test-secret"}
+
+    db = TestingSessionLocal()
+    team = Team(name="Test Racers", color="#D62828")
+    db.add(team)
+    db.commit()
+    team_id = team.id
+    db.close()
+
+    upload = _upload_test_jpeg("original caption")
+    sid = upload.json()["id"]
+    client.post(f"/api/admin/submissions/{sid}/approve", headers=headers)
+
+    r = client.patch(
+        f"/api/admin/submissions/{sid}",
+        headers=headers,
+        json={"team_id": team_id, "note": "updated caption"},
+    )
+    assert r.status_code == 200
+    data = r.json()
+    assert data["team_id"] == team_id
+    assert data["note"] == "updated caption"
+
+    r2 = client.patch(
+        f"/api/admin/submissions/{sid}",
+        headers=headers,
+        json={"team_id": "", "note": ""},
+    )
+    assert r2.status_code == 200
+    assert r2.json()["team_id"] is None
+    assert r2.json()["note"] is None

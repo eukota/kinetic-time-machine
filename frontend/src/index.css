@@ -43,6 +43,15 @@ body {
            transition-all;
   }
 
+  .kinetic-btn-submit {
+    @apply kinetic-btn-primary w-full font-display text-xl py-3;
+    letter-spacing: 0.1em;
+    text-shadow:
+      0 1px 0 #1B263B,
+      0 0 8px rgba(255, 249, 235, 0.55),
+      0 0 18px rgba(252, 191, 73, 0.3);
+  }
+
   .kinetic-btn-secondary {
     @apply bg-kinetic-gold text-kinetic-navy font-bold py-2.5 px-4 rounded-lg
            border-2 border-kinetic-navy shadow-kinetic-sm
@@ -121,6 +130,20 @@ body {
 
   .kinetic-modal-counter {
     @apply kinetic-badge bg-kinetic-gold/40 text-sm;
+  }
+
+  .kinetic-modal-photo-viewport {
+    @apply w-full h-full overflow-hidden touch-none select-none;
+  }
+
+  .kinetic-modal-photo-transform {
+    @apply w-full h-full flex items-center justify-center;
+    transform-origin: center center;
+    will-change: transform;
+  }
+
+  .kinetic-modal-photo-image {
+    @apply block w-auto h-auto object-contain rounded-lg border-2 border-kinetic-gold/30 shadow-kinetic;
   }
 
   .kinetic-sidebar-section {

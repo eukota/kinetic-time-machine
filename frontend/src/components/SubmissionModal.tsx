@@ -2,6 +2,9 @@ import { useEffect, useState, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { useStore, Submission } from '../store'
 import { useSubmissions } from '../hooks/useSubmissions'
+import { useTeams } from '../hooks/useTeams'
+import { submissionDisplayDate } from '../lib/formatDate'
+import { ZoomableImage } from './ZoomableImage'
 
 interface DetailPhoto {
   id: string
@@ -27,13 +30,20 @@ export const SubmissionModal = () => {
     initialIndex,
   } = useStore()
   const { getSubmissionDetails } = useSubmissions()
+  useTeams()
 
   const isOpen = selectedSubmission !== null || selectedSubmissions.length > 0
   const items: Submission[] = selectedSubmission ? [selectedSubmission] : selectedSubmissions
 
+  const [isAdmin, setIsAdmin] = useState(() => Boolean(localStorage.getItem(ADMIN_TOKEN_KEY)))
+
   const [index, setIndex] = useState(0)
   const [detail, setDetail] = useState<Detail | null>(null)
   const [loading, setLoading] = useState(false)
+  const [editTeamId, setEditTeamId] = useState('')
+  const [editNote, setEditNote] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [saveMsg, setSaveMsg] = useState<string | null>(null)
 
   const close = useCallback(() => {
     selectSubmission(null)
@@ -43,6 +53,10 @@ export const SubmissionModal = () => {
   }, [selectSubmission, selectSubmissions])
 
   useEffect(() => { if (isOpen) setIndex(initialIndex) }, [isOpen, initialIndex])
+
+  useEffect(() => {
+    if (isOpen) setIsAdmin(Boolean(localStorage.getItem(ADMIN_TOKEN_KEY)))
+  }, [isOpen])
 
   const activeId = items[index]?.id
 
@@ -64,6 +78,63 @@ export const SubmissionModal = () => {
       })
     return () => { cancelled = true }
   }, [isOpen, activeId, getSubmissionDetails])
+
+  const activeSubmission = (detail?.id === activeId ? detail : null) ?? items[index]
+
+  useEffect(() => {
+    if (!activeSubmission) return
+    setEditTeamId(activeSubmission.team_id ?? '')
+    setEditNote(activeSubmission.note ?? '')
+    setSaveMsg(null)
+  }, [activeId, activeSubmission?.team_id, activeSubmission?.note, activeSubmission?.id])
+
+  const applySubmissionUpdate = useCallback((id: string, updates: Partial<Submission>) => {
+    setSubmissions(submissions.map((s) => (s.id === id ? { ...s, ...updates } : s)))
+    if (selectedSubmission?.id === id) {
+      selectSubmission({ ...selectedSubmission, ...updates })
+    }
+    if (selectedSubmissions.length > 0) {
+      selectSubmissions(selectedSubmissions.map((s) => (s.id === id ? { ...s, ...updates } : s)))
+    }
+    setDetail((d) => (d?.id === id ? { ...d, ...updates } : d))
+  }, [submissions, selectedSubmission, selectedSubmissions, selectSubmission, selectSubmissions, setSubmissions])
+
+  const handleSaveMeta = async () => {
+    if (!activeSubmission) return
+    const token = localStorage.getItem(ADMIN_TOKEN_KEY)
+    if (!token) return
+    setSaving(true)
+    setSaveMsg(null)
+    try {
+      const r = await fetch(`/api/admin/submissions/${activeSubmission.id}`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          team_id: editTeamId || '',
+          note: editNote,
+        }),
+      })
+      if (!r.ok) {
+        const msg = r.status === 401
+          ? 'Invalid admin token — sign in again.'
+          : `Save failed (${r.status})`
+        setSaveMsg(msg)
+        return
+      }
+      const updated = await r.json()
+      applySubmissionUpdate(activeSubmission.id, {
+        team_id: updated.team_id,
+        note: updated.note,
+      })
+      setSaveMsg('Saved')
+      setTimeout(() => setSaveMsg(null), 2500)
+    } finally {
+      setSaving(false)
+    }
+  }
 
   const prev = useCallback(() => setIndex((i) => (i - 1 + items.length) % items.length), [items.length])
   const next = useCallback(() => setIndex((i) => (i + 1) % items.length), [items.length])
@@ -120,26 +191,20 @@ export const SubmissionModal = () => {
       }
     : undefined
   const photo = detailPhoto ?? listPhoto
-  const teamName = current?.team_id ? teams.find((t) => t.id === current.team_id)?.name : null
+  const teamName = activeSubmission?.team_id
+    ? teams.find((t) => t.id === activeSubmission.team_id)?.name
+    : null
+  const displayDate = submissionDisplayDate(activeSubmission ?? {})
   const multi = items.length > 1
 
-  const renderPhoto = () => {
+  const photoSrc = (() => {
     if (!photo) return null
     const isWide = typeof window !== 'undefined' && window.matchMedia('(min-width: 641px)').matches
-    const src = isWide
+    const path = isWide
       ? (photo.medium_path ?? photo.display_path ?? photo.thumb_path ?? photo.file_path)
       : (photo.display_path ?? photo.thumb_path ?? photo.medium_path ?? photo.file_path)
-
-    return (
-      <img
-        key={`${current?.id}-${src}`}
-        src={`/photos/${src}`}
-        alt="submission"
-        className="max-w-full max-h-full object-contain rounded-lg border-2 border-kinetic-gold/30 shadow-kinetic"
-        decoding="async"
-      />
-    )
-  }
+    return `/photos/${path}`
+  })()
 
   return createPortal(
     <div
@@ -163,20 +228,27 @@ export const SubmissionModal = () => {
         <button type="button" onClick={close} className="kinetic-modal-close" aria-label="Close">✕</button>
       </div>
 
-      <div className="flex-1 flex items-stretch min-h-0 relative" onClick={(e) => e.stopPropagation()}>
+      <div className="flex-1 flex items-stretch min-h-0 min-w-0 relative" onClick={(e) => e.stopPropagation()}>
 
         <button
           type="button"
           onClick={prev}
           data-cta-action="photo-prev"
           data-cta-label="Previous photo"
-          className={`kinetic-modal-arrow ml-2 self-center ${!multi ? 'invisible' : ''}`}
+          className={`kinetic-modal-arrow ml-2 self-center hidden sm:flex ${!multi ? 'invisible' : ''}`}
         >
           ‹
         </button>
 
-        <div className="flex-1 flex items-center justify-center min-w-0 p-2">
-          {photo ? renderPhoto() : loading ? (
+        <div className="flex-1 flex items-center justify-center min-w-0 min-h-0 p-0 sm:p-2">
+          {photoSrc ? (
+            <ZoomableImage
+              src={photoSrc}
+              alt="submission"
+              onSwipeLeft={multi ? next : undefined}
+              onSwipeRight={multi ? prev : undefined}
+            />
+          ) : loading ? (
             <div className="kinetic-loading">Loading photo…</div>
           ) : null}
           {!loading && !photo && current?.pending_review && (
@@ -199,22 +271,72 @@ export const SubmissionModal = () => {
           onClick={next}
           data-cta-action="photo-next"
           data-cta-label="Next photo"
-          className={`kinetic-modal-arrow mr-2 self-center ${!multi ? 'invisible' : ''}`}
+          className={`kinetic-modal-arrow mr-2 self-center hidden sm:flex ${!multi ? 'invisible' : ''}`}
         >
           ›
         </button>
       </div>
 
       <div className="kinetic-modal-footer" onClick={(e) => e.stopPropagation()}>
-        {teamName && <p className="font-display text-lg text-kinetic-navy">{teamName}</p>}
-        {current?.timestamp && (
-          <p className="text-kinetic-navy/70 font-semibold">{new Date(current.timestamp).toLocaleString()}</p>
+        {!isAdmin && teamName && (
+          <p className="font-display text-lg text-kinetic-navy">{teamName}</p>
         )}
-        {current?.latitude != null && (
-          <p className="text-kinetic-navy/50 text-xs">{current.latitude.toFixed(5)}, {current.longitude!.toFixed(5)}</p>
+        {displayDate && (
+          <p className="text-kinetic-navy/70 font-semibold tabular-nums">{displayDate}</p>
         )}
-        {current?.note && <p className="text-kinetic-navy/70 italic">{current.note}</p>}
+        {activeSubmission?.latitude != null && (
+          <p className="text-kinetic-navy/50 text-xs tabular-nums">
+            {activeSubmission.latitude.toFixed(5)}, {activeSubmission.longitude!.toFixed(5)}
+          </p>
+        )}
+        {!isAdmin && activeSubmission?.note && (
+          <p className="text-kinetic-navy/70 italic">{activeSubmission.note}</p>
+        )}
         {photo?.mime_type && <p className="text-kinetic-navy/40 text-xs">{photo.mime_type}</p>}
+
+        {isAdmin && activeSubmission && (
+          <div className="mt-2 pt-3 border-t-2 border-kinetic-navy/10 space-y-3">
+            <p className="kinetic-sidebar-heading !mb-0">Admin edit</p>
+            <div>
+              <label className="block text-xs font-bold text-kinetic-navy/70 mb-1">Team</label>
+              <select
+                value={editTeamId}
+                onChange={(e) => setEditTeamId(e.target.value)}
+                className="kinetic-input"
+              >
+                <option value="">No team</option>
+                {teams.map((t) => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-kinetic-navy/70 mb-1">Caption</label>
+              <textarea
+                value={editNote}
+                onChange={(e) => setEditNote(e.target.value)}
+                rows={2}
+                className="kinetic-input"
+                placeholder="Photo caption…"
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleSaveMeta}
+                disabled={saving}
+                className="kinetic-btn-secondary !py-1.5 !px-3 text-sm"
+              >
+                {saving ? 'Saving…' : 'Save changes'}
+              </button>
+              {saveMsg && (
+                <span className={`text-xs font-bold ${saveMsg === 'Saved' ? 'text-kinetic-teal' : 'text-kinetic-red'}`}>
+                  {saveMsg}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="flex items-center justify-between pt-2">
           <div className="flex gap-2">

@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { Submission, Team } from '../store'
+import { submissionDisplayDate } from '../lib/formatDate'
 
 interface Props {
   submission: Submission
@@ -24,11 +25,7 @@ export const GalleryTile = ({ submission, team, index, onClick }: Props) => {
     [overlayVisible, onClick]
   )
 
-  const timeStr = submission.timestamp
-    ? new Date(submission.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    : submission.created_at
-    ? new Date(submission.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    : null
+  const timeStr = submissionDisplayDate(submission)
 
   return (
     <div
@@ -74,7 +71,7 @@ export const GalleryTile = ({ submission, team, index, onClick }: Props) => {
           <p className="text-kinetic-gold text-xs font-bold truncate leading-tight">{team.name}</p>
         )}
         {timeStr && (
-          <p className="text-white/70 text-xs leading-tight">{timeStr}</p>
+          <p className="text-white/70 text-[10px] leading-tight tabular-nums">{timeStr}</p>
         )}
       </div>
     </div>

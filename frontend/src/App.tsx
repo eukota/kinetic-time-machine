@@ -132,7 +132,7 @@ export default function App() {
               data-entity-id="page_about"
               className="flex-1 min-h-0 flex flex-col"
             >
-              <About />
+              <About onNavigate={setView} />
             </div>
           )}
 

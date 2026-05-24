@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { submissionDisplayDate } from '../lib/formatDate'
 
 interface PendingSubmission {
   id: string
@@ -152,7 +153,9 @@ export const Admin = () => {
                   />
                 )}
                 <div className="p-3 text-xs space-y-1 text-kinetic-navy/80">
-                  {s.timestamp && <p className="font-bold">{new Date(s.timestamp).toLocaleString()}</p>}
+                  {submissionDisplayDate(s) && (
+                    <p className="font-bold tabular-nums">{submissionDisplayDate(s)}</p>
+                  )}
                   {s.latitude != null && <p className="text-kinetic-navy/50">{s.latitude.toFixed(5)}, {s.longitude!.toFixed(5)}</p>}
                   {s.note && <p className="italic text-kinetic-navy/60">"{s.note}"</p>}
                   {s.moderation_note && (

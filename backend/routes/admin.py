@@ -1,17 +1,23 @@
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
 from auth import require_admin
 from config import PHOTOS_DIR
 from database import get_db
-from models import Submission
+from models import Submission, Team
 from utils.images import variant_path_if_exists
 
 import os, shutil
 
 
 router = APIRouter(prefix="/api/admin", tags=["admin"], dependencies=[Depends(require_admin)])
+
+
+class SubmissionUpdate(BaseModel):
+    team_id: str | None = None
+    note: str | None = None
 
 
 def _serialize(s):
@@ -58,6 +64,29 @@ def approve(submission_id: str, db: Session = Depends(get_db)):
     sub.approved = True
     db.commit()
     return {"id": sub.id, "approved": True}
+
+
+@router.patch("/submissions/{submission_id}")
+def update_submission(submission_id: str, body: SubmissionUpdate, db: Session = Depends(get_db)):
+    sub = db.query(Submission).filter(Submission.id == submission_id).first()
+    if not sub:
+        raise HTTPException(status_code=404, detail="Submission not found")
+
+    if body.team_id is not None:
+        if body.team_id == "":
+            sub.team_id = None
+        else:
+            team = db.query(Team).filter(Team.id == body.team_id).first()
+            if not team:
+                raise HTTPException(status_code=400, detail="Team not found")
+            sub.team_id = body.team_id
+
+    if body.note is not None:
+        sub.note = body.note.strip() or None
+
+    db.commit()
+    db.refresh(sub)
+    return _serialize(sub)
 
 
 @router.delete("/submissions/{submission_id}", status_code=204)

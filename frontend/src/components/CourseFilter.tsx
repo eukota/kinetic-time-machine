@@ -1,4 +1,5 @@
 import { useStore } from '../store'
+import { CourseDayHeadingIcon } from './TabIcons'
 
 const DAYS = [
   { day: 1, label: 'Day 1', sublabel: 'Arcata → Eureka', color: '#2563eb' },
@@ -15,7 +16,10 @@ export const CourseFilter = () => {
       data-component-version="1.0"
       data-component-category="filter"
     >
-      <h3 className="kinetic-filter-heading">🛤 Course Day</h3>
+      <h3 className="kinetic-filter-heading flex items-center gap-2.5">
+        <CourseDayHeadingIcon size={36} className="drop-shadow-[0_2px_0_rgba(27,38,59,0.25)]" />
+        <span>Course Day</span>
+      </h3>
       <div className="space-y-1">
         <button
           type="button"
