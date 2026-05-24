@@ -47,13 +47,26 @@ export const About = ({ onNavigate }: Props) => {
       </div>
 
       <div className="border-t-2 border-dashed border-kinetic-gold/30 pt-8">
-        <h2 className="font-display text-xl text-kinetic-gold mb-3">About the builder</h2>
-        <p className="text-white/70 leading-relaxed">
-          I lived in Arcata from 2004–2009 and have been fascinated by the kinetic race ever since.
-          Participating in it in some fashion has been a dream for a long time.
-          I moved back to the area in September 2025 — this app is part of making that happen.
-          This year I'm playing trombone in the Royal Kinetic Madness Band.
-        </p>
+        <h2 className="font-display text-xl text-kinetic-gold mb-3">About the builders</h2>
+        <div className="space-y-5 text-white/70 leading-relaxed">
+          <div>
+            <p className="font-bold text-kinetic-gold/90 mb-1">Darrell</p>
+            <p>
+              I lived in Arcata from 2004–2009 and have been fascinated by the kinetic race ever since.
+              Participating in it in some fashion has been a dream for a long time.
+              I moved back to the area in September 2025 — this app is part of making that happen.
+              This year I'm playing trombone in the Royal Kinetic Madness Band.
+            </p>
+          </div>
+          <div>
+            <p className="font-bold text-kinetic-gold/90 mb-1">Lindsay</p>
+            <p>
+              I grew up in Humboldt and graduated from HSU. My husband and I come back every year
+              to play with the band for Kinetic Madness — it's one of the best weekends of the year.
+              When Darrell asked for help getting this app ready for race day, I jumped in to help out!
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="border-t-2 border-dashed border-kinetic-gold/30 pt-8">
@@ -68,8 +81,9 @@ export const About = ({ onNavigate }: Props) => {
       <div className="border-t-2 border-dashed border-kinetic-gold/30 pt-8">
         <h2 className="font-display text-xl text-kinetic-gold mb-3">A note on the code</h2>
         <p className="text-white/70 leading-relaxed">
-          This app was written in a feverish sprint with AI just 48 hours before the 2026 race.
-          Pardon the mess. If it turns out to be useful, I'll keep building on it after the race.
+          This app was written in a feverish sprint with AI in the days before the 2026 race.
+          Darrell built the core; Lindsay came in to redesign the UI and harden it for race day.
+          Pardon the mess. If it turns out to be useful, we'll keep building on it after the race.
         </p>
       </div>
 
