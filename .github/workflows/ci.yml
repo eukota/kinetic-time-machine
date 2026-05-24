@@ -96,4 +96,5 @@ jobs:
             git checkout staging
             git pull --ff-only origin staging
             docker compose -f docker-compose.staging.yml up -d --build
+            docker compose -f docker-compose.staging.yml run --rm backend python seed_teams.py
             docker image prune -f
