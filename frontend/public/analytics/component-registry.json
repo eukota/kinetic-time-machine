@@ -114,7 +114,7 @@
       "current_version": "1.0",
       "events": [
         { "event_name": "cta_click", "trigger": "open-submit-form" },
-        { "event_name": "cta_click", "trigger": "open-filters-panel" }
+        { "event_name": "cta_click", "trigger": "toggle-filters-panel" }
       ]
     }
   ]
