@@ -4,9 +4,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
 from auth import require_admin
-from config import PHOTOS_DIR
+from config import PHOTOS_DIR, DATABASE_URL
 from database import get_db
-from models import Submission, Team
+from models import Submission, Team, Photo
 from utils.images import variant_path_if_exists
 
 import os, shutil
@@ -87,6 +87,25 @@ def update_submission(submission_id: str, body: SubmissionUpdate, db: Session = 
     db.commit()
     db.refresh(sub)
     return _serialize(sub)
+
+
+@router.get("/info")
+def site_info(db: Session = Depends(get_db)):
+    """Where am I? Helps tell prod from staging at a glance."""
+    db_path = DATABASE_URL.replace("sqlite:///", "")
+    db_size = None
+    if os.path.exists(db_path):
+        db_size = os.path.getsize(db_path)
+    return {
+        "env_name": os.getenv("ENV_NAME", "unknown"),
+        "git_sha": os.getenv("GIT_SHA", "unknown"),
+        "database_url": DATABASE_URL,
+        "db_file_size_bytes": db_size,
+        "photos_dir": PHOTOS_DIR,
+        "team_count": db.query(Team).count(),
+        "submission_count": db.query(Submission).count(),
+        "photo_count": db.query(Photo).count(),
+    }
 
 
 @router.delete("/submissions/{submission_id}", status_code=204)

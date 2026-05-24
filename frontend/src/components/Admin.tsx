@@ -4,6 +4,7 @@ import { getAnalyticsDashboard } from '../lib/analyticsDashboard'
 import { clearAdminToken, getAdminToken, setAdminToken } from '../lib/adminAuth'
 import { clearAnalyticsUser, getAnalyticsUser } from '../lib/analyticsUser'
 import { PhotoImg } from './PhotoImg'
+import { SiteInfoPanel } from './SiteInfoPanel'
 
 interface PendingSubmission {
   id: string
@@ -243,6 +244,8 @@ export const Admin = () => {
             )
           })}
         </div>
+
+        <SiteInfoPanel token={token} />
       </div>
     </div>
   )
