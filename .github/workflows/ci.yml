@@ -72,6 +72,7 @@ jobs:
             cd /opt/kinetic-time-machine
             git pull --ff-only
             docker compose -f docker-compose.prod.yml up -d --build
+            docker compose -f docker-compose.prod.yml run --rm backend python backfill_variants.py
             docker image prune -f
 
   deploy_staging:
@@ -96,4 +97,9 @@ jobs:
             git checkout staging
             git pull --ff-only origin staging
             docker compose -f docker-compose.staging.yml up -d --build
+            docker compose -f docker-compose.staging.yml run --rm backend python seed_teams.py
+            docker compose -f docker-compose.staging.yml run --rm \
+              -e PROD_URL=https://kinetic.eukota.com \
+              backend python sync_from_prod.py
+            docker compose -f docker-compose.staging.yml run --rm backend python backfill_variants.py
             docker image prune -f

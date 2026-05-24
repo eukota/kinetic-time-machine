@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useCallback } from 'react'
 import { useStore, Submission } from '../store'
 
 const REFRESH_MS = 30_000
@@ -25,15 +25,19 @@ export const useSubmissions = () => {
   const createSubmission = async (formData: FormData): Promise<Submission | null> => {
     try {
       const r = await fetch('/api/submissions/', { method: 'POST', body: formData })
-      if (!r.ok) throw new Error('Upload failed')
+      if (!r.ok) {
+        const body = await r.json().catch(() => ({}))
+        const msg = body.detail || 'Upload failed'
+        throw new Error(typeof msg === 'string' ? msg : 'Upload failed')
+      }
       return r.json()
     } catch (e) {
       console.error('Failed to create submission:', e)
-      return null
+      throw e
     }
   }
 
-  const getSubmissionDetails = async (id: string): Promise<Submission | null> => {
+  const getSubmissionDetails = useCallback(async (id: string): Promise<Submission | null> => {
     try {
       const r = await fetch(`/api/submissions/${id}`)
       if (!r.ok) return null
@@ -42,7 +46,7 @@ export const useSubmissions = () => {
       console.error('Failed to fetch submission details:', e)
       return null
     }
-  }
+  }, [])
 
   return { createSubmission, getSubmissionDetails }
 }

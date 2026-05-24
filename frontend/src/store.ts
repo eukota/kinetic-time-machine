@@ -3,6 +3,8 @@ import { create } from 'zustand'
 export interface Photo {
   id: string
   file_path: string
+  thumb_path?: string | null
+  medium_path?: string | null
   mime_type: string | null
   uploaded_at: string
 }
@@ -17,6 +19,9 @@ export interface Submission {
   photo_count: number
   created_at?: string
   first_photo?: string | null
+  first_photo_thumb?: string | null
+  first_photo_display?: string | null
+  first_photo_medium?: string | null
   first_photo_mime?: string | null
   photos?: Photo[]
   approved?: boolean

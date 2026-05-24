@@ -1,0 +1,35 @@
+---
+description: DOM-driven analytics for Kinetic Time Machine. Load when instrumenting components or editing analytics-core.
+globs: frontend/src/**/*.{tsx,ts},frontend/public/analytics/**/*
+alwaysApply: false
+---
+
+# KTM DOM-Driven Analytics
+
+Darrell's **Umami** stack stays the dispatch destination. Components declare intent via `data-*` attributes; `frontend/src/analytics/analytics-core.ts` observes and routes events.
+
+## Rules
+
+- **No** `window.umami.track()` or `trackEvent()` inside components.
+- Register components in `frontend/src/analytics/component-registry.json` before adding new slugs.
+- Root: `data-component`, `data-component-version`, `data-component-category`, `data-entity-type`, `data-entity-id`.
+- CTAs: `data-cta-action`, `data-cta-label` (optional: `data-cta-destination`).
+- Async outcomes (e.g. upload success): render a hidden `[data-analytics-outcome]` node — do not call Umami directly.
+- Leaflet/non-DOM bridges: use `markAnalyticsOutcome()` on `#ktm-analytics-sink` only.
+
+## Entity ID prefixes
+
+| Entity | Prefix | Example |
+|--------|--------|---------|
+| Submission | `sub_` | `sub_a1b2c3…` |
+| Team | `team_` | `team_uuid…` |
+| Page/tab | `page_` | `page_gallery` |
+
+## Legacy Umami events preserved
+
+- `submission-created` — same name + `{ team, pending_review, has_note }` shape
+- Tab URLs → Umami page views via History API (`/`, `/gallery`, `/about`, `/admin`)
+
+## Dev
+
+Append `?analytics-debug` or run on localhost — console adapter logs full payloads.

@@ -2,10 +2,16 @@ import { useEffect, useState, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { useStore, Submission } from '../store'
 import { useSubmissions } from '../hooks/useSubmissions'
+import { useTeams } from '../hooks/useTeams'
+import { submissionDisplayDate } from '../lib/formatDate'
+import { ZoomableImage } from './ZoomableImage'
 
 interface DetailPhoto {
   id: string
   file_path: string
+  thumb_path?: string | null
+  display_path?: string | null
+  medium_path?: string | null
   mime_type: string | null
   uploaded_at: string
 }
@@ -13,6 +19,8 @@ interface DetailPhoto {
 interface Detail extends Submission {
   photos?: DetailPhoto[]
 }
+
+const ADMIN_TOKEN_KEY = 'ktm.admin.token'
 
 export const SubmissionModal = () => {
   const {
@@ -22,13 +30,20 @@ export const SubmissionModal = () => {
     initialIndex,
   } = useStore()
   const { getSubmissionDetails } = useSubmissions()
+  useTeams()
 
   const isOpen = selectedSubmission !== null || selectedSubmissions.length > 0
   const items: Submission[] = selectedSubmission ? [selectedSubmission] : selectedSubmissions
 
+  const [isAdmin, setIsAdmin] = useState(() => Boolean(localStorage.getItem(ADMIN_TOKEN_KEY)))
+
   const [index, setIndex] = useState(0)
   const [detail, setDetail] = useState<Detail | null>(null)
   const [loading, setLoading] = useState(false)
+  const [editTeamId, setEditTeamId] = useState('')
+  const [editNote, setEditNote] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [saveMsg, setSaveMsg] = useState<string | null>(null)
 
   const close = useCallback(() => {
     selectSubmission(null)
@@ -40,16 +55,86 @@ export const SubmissionModal = () => {
   useEffect(() => { if (isOpen) setIndex(initialIndex) }, [isOpen, initialIndex])
 
   useEffect(() => {
-    if (!isOpen || items.length === 0) return
-    const item = items[index]
-    if (!item) return
-    setDetail(null)
-    setLoading(true)
-    getSubmissionDetails(item.id).then((d) => {
-      setDetail(d as Detail)
+    if (isOpen) setIsAdmin(Boolean(localStorage.getItem(ADMIN_TOKEN_KEY)))
+  }, [isOpen])
+
+  const activeId = items[index]?.id
+
+  useEffect(() => {
+    if (!isOpen || !activeId) {
+      setDetail(null)
       setLoading(false)
-    })
-  }, [index, isOpen])
+      return
+    }
+    let cancelled = false
+    setLoading(true)
+    getSubmissionDetails(activeId)
+      .then((d) => {
+        if (cancelled) return
+        setDetail(d as Detail)
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => { cancelled = true }
+  }, [isOpen, activeId, getSubmissionDetails])
+
+  const activeSubmission = (detail?.id === activeId ? detail : null) ?? items[index]
+
+  useEffect(() => {
+    if (!activeSubmission) return
+    setEditTeamId(activeSubmission.team_id ?? '')
+    setEditNote(activeSubmission.note ?? '')
+    setSaveMsg(null)
+  }, [activeId, activeSubmission?.team_id, activeSubmission?.note, activeSubmission?.id])
+
+  const applySubmissionUpdate = useCallback((id: string, updates: Partial<Submission>) => {
+    setSubmissions(submissions.map((s) => (s.id === id ? { ...s, ...updates } : s)))
+    if (selectedSubmission?.id === id) {
+      selectSubmission({ ...selectedSubmission, ...updates })
+    }
+    if (selectedSubmissions.length > 0) {
+      selectSubmissions(selectedSubmissions.map((s) => (s.id === id ? { ...s, ...updates } : s)))
+    }
+    setDetail((d) => (d?.id === id ? { ...d, ...updates } : d))
+  }, [submissions, selectedSubmission, selectedSubmissions, selectSubmission, selectSubmissions, setSubmissions])
+
+  const handleSaveMeta = async () => {
+    if (!activeSubmission) return
+    const token = localStorage.getItem(ADMIN_TOKEN_KEY)
+    if (!token) return
+    setSaving(true)
+    setSaveMsg(null)
+    try {
+      const r = await fetch(`/api/admin/submissions/${activeSubmission.id}`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          team_id: editTeamId || '',
+          note: editNote,
+        }),
+      })
+      if (!r.ok) {
+        const msg = r.status === 401
+          ? 'Invalid admin token — sign in again.'
+          : `Save failed (${r.status})`
+        setSaveMsg(msg)
+        return
+      }
+      const updated = await r.json()
+      applySubmissionUpdate(activeSubmission.id, {
+        team_id: updated.team_id,
+        note: updated.note,
+      })
+      setSaveMsg('Saved')
+      setTimeout(() => setSaveMsg(null), 2500)
+    } finally {
+      setSaving(false)
+    }
+  }
 
   const prev = useCallback(() => setIndex((i) => (i - 1 + items.length) % items.length), [items.length])
   const next = useCallback(() => setIndex((i) => (i + 1) % items.length), [items.length])
@@ -65,16 +150,28 @@ export const SubmissionModal = () => {
     return () => document.removeEventListener('keydown', handler)
   }, [isOpen, close, prev, next])
 
-  const adminToken = localStorage.getItem('ktm.admin.token')
-
   const handleDelete = async () => {
-    if (!detail || !adminToken || !confirm('Delete this submission and its photos?')) return
+    if (!detail || !confirm('Delete this submission and its photos?')) return
+    const token = localStorage.getItem(ADMIN_TOKEN_KEY)
+    if (!token) {
+      alert('Sign in on the Admin tab first — delete requires an admin token.')
+      return
+    }
     const r = await fetch(`/api/admin/submissions/${detail.id}`, {
       method: 'DELETE',
-      headers: { Authorization: `Bearer ${adminToken}` },
+      headers: { Authorization: `Bearer ${token}` },
     })
-    if (!r.ok) return
+    if (!r.ok) {
+      const msg = r.status === 503
+        ? 'Delete unavailable — server has no ADMIN_TOKEN configured.'
+        : r.status === 401
+          ? 'Invalid admin token — sign in again on the Admin tab.'
+          : `Delete failed (${r.status})`
+      alert(msg)
+      return
+    }
     setSubmissions(submissions.filter((s) => s.id !== detail.id))
+    window.dispatchEvent(new CustomEvent('ktm:submission-deleted', { detail: { id: detail.id } }))
     const remaining = items.filter((s) => s.id !== detail.id)
     if (remaining.length === 0) { close(); return }
     selectSubmissions(remaining)
@@ -84,84 +181,184 @@ export const SubmissionModal = () => {
   if (!isOpen) return null
 
   const current = items[index]
-  // Portal renders into document.body — escapes any parent stacking context
-  const photo = detail?.photos?.[0]
-  const teamName = current?.team_id ? teams.find((t) => t.id === current.team_id)?.name : null
+  const detailPhoto = detail?.id === current?.id ? detail?.photos?.[0] : undefined
+  const listPhoto = current?.first_photo
+    ? {
+        file_path: current.first_photo,
+        thumb_path: current.first_photo_thumb,
+        display_path: current.first_photo_display,
+        medium_path: current.first_photo_medium,
+      }
+    : undefined
+  const photo = detailPhoto ?? listPhoto
+  const teamName = activeSubmission?.team_id
+    ? teams.find((t) => t.id === activeSubmission.team_id)?.name
+    : null
+  const displayDate = submissionDisplayDate(activeSubmission ?? {})
   const multi = items.length > 1
 
-  return createPortal(
-    <div className="fixed inset-0 z-[9999] flex flex-col select-none" style={{ backgroundColor: 'rgba(0,0,0,0.92)' }} onClick={close}>
+  const photoSrc = (() => {
+    if (!photo) return null
+    const isWide = typeof window !== 'undefined' && window.matchMedia('(min-width: 641px)').matches
+    const path = isWide
+      ? (photo.medium_path ?? photo.display_path ?? photo.thumb_path ?? photo.file_path)
+      : (photo.display_path ?? photo.thumb_path ?? photo.medium_path ?? photo.file_path)
+    return `/photos/${path}`
+  })()
 
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-4 pt-3 pb-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-        <span className="text-white/50 text-sm">{multi ? `${index + 1} / ${items.length}` : ''}</span>
-        <button onClick={close} className="text-white/70 hover:text-white text-2xl w-11 h-11 flex items-center justify-center rounded-full hover:bg-white/10 active:bg-white/20 transition-colors">✕</button>
+  return createPortal(
+    <div
+      data-component="submission-modal"
+      data-component-version="1.0"
+      data-component-category="content"
+      data-entity-type="content"
+      data-entity-id={current ? `sub_${current.id}` : 'sub_unknown'}
+      data-analytics-impression-dwell="300"
+      className="kinetic-modal-overlay"
+      onClick={close}
+    >
+      <div className="h-1 flex-shrink-0 bg-kinetic-stripes" aria-hidden />
+
+      <div className="kinetic-modal-header" onClick={(e) => e.stopPropagation()}>
+        {multi ? (
+          <span className="kinetic-modal-counter">{index + 1} / {items.length}</span>
+        ) : (
+          <span className="font-display text-kinetic-gold text-lg tracking-wide">Race Photo</span>
+        )}
+        <button type="button" onClick={close} className="kinetic-modal-close" aria-label="Close">✕</button>
       </div>
 
-      {/* Image + side arrows */}
-      <div className="flex-1 flex items-stretch min-h-0 relative" onClick={(e) => e.stopPropagation()}>
+      <div className="flex-1 flex items-stretch min-h-0 min-w-0 relative" onClick={(e) => e.stopPropagation()}>
 
-        {/* Left arrow */}
         <button
+          type="button"
           onClick={prev}
-          className={`flex-shrink-0 w-14 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/5 transition-colors text-4xl ${!multi ? 'invisible' : ''}`}
+          data-cta-action="photo-prev"
+          data-cta-label="Previous photo"
+          className={`kinetic-modal-arrow ml-2 self-center hidden sm:flex ${!multi ? 'invisible' : ''}`}
         >
           ‹
         </button>
 
-        {/* Photo */}
-        <div className="flex-1 flex items-center justify-center min-w-0 py-2">
-          {loading && <div className="text-white/30 text-sm">Loading…</div>}
-          {!loading && photo && (
-            <img
-              src={`/photos/${photo.file_path}`}
+        <div className="flex-1 flex items-center justify-center min-w-0 min-h-0 p-0 sm:p-2">
+          {photoSrc ? (
+            <ZoomableImage
+              src={photoSrc}
+              fallbackSrc={photo?.file_path ? `/photos/${photo.file_path}` : undefined}
               alt="submission"
-              className="max-w-full max-h-full object-contain rounded-sm"
+              onSwipeLeft={multi ? next : undefined}
+              onSwipeRight={multi ? prev : undefined}
             />
-          )}
+          ) : loading ? (
+            <div className="kinetic-loading">Loading photo…</div>
+          ) : null}
           {!loading && !photo && current?.pending_review && (
-            <div className="max-w-sm mx-6 px-6 py-8 border border-yellow-400/30 bg-yellow-500/5 rounded-lg text-center space-y-2">
+            <div className="kinetic-callout-pending space-y-2">
               <div className="text-3xl" aria-hidden>🕒</div>
-              <p className="text-yellow-200 font-medium text-base">Pending approval</p>
-              <p className="text-yellow-100/60 text-sm leading-relaxed">
+              <p className="font-display text-xl text-kinetic-navy">Pending approval</p>
+              <p className="text-kinetic-navy/70 text-sm leading-relaxed">
                 Your photo was submitted successfully. It'll appear here for everyone
                 once it passes a quick safety review.
               </p>
             </div>
           )}
           {!loading && !photo && !current?.pending_review && (
-            <div className="text-white/30 text-sm">No photo</div>
+            <div className="kinetic-loading">No photo</div>
           )}
         </div>
 
-        {/* Right arrow */}
         <button
+          type="button"
           onClick={next}
-          className={`flex-shrink-0 w-14 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/5 transition-colors text-4xl ${!multi ? 'invisible' : ''}`}
+          data-cta-action="photo-next"
+          data-cta-label="Next photo"
+          className={`kinetic-modal-arrow mr-2 self-center hidden sm:flex ${!multi ? 'invisible' : ''}`}
         >
           ›
         </button>
       </div>
 
-      {/* Footer metadata */}
-      <div className="flex-shrink-0 px-4 py-3 text-sm space-y-0.5" onClick={(e) => e.stopPropagation()}>
-        {teamName && <p className="text-white font-medium">{teamName}</p>}
-        {current?.timestamp && <p className="text-white/60">{new Date(current.timestamp).toLocaleString()}</p>}
-        {current?.latitude != null && <p className="text-white/40 text-xs">{current.latitude.toFixed(5)}, {current.longitude.toFixed(5)}</p>}
-        {current?.note && <p className="text-white/60 italic">{current.note}</p>}
-        {photo?.mime_type && <p className="text-white/30 text-xs">{photo.mime_type}</p>}
+      <div className="kinetic-modal-footer" onClick={(e) => e.stopPropagation()}>
+        {!isAdmin && teamName && (
+          <p className="font-display text-lg text-kinetic-navy">{teamName}</p>
+        )}
+        {displayDate && (
+          <p className="text-kinetic-navy/70 font-semibold tabular-nums">{displayDate}</p>
+        )}
+        {activeSubmission?.latitude != null && (
+          <p className="text-kinetic-navy/50 text-xs tabular-nums">
+            {activeSubmission.latitude.toFixed(5)}, {activeSubmission.longitude!.toFixed(5)}
+          </p>
+        )}
+        {!isAdmin && activeSubmission?.note && (
+          <p className="text-kinetic-navy/70 italic">{activeSubmission.note}</p>
+        )}
+        {photo?.mime_type && <p className="text-kinetic-navy/40 text-xs">{photo.mime_type}</p>}
+
+        {isAdmin && activeSubmission && (
+          <div className="mt-2 pt-3 border-t-2 border-kinetic-navy/10 space-y-3">
+            <p className="kinetic-sidebar-heading !mb-0">Admin edit</p>
+            <div>
+              <label className="block text-xs font-bold text-kinetic-navy/70 mb-1">Team</label>
+              <select
+                value={editTeamId}
+                onChange={(e) => setEditTeamId(e.target.value)}
+                className="kinetic-input"
+              >
+                <option value="">No team</option>
+                {teams.map((t) => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-kinetic-navy/70 mb-1">Caption</label>
+              <textarea
+                value={editNote}
+                onChange={(e) => setEditNote(e.target.value)}
+                rows={2}
+                className="kinetic-input"
+                placeholder="Photo caption…"
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleSaveMeta}
+                disabled={saving}
+                className="kinetic-btn-secondary !py-1.5 !px-3 text-sm"
+              >
+                {saving ? 'Saving…' : 'Save changes'}
+              </button>
+              {saveMsg && (
+                <span className={`text-xs font-bold ${saveMsg === 'Saved' ? 'text-kinetic-teal' : 'text-kinetic-red'}`}>
+                  {saveMsg}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="flex items-center justify-between pt-2">
-          <div className="flex gap-1.5">
+          <div className="flex gap-2">
             {multi && items.map((_, i) => (
-              <button key={i} onClick={() => setIndex(i)}
-                className={`w-1.5 h-1.5 rounded-full transition-colors ${i === index ? 'bg-white' : 'bg-white/25'}`}
+              <button
+                key={i}
+                type="button"
+                onClick={() => setIndex(i)}
+                className={i === index ? 'kinetic-dot-active' : 'kinetic-dot-inactive'}
+                aria-label={`Photo ${i + 1}`}
               />
             ))}
           </div>
-          {adminToken && (
-            <button onClick={handleDelete} className="text-xs text-red-400/70 hover:text-red-300">Delete</button>
-          )}
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="text-xs text-kinetic-red font-bold hover:text-kinetic-orange transition-colors"
+            title={localStorage.getItem(ADMIN_TOKEN_KEY) ? 'Delete submission' : 'Requires Admin sign-in'}
+          >
+            Delete
+          </button>
         </div>
       </div>
     </div>,
