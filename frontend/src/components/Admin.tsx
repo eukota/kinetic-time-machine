@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { submissionDisplayDate } from '../lib/formatDate'
 import { getAnalyticsDashboard } from '../lib/analyticsDashboard'
+import { PhotoImg } from './PhotoImg'
 
 interface PendingSubmission {
   id: string
@@ -159,8 +160,9 @@ export const Admin = () => {
             return (
               <div key={s.id} className="kinetic-panel overflow-hidden !rounded-lg">
                 {s.first_photo && (
-                  <img
-                    src={`/photos/${s.first_photo_thumb ?? s.first_photo}`}
+                  <PhotoImg
+                    primarySrc={`/photos/${s.first_photo_thumb ?? s.first_photo}`}
+                    fallbackSrc={`/photos/${s.first_photo}`}
                     alt="pending"
                     className="w-full aspect-square object-cover border-b-2 border-kinetic-navy"
                   />

@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import { Submission, Team } from '../store'
 import { submissionDisplayDate } from '../lib/formatDate'
+import { PhotoImg } from './PhotoImg'
 
 interface Props {
   submission: Submission
@@ -42,8 +43,9 @@ export const GalleryTile = ({ submission, team, index, onClick }: Props) => {
       onTouchEnd={handleTouchEnd}
     >
       {submission.first_photo && (
-        <img
-          src={`/photos/${submission.first_photo_thumb ?? submission.first_photo}`}
+        <PhotoImg
+          primarySrc={`/photos/${submission.first_photo_thumb ?? submission.first_photo}`}
+          fallbackSrc={`/photos/${submission.first_photo}`}
           srcSet={
             submission.first_photo_thumb
               ? [

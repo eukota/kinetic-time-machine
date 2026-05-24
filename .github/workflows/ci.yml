@@ -72,6 +72,7 @@ jobs:
             cd /opt/kinetic-time-machine
             git pull --ff-only
             docker compose -f docker-compose.prod.yml up -d --build
+            docker compose -f docker-compose.prod.yml run --rm backend python backfill_variants.py
             docker image prune -f
 
   deploy_staging:

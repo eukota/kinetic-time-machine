@@ -244,6 +244,7 @@ export const SubmissionModal = () => {
           {photoSrc ? (
             <ZoomableImage
               src={photoSrc}
+              fallbackSrc={photo?.file_path ? `/photos/${photo.file_path}` : undefined}
               alt="submission"
               onSwipeLeft={multi ? next : undefined}
               onSwipeRight={multi ? prev : undefined}

@@ -25,6 +25,7 @@ interface PanState {
 
 interface ZoomableImageProps {
   src: string
+  fallbackSrc?: string
   alt: string
   imageClassName?: string
   onSwipeLeft?: () => void
@@ -45,6 +46,7 @@ function clamp(value: number, min: number, max: number): number {
 
 export function ZoomableImage({
   src,
+  fallbackSrc,
   alt,
   imageClassName = '',
   onSwipeLeft,
@@ -52,6 +54,7 @@ export function ZoomableImage({
 }: ZoomableImageProps) {
   const viewportRef = useRef<HTMLDivElement>(null)
   const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 })
+  const [activeSrc, setActiveSrc] = useState(src)
   const [scale, setScale] = useState(MIN_SCALE)
   const [offset, setOffset] = useState({ x: 0, y: 0 })
 
@@ -75,6 +78,7 @@ export function ZoomableImage({
 
   useEffect(() => {
     resetTransform()
+    setActiveSrc(src)
   }, [src, resetTransform])
 
   useEffect(() => {
@@ -259,13 +263,16 @@ export function ZoomableImage({
         }}
       >
         <img
-          key={src}
-          src={src}
+          key={activeSrc}
+          src={activeSrc}
           alt={alt}
           draggable={false}
           decoding="async"
           style={imageStyle}
           className={`kinetic-modal-photo-image ${imageClassName}`.trim()}
+          onError={() => {
+            if (fallbackSrc && activeSrc !== fallbackSrc) setActiveSrc(fallbackSrc)
+          }}
         />
       </div>
     </div>
