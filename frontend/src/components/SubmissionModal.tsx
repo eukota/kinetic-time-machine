@@ -6,6 +6,7 @@ import { useTeams } from '../hooks/useTeams'
 import { submissionDisplayDate } from '../lib/formatDate'
 import { getAdminToken, isAdminSignedIn } from '../lib/adminAuth'
 import { ZoomableImage } from './ZoomableImage'
+import { TeamPicker } from './TeamPicker'
 
 interface DetailPhoto {
   id: string
@@ -309,16 +310,7 @@ export const SubmissionModal = () => {
             <p className="kinetic-sidebar-heading !mb-0">Admin edit</p>
             <div>
               <label className="block text-xs font-bold text-kinetic-navy/70 mb-1">Team</label>
-              <select
-                value={editTeamId}
-                onChange={(e) => setEditTeamId(e.target.value)}
-                className="kinetic-input"
-              >
-                <option value="">No team</option>
-                {teams.map((t) => (
-                  <option key={t.id} value={t.id}>{t.name}</option>
-                ))}
-              </select>
+              <TeamPicker teams={teams} value={editTeamId} onChange={setEditTeamId} />
             </div>
             <div>
               <label className="block text-xs font-bold text-kinetic-navy/70 mb-1">Caption</label>
