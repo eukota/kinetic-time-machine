@@ -50,8 +50,13 @@ RACERS = [
     (139, "The 'Ccino Machino", None),
     (140, "E.T. Phone Humboldt", "Team K3D"),
     (141, "KPS Tools of Liberté", "The Kinetic Paranormal Society"),
+    (142, "Bosozoku (AKA Reckless Driving Crew)", None),
     (143, "Pretty Sketchy and the Kewl Doodz", "Team Royal Pain Inc"),
-    (420, "Hippie-potamus", None),
+    (144, "Bone Shaker", None),
+    (145, "Bounced Forty 9th Glory", None),
+    (146, "Five Year Plan", None),
+    (147, "Baby Got Back to the Future", None),
+    (420, "Hippypotamus", None),
 ]
 
 # Non-race categories — for photos not tied to a specific sculpture
@@ -61,6 +66,8 @@ NON_RACERS = [
     ("#6b7280", "Volunteer"),
     ("#6b7280", "Pit Crew"),
     ("#6b7280", "Course / Scenery"),
+    ("#7c3aed", "Rutabaga Queen"),
+    ("#a855f7", "Rutabaga Royalty"),
 ]
 
 # Colors that override make_color() for specific racer numbers
@@ -80,7 +87,10 @@ added = skipped = 0
 
 # Cleanup: prior band entries (pre-rename / pre-numbering) so the new #001
 # entry isn't a duplicate.
-for stale in ["Kinetic Madness Band", "Royal Kinetic Madness Band"]:
+for stale in [
+    "Kinetic Madness Band", "Royal Kinetic Madness Band",  # pre-numbering band names
+    "#420 Hippie-potamus",                                  # superseded by Hippypotamus rename
+]:
     old = db.query(Team).filter(Team.name == stale).first()
     if old:
         db.delete(old)

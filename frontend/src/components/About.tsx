@@ -112,7 +112,7 @@ export const About = ({ onNavigate }: Props) => {
       <div className="border-t-2 border-dashed border-kinetic-gold/30 pt-8">
         <h2 className="font-display text-3xl text-kinetic-gold mb-4">A note on the code</h2>
         <p className="text-xl text-white/70 leading-relaxed">
-          This app was written in a feverish sprint with AI in the days before the 2026 race.
+          This app was written in a feverish sprint in the days before the 2026 race.
           Darrell built the core; Lindsay came in to redesign the UI and harden it for race day.
           Pardon the mess. If it turns out to be useful, we'll keep building on it after the race.
         </p>
