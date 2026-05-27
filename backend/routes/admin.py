@@ -18,6 +18,7 @@ router = APIRouter(prefix="/api/admin", tags=["admin"], dependencies=[Depends(re
 class SubmissionUpdate(BaseModel):
     team_id: str | None = None
     note: str | None = None
+    attribution: str | None = None
 
 
 def _serialize(s):
@@ -29,6 +30,7 @@ def _serialize(s):
         "timestamp": s.timestamp,
         "team_id": s.team_id,
         "note": s.note,
+        "attribution": s.attribution,
         "approved": s.approved,
         "moderation_note": s.moderation_note,
         "photo_count": len(s.photos),
@@ -83,6 +85,9 @@ def update_submission(submission_id: str, body: SubmissionUpdate, db: Session = 
 
     if body.note is not None:
         sub.note = body.note.strip() or None
+
+    if body.attribution is not None:
+        sub.attribution = body.attribution.strip() or None
 
     db.commit()
     db.refresh(sub)

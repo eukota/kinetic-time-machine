@@ -20,6 +20,7 @@ class Submission(Base):
     longitude = Column(Float, nullable=True)
     timestamp = Column(DateTime, nullable=True)
     note = Column(Text, nullable=True)
+    attribution = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     approved = Column(Boolean, default=False, nullable=False, index=True)
     moderation_note = Column(Text, nullable=True)

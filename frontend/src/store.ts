@@ -16,6 +16,7 @@ export interface Submission {
   timestamp: string | null
   team_id: string | null
   note: string | null
+  attribution?: string | null
   photo_count: number
   created_at?: string
   first_photo?: string | null

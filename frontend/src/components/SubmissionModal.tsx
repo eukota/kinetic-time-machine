@@ -42,6 +42,7 @@ export const SubmissionModal = () => {
   const [loading, setLoading] = useState(false)
   const [editTeamId, setEditTeamId] = useState('')
   const [editNote, setEditNote] = useState('')
+  const [editAttribution, setEditAttribution] = useState('')
   const [saving, setSaving] = useState(false)
   const [saveMsg, setSaveMsg] = useState<string | null>(null)
 
@@ -95,8 +96,9 @@ export const SubmissionModal = () => {
     if (!activeSubmission) return
     setEditTeamId(activeSubmission.team_id ?? '')
     setEditNote(activeSubmission.note ?? '')
+    setEditAttribution(activeSubmission.attribution ?? '')
     setSaveMsg(null)
-  }, [activeId, activeSubmission?.team_id, activeSubmission?.note, activeSubmission?.id])
+  }, [activeId, activeSubmission?.team_id, activeSubmission?.note, activeSubmission?.attribution, activeSubmission?.id])
 
   const applySubmissionUpdate = useCallback((id: string, updates: Partial<Submission>) => {
     setSubmissions(submissions.map((s) => (s.id === id ? { ...s, ...updates } : s)))
@@ -125,6 +127,7 @@ export const SubmissionModal = () => {
         body: JSON.stringify({
           team_id: editTeamId || '',
           note: editNote,
+          attribution: editAttribution,
         }),
       })
       if (!r.ok) {
@@ -303,6 +306,9 @@ export const SubmissionModal = () => {
         {!isAdmin && activeSubmission?.note && (
           <p className="text-kinetic-navy/70 italic">{activeSubmission.note}</p>
         )}
+        {activeSubmission?.attribution && (
+          <p className="text-kinetic-navy/50 text-xs">📷 {activeSubmission.attribution}</p>
+        )}
         {photo?.mime_type && <p className="text-kinetic-navy/40 text-xs">{photo.mime_type}</p>}
 
         {isAdmin && activeSubmission && (
@@ -320,6 +326,16 @@ export const SubmissionModal = () => {
                 rows={2}
                 className="kinetic-input"
                 placeholder="Photo caption…"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-kinetic-navy/70 mb-1">Attribution</label>
+              <input
+                type="text"
+                value={editAttribution}
+                onChange={(e) => setEditAttribution(e.target.value)}
+                className="kinetic-input"
+                placeholder="e.g. @username on Instagram"
               />
             </div>
             <div className="flex items-center gap-3">

@@ -20,6 +20,7 @@ export const SubmissionForm = ({ onClose }: Props) => {
   const [teamSearch, setTeamSearch] = useState('')
   const [showTeamList, setShowTeamList] = useState(false)
   const [note, setNote] = useState('')
+  const [attribution, setAttribution] = useState('')
   const [uploading, setUploading] = useState(false)
   const [preview, setPreview] = useState<string | null>(null)
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
@@ -73,6 +74,7 @@ export const SubmissionForm = ({ onClose }: Props) => {
     const formData = new FormData()
     formData.append('image', file)
     if (note) formData.append('note', note)
+    if (attribution) formData.append('attribution', attribution)
     if (teamName) formData.append('team_name', teamName)
     if (captchaToken) formData.append('captcha_token', captchaToken)
     try {
@@ -87,6 +89,7 @@ export const SubmissionForm = ({ onClose }: Props) => {
         setTeamName('')
         setTeamSearch('')
         setNote('')
+        setAttribution('')
         setPreview(null)
         setCaptchaToken(null)
         captchaRef.current?.resetCaptcha()
@@ -216,6 +219,18 @@ export const SubmissionForm = ({ onClose }: Props) => {
           className="kinetic-input"
           placeholder="Anything worth noting..."
         />
+      </div>
+
+      <div>
+        <label className="block text-sm font-bold mb-1 text-kinetic-navy">Attribution (optional)</label>
+        <input
+          type="text"
+          value={attribution}
+          onChange={(e) => setAttribution(e.target.value)}
+          className="kinetic-input"
+          placeholder="e.g. @username on Instagram, Jane Doe via Facebook"
+        />
+        <p className="text-xs text-kinetic-navy/50 mt-1">Credit the photographer or source if the photo isn't yours.</p>
       </div>
       {hcaptchaSitekey && (
         <div>

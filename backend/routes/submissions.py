@@ -25,6 +25,7 @@ async def create_submission(
     request: Request,
     image: UploadFile = File(...),
     note: str = Form(None),
+    attribution: str = Form(None),
     team_name: str = Form(None),
     captcha_token: str = Form(None),
     db: Session = Depends(get_db),
@@ -72,6 +73,7 @@ async def create_submission(
         longitude=exif_data["longitude"],
         timestamp=exif_data["timestamp"],
         note=note,
+        attribution=(attribution.strip() or None) if attribution else None,
     )
 
     if team_name:
@@ -118,6 +120,7 @@ async def create_submission(
         "timestamp": submission.timestamp,
         "team_id": submission.team_id,
         "note": submission.note,
+        "attribution": submission.attribution,
         "photo_count": len(submission.photos),
         "approved": submission.approved,
         "pending_review": not submission.approved,
@@ -133,6 +136,7 @@ def _serialize_submission_summary(s):
         "timestamp": s.timestamp,
         "team_id": s.team_id,
         "note": s.note,
+        "attribution": s.attribution,
         "photo_count": len(s.photos),
         "created_at": s.created_at,
         "first_photo": first,
@@ -174,6 +178,7 @@ def get_submission(submission_id: str, db: Session = Depends(get_db)):
         "timestamp": sub.timestamp,
         "team_id": sub.team_id,
         "note": sub.note,
+        "attribution": sub.attribution,
         "photos": [
             {
                 "id": p.id,

@@ -47,3 +47,8 @@ def _migrate():
         if "moderation_note" not in sub_cols:
             conn.exec_driver_sql("ALTER TABLE submissions ADD COLUMN moderation_note TEXT")
             conn.commit()
+
+        sub_cols = [r[1] for r in conn.exec_driver_sql("PRAGMA table_info(submissions)")]
+        if "attribution" not in sub_cols:
+            conn.exec_driver_sql("ALTER TABLE submissions ADD COLUMN attribution TEXT")
+            conn.commit()
