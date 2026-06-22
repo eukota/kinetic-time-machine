@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from database import get_db
 from models import Team, Tracker, TrackerLocation, Submission, Photo
 
@@ -38,10 +38,17 @@ def get_team_detail(team_id: str, db: Session = Depends(get_db)):
             }
 
     # Get recent photos (last 20)
-    submissions = db.query(Submission).filter(
-        Submission.team_id == team_id,
-        Submission.approved == True
-    ).order_by(Submission.created_at.desc()).limit(20).all()
+    submissions = (
+        db.query(Submission)
+        .options(joinedload(Submission.photos))
+        .filter(
+            Submission.team_id == team_id,
+            Submission.approved == True
+        )
+        .order_by(Submission.created_at.desc())
+        .limit(20)
+        .all()
+    )
 
     photos = []
     for submission in submissions:
