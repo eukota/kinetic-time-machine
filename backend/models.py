@@ -27,6 +27,31 @@ class Submission(Base):
     team = relationship("Team", back_populates="submissions")
     photos = relationship("Photo", back_populates="submission", cascade="all, delete-orphan")
 
+class Tracker(Base):
+    __tablename__ = "trackers"
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    team_id = Column(String, ForeignKey("teams.id"), nullable=False, index=True)
+    code = Column(String, unique=True, nullable=False, index=True)  # e.g., "KINETIC-001"
+    email = Column(String, nullable=True)
+    status = Column(String, default="pending", nullable=False, index=True)  # pending, approved, rejected
+    approved_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    team = relationship("Team", foreign_keys=[team_id])
+    locations = relationship("TrackerLocation", back_populates="tracker", cascade="all, delete-orphan")
+
+class TrackerLocation(Base):
+    __tablename__ = "tracker_locations"
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    tracker_id = Column(String, ForeignKey("trackers.id"), nullable=False, index=True)
+    team_id = Column(String, ForeignKey("teams.id"), nullable=False, index=True)
+    latitude = Column(Float, nullable=False)
+    longitude = Column(Float, nullable=False)
+    accuracy = Column(Float, nullable=True)  # in meters
+    timestamp = Column(DateTime, nullable=False)  # when location was recorded
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    tracker = relationship("Tracker", back_populates="locations")
+    team = relationship("Team", foreign_keys=[team_id])
+
 class Photo(Base):
     __tablename__ = "photos"
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
