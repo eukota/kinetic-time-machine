@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
+from sqlalchemy import func, and_
 from datetime import datetime
 from database import get_db
 from models import Tracker, TrackerLocation, Team
@@ -57,6 +58,10 @@ def update_location(req: TrackerLocationUpdate, db: Session = Depends(get_db)):
     if not tracker:
         raise HTTPException(status_code=403, detail="Tracker not found or not approved")
 
+    # Validate team_id consistency (defensive check)
+    if tracker.team_id != req.team_id:
+        raise HTTPException(status_code=400, detail="Team ID mismatch")
+
     # Record the location
     location = TrackerLocation(
         id=str(uuid.uuid4()),
@@ -76,25 +81,39 @@ def update_location(req: TrackerLocationUpdate, db: Session = Depends(get_db)):
 @router.get("/current-locations")
 def get_current_locations(db: Session = Depends(get_db)):
     """Get latest location for all approved trackers"""
-    # Get all approved trackers with their latest location
-    trackers = db.query(Tracker).filter(Tracker.status == "approved").all()
+    # Subquery to find latest location per tracker
+    subq = (
+        db.query(
+            TrackerLocation.tracker_id,
+            func.max(TrackerLocation.created_at).label("latest_time")
+        )
+        .group_by(TrackerLocation.tracker_id)
+        .subquery()
+    )
+
+    # Get latest locations with team info in a single optimized query
+    locations = (
+        db.query(TrackerLocation, Team.name)
+        .join(subq, and_(
+            TrackerLocation.tracker_id == subq.c.tracker_id,
+            TrackerLocation.created_at == subq.c.latest_time
+        ))
+        .join(Team, TrackerLocation.team_id == Team.id)
+        .join(Tracker, TrackerLocation.tracker_id == Tracker.id)
+        .filter(Tracker.status == "approved")
+        .all()
+    )
 
     result = []
-    for tracker in trackers:
-        # Get latest location
-        latest = db.query(TrackerLocation).filter(
-            TrackerLocation.tracker_id == tracker.id
-        ).order_by(TrackerLocation.created_at.desc()).first()
-
-        if latest:
-            result.append({
-                "team_id": tracker.team_id,
-                "team_name": tracker.team.name,
-                "latitude": latest.latitude,
-                "longitude": latest.longitude,
-                "accuracy": latest.accuracy,
-                "timestamp": latest.timestamp,
-                "status": "tracking"
-            })
+    for location, team_name in locations:
+        result.append({
+            "team_id": location.team_id,
+            "team_name": team_name,
+            "latitude": location.latitude,
+            "longitude": location.longitude,
+            "accuracy": location.accuracy,
+            "timestamp": location.timestamp,
+            "status": "tracking"
+        })
 
     return result
