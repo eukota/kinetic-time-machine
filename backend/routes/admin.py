@@ -2,11 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
+from datetime import datetime
 
 from auth import require_admin
 from config import PHOTOS_DIR, DATABASE_URL
 from database import get_db
-from models import Submission, Team, Photo
+from models import Submission, Team, Photo, Tracker
 from utils.images import variant_path_if_exists
 
 import os, shutil
@@ -19,6 +20,11 @@ class SubmissionUpdate(BaseModel):
     team_id: str | None = None
     note: str | None = None
     attribution: str | None = None
+
+
+class TrackerUpdate(BaseModel):
+    status: str | None = None
+    email: str | None = None
 
 
 def _serialize(s):
@@ -124,3 +130,93 @@ def reject(submission_id: str, db: Session = Depends(get_db)):
         shutil.rmtree(photo_dir)
     db.delete(sub)
     db.commit()
+
+
+# Tracker Admin Endpoints
+
+def _serialize_tracker(t):
+    """Serialize tracker for API response"""
+    return {
+        "id": t.id,
+        "team_id": t.team_id,
+        "code": t.code,
+        "email": t.email,
+        "status": t.status,
+        "created_at": t.created_at,
+        "approved_at": t.approved_at,
+    }
+
+
+@router.get("/trackers/pending")
+def list_pending_trackers(db: Session = Depends(get_db)):
+    """List all pending tracker registrations"""
+    items = (
+        db.query(Tracker)
+        .filter(Tracker.status == "pending")
+        .order_by(desc(Tracker.created_at))
+        .all()
+    )
+    return [_serialize_tracker(t) for t in items]
+
+
+@router.get("/trackers/all")
+def list_all_trackers(db: Session = Depends(get_db)):
+    """List all tracker registrations"""
+    items = db.query(Tracker).order_by(desc(Tracker.created_at)).all()
+    return [_serialize_tracker(t) for t in items]
+
+
+@router.get("/trackers/{tracker_id}")
+def get_tracker(tracker_id: str, db: Session = Depends(get_db)):
+    """Get tracker details"""
+    tracker = db.query(Tracker).filter(Tracker.id == tracker_id).first()
+    if not tracker:
+        raise HTTPException(status_code=404, detail="Tracker not found")
+    return _serialize_tracker(tracker)
+
+
+@router.post("/trackers/{tracker_id}/approve")
+def approve_tracker(tracker_id: str, db: Session = Depends(get_db)):
+    """Approve a pending tracker registration"""
+    tracker = db.query(Tracker).filter(Tracker.id == tracker_id).first()
+    if not tracker:
+        raise HTTPException(status_code=404, detail="Tracker not found")
+
+    tracker.status = "approved"
+    tracker.approved_at = datetime.utcnow()
+    db.commit()
+    db.refresh(tracker)
+    return _serialize_tracker(tracker)
+
+
+@router.post("/trackers/{tracker_id}/reject")
+def reject_tracker(tracker_id: str, db: Session = Depends(get_db)):
+    """Reject a pending tracker registration"""
+    tracker = db.query(Tracker).filter(Tracker.id == tracker_id).first()
+    if not tracker:
+        raise HTTPException(status_code=404, detail="Tracker not found")
+
+    tracker.status = "rejected"
+    db.commit()
+    db.refresh(tracker)
+    return _serialize_tracker(tracker)
+
+
+@router.patch("/trackers/{tracker_id}")
+def update_tracker(tracker_id: str, body: TrackerUpdate, db: Session = Depends(get_db)):
+    """Update tracker details"""
+    tracker = db.query(Tracker).filter(Tracker.id == tracker_id).first()
+    if not tracker:
+        raise HTTPException(status_code=404, detail="Tracker not found")
+
+    if body.status is not None:
+        tracker.status = body.status
+        if body.status == "approved" and not tracker.approved_at:
+            tracker.approved_at = datetime.utcnow()
+
+    if body.email is not None:
+        tracker.email = body.email.strip() or None
+
+    db.commit()
+    db.refresh(tracker)
+    return _serialize_tracker(tracker)

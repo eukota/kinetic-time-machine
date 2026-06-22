@@ -159,3 +159,124 @@ def test_admin_update_submission_team_and_note(monkeypatch):
     assert r2.status_code == 200
     assert r2.json()["team_id"] is None
     assert r2.json()["note"] is None
+
+
+def test_admin_list_pending_trackers(monkeypatch):
+    """Test listing pending tracker registrations"""
+    from models import Team, Tracker
+
+    import auth
+    monkeypatch.setattr(auth, "ADMIN_TOKEN", "test-secret")
+    headers = {"Authorization": "Bearer test-secret"}
+
+    db = TestingSessionLocal()
+    team = Team(name="Tracker Team", color="#FF0000", code="TRACKER-001")
+    db.add(team)
+    db.commit()
+
+    # Create pending tracker
+    tracker = Tracker(team_id=team.id, code="TRACKER-001", email="tracker@example.com", status="pending")
+    db.add(tracker)
+    db.commit()
+    tracker_id = tracker.id
+    db.close()
+
+    r = client.get("/api/admin/trackers/pending", headers=headers)
+    assert r.status_code == 200
+    data = r.json()
+    assert len(data) > 0
+    assert any(t["id"] == tracker_id for t in data)
+
+
+def test_admin_approve_tracker(monkeypatch):
+    """Test approving a pending tracker registration"""
+    from models import Team, Tracker
+
+    import auth
+    monkeypatch.setattr(auth, "ADMIN_TOKEN", "test-secret")
+    headers = {"Authorization": "Bearer test-secret"}
+
+    db = TestingSessionLocal()
+    team = Team(name="Tracker Team 2", color="#00FF00", code="TRACKER-002")
+    db.add(team)
+    db.commit()
+
+    tracker = Tracker(team_id=team.id, code="TRACKER-002", email="tracker2@example.com", status="pending")
+    db.add(tracker)
+    db.commit()
+    tracker_id = tracker.id
+    db.close()
+
+    r = client.post(f"/api/admin/trackers/{tracker_id}/approve", headers=headers)
+    assert r.status_code == 200
+    data = r.json()
+    assert data["status"] == "approved"
+    assert data["approved_at"] is not None
+
+    # Verify tracker can now update locations
+    db = TestingSessionLocal()
+    tracker = db.query(Tracker).filter(Tracker.id == tracker_id).first()
+    assert tracker.status == "approved"
+    assert tracker.approved_at is not None
+    db.close()
+
+
+def test_admin_reject_tracker(monkeypatch):
+    """Test rejecting a pending tracker registration"""
+    from models import Team, Tracker
+
+    import auth
+    monkeypatch.setattr(auth, "ADMIN_TOKEN", "test-secret")
+    headers = {"Authorization": "Bearer test-secret"}
+
+    db = TestingSessionLocal()
+    team = Team(name="Tracker Team 3", color="#0000FF", code="TRACKER-003")
+    db.add(team)
+    db.commit()
+
+    tracker = Tracker(team_id=team.id, code="TRACKER-003", email="tracker3@example.com", status="pending")
+    db.add(tracker)
+    db.commit()
+    tracker_id = tracker.id
+    db.close()
+
+    r = client.post(f"/api/admin/trackers/{tracker_id}/reject", headers=headers)
+    assert r.status_code == 200
+    data = r.json()
+    assert data["status"] == "rejected"
+
+    # Verify tracker status is rejected
+    db = TestingSessionLocal()
+    tracker = db.query(Tracker).filter(Tracker.id == tracker_id).first()
+    assert tracker.status == "rejected"
+    db.close()
+
+
+def test_admin_get_tracker(monkeypatch):
+    """Test retrieving tracker details"""
+    from models import Team, Tracker
+
+    import auth
+    monkeypatch.setattr(auth, "ADMIN_TOKEN", "test-secret")
+    headers = {"Authorization": "Bearer test-secret"}
+
+    db = TestingSessionLocal()
+    team = Team(name="Tracker Team 4", color="#FFFF00", code="TRACKER-004")
+    db.add(team)
+    db.commit()
+
+    tracker = Tracker(team_id=team.id, code="TRACKER-004", email="tracker4@example.com", status="pending")
+    db.add(tracker)
+    db.commit()
+    tracker_id = tracker.id
+    team_id = team.id
+    db.close()
+
+    r = client.get(f"/api/admin/trackers/{tracker_id}", headers=headers)
+    assert r.status_code == 200
+    data = r.json()
+    assert data["id"] == tracker_id
+    assert data["team_id"] == team_id
+    assert data["code"] == "TRACKER-004"
+    assert data["email"] == "tracker4@example.com"
+    assert data["status"] == "pending"
