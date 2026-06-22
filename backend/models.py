@@ -9,6 +9,7 @@ class Team(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String, index=True)
     color = Column(String)
+    code = Column(String, unique=True, nullable=True, index=True)
     active = Column(Boolean, default=True)
     submissions = relationship("Submission", back_populates="team")
 
