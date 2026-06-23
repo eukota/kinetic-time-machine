@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Map } from './components/Map'
 import { Gallery } from './components/Gallery'
 import { About } from './components/About'
@@ -53,7 +53,26 @@ export default function App() {
   const [showForm, setShowForm] = useState(false)
   const [showTeams, setShowTeams] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [visibleTrackers, setVisibleTrackers] = useState<Set<string>>(new Set())
   const { view, teamId, setView } = useViewRoute()
+  const { locations: trackerLocations } = useTrackerLocations(30000)
+
+  // Initialize visible trackers when locations are loaded
+  useEffect(() => {
+    if (visibleTrackers.size === 0 && trackerLocations.length > 0) {
+      setVisibleTrackers(new Set(trackerLocations.map((l) => l.team_id)))
+    }
+  }, [trackerLocations.length])
+
+  const handleTrackerVisibility = (teamId: string, visible: boolean) => {
+    const newSet = new Set(visibleTrackers)
+    if (visible) {
+      newSet.add(teamId)
+    } else {
+      newSet.delete(teamId)
+    }
+    setVisibleTrackers(newSet)
+  }
 
   return (
     <div className="h-screen flex flex-col overflow-hidden font-body">
@@ -121,7 +140,7 @@ export default function App() {
             data-entity-id="page_map"
             className={view === 'map' ? 'flex-1 min-h-0' : 'hidden'}
           >
-            <Map />
+            <Map visibleTrackers={visibleTrackers} />
           </div>
 
           {view === 'gallery' && (
@@ -232,6 +251,11 @@ export default function App() {
                   <p className="kinetic-sidebar-heading !mb-0">Filters</p>
                   <CourseFilter />
                   <TeamFilter />
+                  <TrackerFilter
+                    trackers={trackerLocations}
+                    visibleTeams={visibleTrackers}
+                    onVisibilityChange={handleTrackerVisibility}
+                  />
                 </div>
               </div>
             </div>
@@ -252,8 +276,15 @@ export default function App() {
               <p className="kinetic-sidebar-heading">Filters</p>
               <CourseFilter />
             </div>
-            <div className="kinetic-sidebar-section flex-1">
+            <div className="kinetic-sidebar-section">
               <TeamFilter />
+            </div>
+            <div className="kinetic-sidebar-section flex-1">
+              <TrackerFilter
+                trackers={trackerLocations}
+                visibleTeams={visibleTrackers}
+                onVisibilityChange={handleTrackerVisibility}
+              />
             </div>
             <div className="p-3 min-w-[320px] border-t-2 border-dashed border-kinetic-duct text-center">
               <p className="text-[10px] font-bold text-kinetic-navy/40 uppercase tracking-widest">
