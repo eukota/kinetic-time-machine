@@ -21,8 +21,8 @@ down: ## Stop and remove containers
 test: ## Run backend tests inside container
 	docker compose run --rm -e DATABASE_URL=sqlite:///:memory: backend python -m pytest tests/ -v
 
-seed: ## Seed database with 2026 KGC racers
-	docker compose run --rm backend python seed_teams.py
+seed: ## Seed database with teams and test trackers
+	docker compose run --rm backend python -m seeds.seed
 
 orient-photos: ## Fix EXIF rotation on disk and regenerate variants
 	docker compose run --rm backend python backfill_orientation.py
