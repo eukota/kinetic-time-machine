@@ -5,6 +5,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useStore, Submission } from '../store'
 import { useSubmissions } from '../hooks/useSubmissions'
+import { useTrackerLocations } from '../hooks/useTrackerLocations'
 
 delete (L.Icon.Default.prototype as any)._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -146,7 +147,113 @@ const SubmissionMarkers = () => {
   )
 }
 
-export const Map = () => {
+interface TrackerMarkersProps {
+  visibleTrackers: Set<string>
+}
+
+const TrackerMarkers = ({ visibleTrackers }: TrackerMarkersProps) => {
+  const { locations } = useTrackerLocations(30000)
+
+  const visible = locations.filter((l) => visibleTrackers.has(l.team_id))
+
+  // Create a custom icon for tracker markers (different from submission markers)
+  const trackerIcon = L.icon({
+    iconUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSI4IiBmaWxsPSIjRUYzQjM2IiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMiIvPjwvc3ZnPg==',
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+    popupAnchor: [0, -12],
+  })
+
+  return (
+    <>
+      {visible.map((tracker) => (
+        <Marker
+          key={tracker.team_id}
+          position={[tracker.latitude, tracker.longitude]}
+          icon={trackerIcon}
+          title={tracker.team_name}
+        >
+          <Popup>
+            <div className="text-sm">
+              <p className="font-semibold">{tracker.team_name}</p>
+              <p className="text-xs text-gray-600">
+                {new Date(tracker.timestamp).toLocaleTimeString()}
+              </p>
+              <p className="text-xs text-gray-600">
+                {tracker.latitude.toFixed(4)}, {tracker.longitude.toFixed(4)}
+              </p>
+            </div>
+          </Popup>
+        </Marker>
+      ))}
+    </>
+  )
+}
+
+const TrackerMarkers = ({ visibleTrackers }: { visibleTrackers?: Set<string> }) => {
+  const map = useMap()
+  const { locations } = useTrackerLocations(30000)
+  const markersRef = useRef<Map<string, L.CircleMarker>>(new Map())
+
+  useEffect(() => {
+    // Remove markers that are no longer in locations
+    const locationIds = new Set(locations.map((loc) => loc.team_id))
+    markersRef.current.forEach((marker, teamId) => {
+      if (!locationIds.has(teamId)) {
+        map.removeLayer(marker)
+        markersRef.current.delete(teamId)
+      }
+    })
+
+    // Add or update markers
+    locations.forEach((loc) => {
+      // Skip if visibility filter excludes this tracker
+      if (visibleTrackers && !visibleTrackers.has(loc.team_id)) {
+        const existing = markersRef.current.get(loc.team_id)
+        if (existing) {
+          map.removeLayer(existing)
+          markersRef.current.delete(loc.team_id)
+        }
+        return
+      }
+
+      const existing = markersRef.current.get(loc.team_id)
+      if (existing) {
+        // Update existing marker position
+        existing.setLatLng([loc.latitude, loc.longitude])
+      } else {
+        // Create new marker
+        const marker = L.circleMarker([loc.latitude, loc.longitude], {
+          radius: 8,
+          fillColor: '#ff4444',
+          color: '#000',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.8,
+        })
+
+        marker.bindPopup(`<strong>${loc.team_name}</strong><br>Tracking`)
+
+        marker.on('click', () => {
+          window.location.href = `/team/${loc.team_id}`
+        })
+
+        marker.addTo(map)
+        markersRef.current.set(loc.team_id, marker)
+      }
+    })
+
+    return () => {
+      // Cleanup on unmount
+      markersRef.current.forEach((marker) => map.removeLayer(marker))
+      markersRef.current.clear()
+    }
+  }, [locations, map, visibleTrackers])
+
+  return null
+}
+
+export const Map = ({ visibleTrackers }: { visibleTrackers?: Set<string> } = {}) => {
   useSubmissions()
   return (
     <MapContainer
@@ -162,6 +269,7 @@ export const Map = () => {
       />
       <RaceCourseOverlay />
       <SubmissionMarkers />
+      <TrackerMarkers visibleTrackers={visibleTrackers} />
       <MapZoomTracker />
       <MapResizeObserver />
     </MapContainer>

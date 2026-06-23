@@ -1,33 +1,33 @@
 import { useCallback, useEffect, useState } from 'react'
-import { pathToView, viewToPath, type AppView } from '../lib/routing'
+import { pathToView, viewToPath, type AppView, type RouteState } from '../lib/routing'
 
 export function useViewRoute() {
-  const [view, setViewState] = useState<AppView>(() => pathToView(window.location.pathname))
+  const [route, setRouteState] = useState<RouteState>(() => pathToView(window.location.pathname))
 
   useEffect(() => {
     const parsed = pathToView(window.location.pathname)
-    const canonical = viewToPath(parsed)
+    const canonical = viewToPath(parsed.view, parsed.teamId)
     if (window.location.pathname !== canonical) {
-      history.replaceState({ view: parsed }, '', canonical)
+      history.replaceState(parsed, '', canonical)
     }
-    setViewState(parsed)
+    setRouteState(parsed)
   }, [])
 
   useEffect(() => {
-    const onPopState = () => setViewState(pathToView(window.location.pathname))
+    const onPopState = () => setRouteState(pathToView(window.location.pathname))
     window.addEventListener('popstate', onPopState)
     return () => window.removeEventListener('popstate', onPopState)
   }, [])
 
-  const setView = useCallback((next: AppView) => {
-    const path = viewToPath(next)
+  const setView = useCallback((next: AppView, teamId?: string) => {
+    const path = viewToPath(next, teamId)
     if (window.location.pathname !== path) {
-      history.pushState({ view: next }, '', path)
+      history.pushState({ view: next, teamId }, '', path)
     }
-    setViewState(next)
+    setRouteState({ view: next, teamId })
   }, [])
 
-  return { view, setView }
+  return { view: route.view, teamId: route.teamId, setView }
 }
 
-export { viewToPath, pathToView, type AppView } from '../lib/routing'
+export { viewToPath, pathToView, type AppView, type RouteState } from '../lib/routing'

@@ -10,9 +10,11 @@ import { CourseFilter } from './components/CourseFilter'
 import { BuildInfoStamp } from './components/BuildInfoStamp'
 import { KineticLogo } from './components/KineticLogo'
 import { TabIcon, SidebarToggleIcon, SidebarFiltersIcon } from './components/TabIcons'
+import { RegisterTracker } from './pages/RegisterTracker'
+import { TeamDetail } from './pages/TeamDetail'
 import { useViewRoute, viewToPath, type AppView } from './hooks/useViewRoute'
 
-type NavTabId = Exclude<AppView, 'admin'>
+type NavTabId = Exclude<AppView, 'admin' | 'register-tracker' | 'team-detail'>
 
 const TABS: { id: NavTabId; label: string }[] = [
   { id: 'map', label: 'Map' },
@@ -148,6 +150,19 @@ export default function App() {
               className="flex-1 min-h-0 flex flex-col"
             >
               <Admin />
+            </div>
+          )}
+
+          {view === 'register-tracker' && (
+            <div
+              data-component="register-tracker-page"
+              data-component-version="1.0"
+              data-component-category="content"
+              data-entity-type="page"
+              data-entity-id="page_register_tracker"
+              className="flex-1 min-h-0 flex flex-col overflow-y-auto bg-kinetic-cream"
+            >
+              <RegisterTracker onNavigate={setView} />
             </div>
           )}
 
