@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet'
 import MarkerClusterGroup from 'react-leaflet-cluster'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -147,14 +147,13 @@ const SubmissionMarkers = () => {
   )
 }
 
-interface TrackerMarkersProps {
-  visibleTrackers: Set<string>
-}
-
-const TrackerMarkers = ({ visibleTrackers }: TrackerMarkersProps) => {
+const TrackerMarkers = ({ visibleTrackers }: { visibleTrackers?: Set<string> } = {}) => {
   const { locations } = useTrackerLocations(30000)
 
-  const visible = locations.filter((l) => visibleTrackers.has(l.team_id))
+  // Filter locations based on visibility filter (if provided)
+  const visible = visibleTrackers
+    ? locations.filter((l) => visibleTrackers.has(l.team_id))
+    : locations
 
   // Create a custom icon for tracker markers (different from submission markers)
   const trackerIcon = L.icon({
@@ -172,6 +171,11 @@ const TrackerMarkers = ({ visibleTrackers }: TrackerMarkersProps) => {
           position={[tracker.latitude, tracker.longitude]}
           icon={trackerIcon}
           title={tracker.team_name}
+          eventHandlers={{
+            click: () => {
+              window.location.href = `/team/${tracker.team_id}`
+            },
+          }}
         >
           <Popup>
             <div className="text-sm">
@@ -188,69 +192,6 @@ const TrackerMarkers = ({ visibleTrackers }: TrackerMarkersProps) => {
       ))}
     </>
   )
-}
-
-const TrackerMarkers = ({ visibleTrackers }: { visibleTrackers?: Set<string> }) => {
-  const map = useMap()
-  const { locations } = useTrackerLocations(30000)
-  const markersRef = useRef<Map<string, L.CircleMarker>>(new Map())
-
-  useEffect(() => {
-    // Remove markers that are no longer in locations
-    const locationIds = new Set(locations.map((loc) => loc.team_id))
-    markersRef.current.forEach((marker, teamId) => {
-      if (!locationIds.has(teamId)) {
-        map.removeLayer(marker)
-        markersRef.current.delete(teamId)
-      }
-    })
-
-    // Add or update markers
-    locations.forEach((loc) => {
-      // Skip if visibility filter excludes this tracker
-      if (visibleTrackers && !visibleTrackers.has(loc.team_id)) {
-        const existing = markersRef.current.get(loc.team_id)
-        if (existing) {
-          map.removeLayer(existing)
-          markersRef.current.delete(loc.team_id)
-        }
-        return
-      }
-
-      const existing = markersRef.current.get(loc.team_id)
-      if (existing) {
-        // Update existing marker position
-        existing.setLatLng([loc.latitude, loc.longitude])
-      } else {
-        // Create new marker
-        const marker = L.circleMarker([loc.latitude, loc.longitude], {
-          radius: 8,
-          fillColor: '#ff4444',
-          color: '#000',
-          weight: 2,
-          opacity: 1,
-          fillOpacity: 0.8,
-        })
-
-        marker.bindPopup(`<strong>${loc.team_name}</strong><br>Tracking`)
-
-        marker.on('click', () => {
-          window.location.href = `/team/${loc.team_id}`
-        })
-
-        marker.addTo(map)
-        markersRef.current.set(loc.team_id, marker)
-      }
-    })
-
-    return () => {
-      // Cleanup on unmount
-      markersRef.current.forEach((marker) => map.removeLayer(marker))
-      markersRef.current.clear()
-    }
-  }, [locations, map, visibleTrackers])
-
-  return null
 }
 
 export const Map = ({ visibleTrackers }: { visibleTrackers?: Set<string> } = {}) => {

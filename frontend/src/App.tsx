@@ -50,7 +50,7 @@ export default function App() {
   const [showForm, setShowForm] = useState(false)
   const [showTeams, setShowTeams] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(true)
-  const { view, setView } = useViewRoute()
+  const { view, teamId, setView } = useViewRoute()
 
   return (
     <div className="h-screen flex flex-col overflow-hidden font-body">
