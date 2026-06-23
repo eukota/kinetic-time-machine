@@ -27,6 +27,6 @@ export function pathToView(pathname: string): RouteState {
 }
 
 export function pageIdForPath(path: string): string {
-  const view = pathToView(path)
-  return `page_${view}`
+  const route = pathToView(path)
+  return `page_${route.view}`
 }
