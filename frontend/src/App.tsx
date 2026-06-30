@@ -17,6 +17,8 @@ import { TrackLocation } from './pages/TrackLocation'
 import { Tracking } from './pages/Tracking'
 import { useViewRoute, viewToPath, type AppView } from './hooks/useViewRoute'
 import { useTrackerLocations } from './hooks/useTrackerLocations'
+import { useTokenTracking } from './hooks/useTokenTracking'
+import { isTrackingActive, getTrackingTeamName } from './utils/trackingStorage'
 
 type NavTabId = Exclude<AppView, 'admin' | 'register-tracker' | 'team-detail' | 'track-location'>
 
@@ -56,20 +58,56 @@ export default function App() {
   const [showTeams, setShowTeams] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [visibleTrackers, setVisibleTrackers] = useState<Set<string>>(new Set())
+  const [isTracking, setIsTracking] = useState(false)
   const { view, teamId, setView } = useViewRoute()
   const { locations: trackerLocations } = useTrackerLocations(30000)
+  const { isTokenValid, trackingError } = useTokenTracking({
+    enabled: view === 'map',
+    onError: (error) => {
+      console.error('Tracking error:', error)
+      setIsTracking(false)
+    },
+  })
+
+  // Check tracking status on mount and when token validity changes
+  useEffect(() => {
+    setIsTracking(isTrackingActive())
+  }, [])
+
+  // Update tracking indicator when token validity changes
+  useEffect(() => {
+    setIsTracking(isTokenValid)
+  }, [isTokenValid])
 
   // Initialize visible trackers when locations are loaded
   useEffect(() => {
     if (visibleTrackers.size === 0 && trackerLocations.length > 0) {
-      const team001 = trackerLocations.find((l) => l.team_name.includes("#001"))
-      if (team001) {
-        setVisibleTrackers(new Set([team001.team_id]))
-      } else {
-        setVisibleTrackers(new Set(trackerLocations.map((l) => l.team_id)))
+      let initialTrackers = new Set<string>()
+
+      // If user is actively tracking, add their team to visible trackers
+      if (isTracking && isTokenValid) {
+        const trackingTeamName = getTrackingTeamName()
+        const trackingTeam = trackerLocations.find((l) =>
+          trackingTeamName && l.team_name.includes(trackingTeamName)
+        )
+        if (trackingTeam) {
+          initialTrackers.add(trackingTeam.team_id)
+        }
       }
+
+      // If still empty, try to find #001 or show all
+      if (initialTrackers.size === 0) {
+        const team001 = trackerLocations.find((l) => l.team_name.includes("#001"))
+        if (team001) {
+          initialTrackers.add(team001.team_id)
+        } else {
+          initialTrackers = new Set(trackerLocations.map((l) => l.team_id))
+        }
+      }
+
+      setVisibleTrackers(initialTrackers)
     }
-  }, [trackerLocations.length])
+  }, [trackerLocations.length, isTracking, isTokenValid])
 
   const handleTrackerVisibility = (teamId: string, visible: boolean) => {
     const newSet = new Set(visibleTrackers)
@@ -108,6 +146,12 @@ export default function App() {
               />
             ))}
           </nav>
+          {isTracking && (
+            <div className="kinetic-tracking-pulse ml-auto">
+              <div className="kinetic-pulse-dot" />
+              <span>Tracking: {getTrackingTeamName() || 'Active'}</span>
+            </div>
+          )}
         </div>
 
         <nav

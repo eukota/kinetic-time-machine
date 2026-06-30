@@ -183,6 +183,27 @@ body {
            border-2 border-kinetic-navy rounded-lg shadow-kinetic-sm
            hover:shadow-kinetic hover:-translate-y-0.5 transition-all duration-150;
   }
+
+  .kinetic-tracking-pulse {
+    @apply inline-flex items-center gap-2 px-3 py-1.5 rounded-full
+           bg-kinetic-red/10 border-2 border-kinetic-red text-kinetic-red font-bold text-sm;
+  }
+
+  .kinetic-pulse-dot {
+    @apply w-2 h-2 rounded-full bg-kinetic-red;
+    animation: kinetic-pulse-animation 1.5s ease-in-out infinite;
+  }
+
+  @keyframes kinetic-pulse-animation {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.4;
+      transform: scale(1.3);
+    }
+  }
 }
 
 /* Leaflet attribution below mobile FAB column (+ / ☰) — parent .leaflet-bottom is z-index 1000 by default */
