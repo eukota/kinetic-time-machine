@@ -495,7 +495,7 @@ export const Admin = () => {
 
         {/* Photo Submissions Section */}
         <div>
-          <h3 className="kinetic-title text-lg mb-4 px-3">Pending Photo Submissions</h3>
+          <h3 className="kinetic-title text-lg mb-4 px-3">📸 Photos Pending Review</h3>
           {pending.length === 0 && !loading && (
             <p className="text-kinetic-gold/50 font-bold text-sm text-center py-12">No pending submissions — all clear!</p>
           )}
