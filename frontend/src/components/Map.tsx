@@ -161,9 +161,9 @@ const TrackerMarkers = ({ visibleTrackers }: { visibleTrackers?: Set<string> } =
     return unique;
   }, [] as typeof locations)
 
-  // Create a custom icon for tracker markers with music note
+  // Create a custom icon for tracker markers with eighth notes
   const trackerIcon = L.icon({
-    iconUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNSIgZmlsbD0iIzk2NWZlMyIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1zaXplPSIyMCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IiNmZmZmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj7wn46tPC90ZXh0Pjwvc3ZnPg==',
+    iconUrl: 'data:image/svg+xml;utf8,%3Csvg%20width=%2232%22%20height=%2232%22%20viewBox=%220%200%2032%2032%22%20fill=%22none%22%20xmlns=%22http://www.w3.org/2000/svg%22%3E%3Ccircle%20cx=%2216%22%20cy=%2216%22%20r=%2215%22%20fill=%22%239765f3%22%20stroke=%22white%22%20stroke-width=%222%22/%3E%3Cg%20transform=%22translate(8,%206)%22%3E%3C!--%20Left%20note%20--%3E%3Ccircle%20cx=%222%22%20cy=%228%22%20r=%221.5%22%20fill=%22black%22/%3E%3Cline%20x1=%224%22%20y1=%228%22%20x2=%224%22%20y2=%221%22%20stroke=%22black%22%20stroke-width=%221.2%22/%3E%3C!--%20Right%20note%20--%3E%3Ccircle%20cx=%227%22%20cy=%2210%22%20r=%221.5%22%20fill=%22black%22/%3E%3Cline%20x1=%229%22%20y1=%2210%22%20x2=%229%22%20y2=%223%22%20stroke=%22black%22%20stroke-width=%221.2%22/%3E%3C!--%20Connecting%20bar%20--%3E%3Cline%20x1=%224%22%20y1=%221%22%20x2=%229%22%20y2=%223%22%20stroke=%22black%22%20stroke-width=%221.2%22/%3E%3C/g%3E%3C/svg%3E',
     iconSize: [32, 32],
     iconAnchor: [16, 16],
     popupAnchor: [0, -16],
