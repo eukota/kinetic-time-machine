@@ -5,7 +5,7 @@ from models import Team
 
 # (number, sculpture_name, team_name_or_None)
 RACERS = [
-    (1, "Royal Kinetic Madness Band", None),
+    (1, "🎵 Royal Kinetic Madness Band", None),
     (101, "Pa Pa Smurf's Coach", "Team Pa Pa"),
     (102, "HMS Sea Cow", "Team Needs More Cowbell"),
     (103, "Astro Bunny & the Space Cadets", "Team Goddess Racing"),

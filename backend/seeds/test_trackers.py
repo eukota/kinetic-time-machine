@@ -13,8 +13,11 @@ def seed_test_trackers(db: Session, team_sample: list = None):
     requiring the admin approval step.
     """
 
-    # Get first 3 teams for testing
-    teams = db.query(Team).limit(3).all() if not team_sample else team_sample
+    # Get teams starting with #001 for testing
+    teams = db.query(Team).filter(Team.name.like('%#001%')).all() if not team_sample else team_sample
+    if not teams:
+        # Fallback to first 3 teams if #001 not found
+        teams = db.query(Team).limit(3).all()
 
     if not teams:
         print("⚠ No teams found. Run seed_teams.py first.")

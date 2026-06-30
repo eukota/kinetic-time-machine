@@ -60,7 +60,12 @@ export default function App() {
   // Initialize visible trackers when locations are loaded
   useEffect(() => {
     if (visibleTrackers.size === 0 && trackerLocations.length > 0) {
-      setVisibleTrackers(new Set(trackerLocations.map((l) => l.team_id)))
+      const team001 = trackerLocations.find((l) => l.team_name.includes("#001"))
+      if (team001) {
+        setVisibleTrackers(new Set([team001.team_id]))
+      } else {
+        setVisibleTrackers(new Set(trackerLocations.map((l) => l.team_id)))
+      }
     }
   }, [trackerLocations.length])
 
