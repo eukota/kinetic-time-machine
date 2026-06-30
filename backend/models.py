@@ -11,6 +11,11 @@ class Team(Base):
     color = Column(String)
     code = Column(String, unique=True, nullable=True, index=True)
     active = Column(Boolean, default=True)
+    current_token = Column(String, nullable=True, unique=True, index=True)
+    token_generated_at = Column(DateTime, nullable=True)
+    last_token_used_at = Column(DateTime, nullable=True)
+    last_location_lat = Column(Float, nullable=True)
+    last_location_lon = Column(Float, nullable=True)
     submissions = relationship("Submission", back_populates="team")
 
 class Submission(Base):
@@ -52,6 +57,16 @@ class TrackerLocation(Base):
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
     tracker = relationship("Tracker", back_populates="locations")
     team = relationship("Team", foreign_keys=[team_id])
+
+class TrackingRequest(Base):
+    __tablename__ = "tracking_requests"
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    team_name = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    code = Column(String, nullable=False, index=True)
+    status = Column(String, default="pending", nullable=False, index=True)  # pending, approved, rejected
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 class Photo(Base):
     __tablename__ = "photos"

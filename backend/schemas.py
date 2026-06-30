@@ -3,6 +3,12 @@ from datetime import datetime
 from typing import Optional
 
 
+class TrackingRequestCreate(BaseModel):
+    team_name: str = Field(..., min_length=1)
+    email: str = Field(..., min_length=1)
+    code: str = Field(..., min_length=1)
+
+
 class TrackerRegisterRequest(BaseModel):
     code: str = Field(..., min_length=1, max_length=50)
     email: Optional[str] = None
@@ -14,6 +20,7 @@ class TrackerLocationUpdate(BaseModel):
     longitude: float = Field(..., ge=-180, le=180)
     accuracy: Optional[float] = None
     timestamp: datetime
+    token: Optional[str] = None
 
 
 class TrackerLocationResponse(BaseModel):

@@ -104,6 +104,16 @@ export const AboutTabIcon = ({ size = 24, active = false, className = '' }: TabI
   </svg>
 )
 
+/** GPS signal waves — tracking / location request */
+export const TrackingTabIcon = ({ size = 24, active = false, className = '' }: TabIconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+    <circle cx="12" cy="12" r="3.5" fill={fillInactive(active, gold)} stroke={stroke(active)} strokeWidth={sw(2)} />
+    <path d="M8 12a4 4 0 0 1 8 0" stroke={stroke(active)} strokeWidth={sw(2.25)} fill="none" strokeLinecap="round" />
+    <path d="M5.5 12a6.5 6.5 0 0 1 13 0" stroke={muted(active)} strokeWidth={sw(2)} fill="none" strokeLinecap="round" />
+    <path d="M3 12a9 9 0 0 1 18 0" stroke={muted(active)} strokeWidth={sw(1.75)} fill="none" strokeLinecap="round" opacity="0.6" />
+  </svg>
+)
+
 /** Clipboard with approval stamp — admin review */
 export const AdminTabIcon = ({ size = 24, active = false, className = '' }: TabIconProps) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
@@ -235,11 +245,12 @@ export const SidebarFiltersIcon = ({ size = 18, className = '' }: { size?: numbe
   </svg>
 )
 
-const ICONS: Record<TabId, TabIconComponent> = {
+const ICONS: Partial<Record<TabId, TabIconComponent>> = {
   map: MapTabIcon,
   gallery: GalleryTabIcon,
   about: AboutTabIcon,
   admin: AdminTabIcon,
+  tracking: TrackingTabIcon,
 }
 
 export const TabIcon = ({ id, active }: { id: TabId; active: boolean }) => {

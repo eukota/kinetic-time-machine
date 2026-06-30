@@ -58,3 +58,29 @@ def _migrate():
         if "code" not in team_cols:
             conn.exec_driver_sql("ALTER TABLE teams ADD COLUMN code TEXT UNIQUE")
             conn.commit()
+
+        # Migration: add token management columns to teams
+        team_cols = [r[1] for r in conn.exec_driver_sql("PRAGMA table_info(teams)")]
+        if "current_token" not in team_cols:
+            conn.exec_driver_sql("ALTER TABLE teams ADD COLUMN current_token TEXT")
+            conn.commit()
+
+        team_cols = [r[1] for r in conn.exec_driver_sql("PRAGMA table_info(teams)")]
+        if "token_generated_at" not in team_cols:
+            conn.exec_driver_sql("ALTER TABLE teams ADD COLUMN token_generated_at TEXT")
+            conn.commit()
+
+        team_cols = [r[1] for r in conn.exec_driver_sql("PRAGMA table_info(teams)")]
+        if "last_token_used_at" not in team_cols:
+            conn.exec_driver_sql("ALTER TABLE teams ADD COLUMN last_token_used_at TEXT")
+            conn.commit()
+
+        team_cols = [r[1] for r in conn.exec_driver_sql("PRAGMA table_info(teams)")]
+        if "last_location_lat" not in team_cols:
+            conn.exec_driver_sql("ALTER TABLE teams ADD COLUMN last_location_lat REAL")
+            conn.commit()
+
+        team_cols = [r[1] for r in conn.exec_driver_sql("PRAGMA table_info(teams)")]
+        if "last_location_lon" not in team_cols:
+            conn.exec_driver_sql("ALTER TABLE teams ADD COLUMN last_location_lon REAL")
+            conn.commit()

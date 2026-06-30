@@ -14,6 +14,7 @@ import { TabIcon, SidebarToggleIcon, SidebarFiltersIcon } from './components/Tab
 import { RegisterTracker } from './pages/RegisterTracker'
 import { TeamDetail } from './pages/TeamDetail'
 import { TrackLocation } from './pages/TrackLocation'
+import { Tracking } from './pages/Tracking'
 import { useViewRoute, viewToPath, type AppView } from './hooks/useViewRoute'
 import { useTrackerLocations } from './hooks/useTrackerLocations'
 
@@ -22,6 +23,7 @@ type NavTabId = Exclude<AppView, 'admin' | 'register-tracker' | 'team-detail' | 
 const TABS: { id: NavTabId; label: string }[] = [
   { id: 'map', label: 'Map' },
   { id: 'gallery', label: 'Gallery' },
+  { id: 'tracking', label: 'Tracking' },
   { id: 'about', label: 'About' },
 ]
 
@@ -151,6 +153,19 @@ export default function App() {
           {view === 'gallery' && (
             <div className="flex-1 min-h-0 flex flex-col">
               <Gallery />
+            </div>
+          )}
+
+          {view === 'tracking' && (
+            <div
+              data-component="tracking-page"
+              data-component-version="1.0"
+              data-component-category="content"
+              data-entity-type="page"
+              data-entity-id="page_tracking"
+              className="flex-1 min-h-0 flex flex-col overflow-y-auto bg-kinetic-cream"
+            >
+              <Tracking onNavigate={setView} />
             </div>
           )}
 

@@ -1,6 +1,6 @@
-export type AppView = 'map' | 'gallery' | 'about' | 'admin' | 'register-tracker' | 'team-detail' | 'track-location'
+export type AppView = 'map' | 'gallery' | 'about' | 'admin' | 'register-tracker' | 'team-detail' | 'track-location' | 'tracking'
 
-const VIEWS: AppView[] = ['map', 'gallery', 'about', 'admin', 'register-tracker', 'team-detail', 'track-location']
+const VIEWS: AppView[] = ['map', 'gallery', 'about', 'admin', 'register-tracker', 'team-detail', 'track-location', 'tracking']
 
 export interface RouteState {
   view: AppView;

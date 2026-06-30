@@ -73,6 +73,19 @@ def update_location(req: TrackerLocationUpdate, db: Session = Depends(get_db)):
         timestamp=req.timestamp
     )
     db.add(location)
+
+    # If token is provided, validate it and log token usage
+    if req.token:
+        team = db.query(Team).filter(Team.id == req.team_id).first()
+        if team and team.current_token == req.token:
+            # Log token usage
+            team.last_token_used_at = datetime.utcnow()
+            team.last_location_lat = req.latitude
+            team.last_location_lon = req.longitude
+        elif team:
+            # Token provided but doesn't match
+            raise HTTPException(status_code=401, detail="Invalid token")
+
     db.commit()
 
     return {"status": "success", "message": "Location updated"}
