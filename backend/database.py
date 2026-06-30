@@ -81,3 +81,21 @@ def _migrate():
                     if "duplicate column" not in str(e).lower():
                         raise
                     conn.rollback()
+
+        # Migration: create tracking_requests table if missing (create_all may have
+        # been skipped on a running container before this model was introduced)
+        tables = [r[0] for r in conn.exec_driver_sql(
+            "SELECT name FROM sqlite_master WHERE type='table'"
+        ).fetchall()]
+        if "tracking_requests" not in tables:
+            conn.exec_driver_sql("""
+                CREATE TABLE tracking_requests (
+                    id TEXT PRIMARY KEY,
+                    team_name TEXT NOT NULL,
+                    email TEXT,
+                    code TEXT,
+                    status TEXT NOT NULL DEFAULT 'pending',
+                    created_at TEXT DEFAULT (datetime('now'))
+                )
+            """)
+            conn.commit()
