@@ -56,7 +56,7 @@ def _migrate():
         # Migration: add `code` column to teams for tracker registration
         team_cols = [r[1] for r in conn.exec_driver_sql("PRAGMA table_info(teams)")]
         if "code" not in team_cols:
-            conn.exec_driver_sql("ALTER TABLE teams ADD COLUMN code TEXT UNIQUE")
+            conn.exec_driver_sql("ALTER TABLE teams ADD COLUMN code TEXT")
             conn.commit()
 
         # Migration: add token management columns to teams
