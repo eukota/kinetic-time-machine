@@ -14,9 +14,16 @@ export const TrackerFilter = ({
 }: TrackerFilterProps) => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filtered = trackers.filter((t) =>
-    t.team_name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filtered = trackers
+    .filter((t) =>
+      t.team_name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .reduce((unique, tracker) => {
+      if (!unique.find((t) => t.team_id === tracker.team_id)) {
+        unique.push(tracker);
+      }
+      return unique;
+    }, [] as typeof trackers);
 
   const allVisible = trackers.every((t) => visibleTeams.has(t.team_id));
   const noneVisible = trackers.every((t) => !visibleTeams.has(t.team_id));

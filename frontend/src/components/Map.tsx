@@ -150,10 +150,16 @@ const SubmissionMarkers = () => {
 const TrackerMarkers = ({ visibleTrackers }: { visibleTrackers?: Set<string> } = {}) => {
   const { locations } = useTrackerLocations(30000)
 
-  // Filter locations based on visibility filter (if provided)
-  const visible = visibleTrackers
+  // Filter locations based on visibility filter and deduplicate by team_id
+  const visible = (visibleTrackers
     ? locations.filter((l) => visibleTrackers.has(l.team_id))
     : locations
+  ).reduce((unique, loc) => {
+    if (!unique.find((l) => l.team_id === loc.team_id)) {
+      unique.push(loc);
+    }
+    return unique;
+  }, [] as typeof locations)
 
   // Create a custom icon for tracker markers (different from submission markers)
   const trackerIcon = L.icon({

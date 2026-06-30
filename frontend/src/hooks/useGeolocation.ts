@@ -8,7 +8,7 @@ interface LocationData {
   timestamp: Date;
 }
 
-const useMock = process.env.REACT_APP_MOCK_GEOLOCATION === "true";
+const useMock = import.meta.env.VITE_MOCK_GEOLOCATION === "true";
 
 export const useGeolocation = () => {
   const [location, setLocation] = useState<LocationData | null>(null);
