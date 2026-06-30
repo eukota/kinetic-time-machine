@@ -56,31 +56,28 @@ def _migrate():
         # Migration: add `code` column to teams for tracker registration
         team_cols = [r[1] for r in conn.exec_driver_sql("PRAGMA table_info(teams)")]
         if "code" not in team_cols:
-            conn.exec_driver_sql("ALTER TABLE teams ADD COLUMN code TEXT")
-            conn.commit()
+            try:
+                conn.exec_driver_sql("ALTER TABLE teams ADD COLUMN code TEXT")
+                conn.commit()
+            except Exception as e:
+                if "duplicate column" not in str(e).lower():
+                    raise
+                conn.rollback()
 
         # Migration: add token management columns to teams
-        team_cols = [r[1] for r in conn.exec_driver_sql("PRAGMA table_info(teams)")]
-        if "current_token" not in team_cols:
-            conn.exec_driver_sql("ALTER TABLE teams ADD COLUMN current_token TEXT")
-            conn.commit()
-
-        team_cols = [r[1] for r in conn.exec_driver_sql("PRAGMA table_info(teams)")]
-        if "token_generated_at" not in team_cols:
-            conn.exec_driver_sql("ALTER TABLE teams ADD COLUMN token_generated_at TEXT")
-            conn.commit()
-
-        team_cols = [r[1] for r in conn.exec_driver_sql("PRAGMA table_info(teams)")]
-        if "last_token_used_at" not in team_cols:
-            conn.exec_driver_sql("ALTER TABLE teams ADD COLUMN last_token_used_at TEXT")
-            conn.commit()
-
-        team_cols = [r[1] for r in conn.exec_driver_sql("PRAGMA table_info(teams)")]
-        if "last_location_lat" not in team_cols:
-            conn.exec_driver_sql("ALTER TABLE teams ADD COLUMN last_location_lat REAL")
-            conn.commit()
-
-        team_cols = [r[1] for r in conn.exec_driver_sql("PRAGMA table_info(teams)")]
-        if "last_location_lon" not in team_cols:
-            conn.exec_driver_sql("ALTER TABLE teams ADD COLUMN last_location_lon REAL")
-            conn.commit()
+        for col_name, col_type in [
+            ("current_token", "TEXT"),
+            ("token_generated_at", "TEXT"),
+            ("last_token_used_at", "TEXT"),
+            ("last_location_lat", "REAL"),
+            ("last_location_lon", "REAL"),
+        ]:
+            team_cols = [r[1] for r in conn.exec_driver_sql("PRAGMA table_info(teams)")]
+            if col_name not in team_cols:
+                try:
+                    conn.exec_driver_sql(f"ALTER TABLE teams ADD COLUMN {col_name} {col_type}")
+                    conn.commit()
+                except Exception as e:
+                    if "duplicate column" not in str(e).lower():
+                        raise
+                    conn.rollback()
