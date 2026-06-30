@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Map } from './components/Map'
 import { Gallery } from './components/Gallery'
 import { About } from './components/About'
@@ -58,15 +58,17 @@ export default function App() {
   const [showTeams, setShowTeams] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [visibleTrackers, setVisibleTrackers] = useState<Set<string>>(new Set())
+  const [hiddenTrackers, setHiddenTrackers] = useState<Set<string>>(new Set())
   const [isTracking, setIsTracking] = useState(false)
   const { view, teamId, setView } = useViewRoute()
   const { locations: trackerLocations } = useTrackerLocations(30000)
+  const handleTrackingError = useCallback((error: string) => {
+    console.error('Tracking error:', error)
+    setIsTracking(false)
+  }, [])
   const { isTokenValid, trackingError } = useTokenTracking({
     enabled: view === 'map',
-    onError: (error) => {
-      console.error('Tracking error:', error)
-      setIsTracking(false)
-    },
+    onError: handleTrackingError,
   })
 
   // Check tracking status on mount and when token validity changes
@@ -79,44 +81,34 @@ export default function App() {
     setIsTracking(isTokenValid)
   }, [isTokenValid])
 
-  // Initialize visible trackers when locations are loaded
+  // Auto-show any tracker that appears in poll results unless the user explicitly hid it
   useEffect(() => {
-    if (visibleTrackers.size === 0 && trackerLocations.length > 0) {
-      let initialTrackers = new Set<string>()
-
-      // If user is actively tracking, add their team to visible trackers
-      if (isTracking && isTokenValid) {
-        const trackingTeamName = getTrackingTeamName()
-        const trackingTeam = trackerLocations.find((l) =>
-          trackingTeamName && l.team_name.includes(trackingTeamName)
-        )
-        if (trackingTeam) {
-          initialTrackers.add(trackingTeam.team_id)
+    setVisibleTrackers(prev => {
+      const next = new Set(prev)
+      let changed = false
+      for (const loc of trackerLocations) {
+        if (!next.has(loc.team_id) && !hiddenTrackers.has(loc.team_id)) {
+          next.add(loc.team_id)
+          changed = true
         }
       }
-
-      // If still empty, try to find #001 or show all
-      if (initialTrackers.size === 0) {
-        const team001 = trackerLocations.find((l) => l.team_name.includes("#001"))
-        if (team001) {
-          initialTrackers.add(team001.team_id)
-        } else {
-          initialTrackers = new Set(trackerLocations.map((l) => l.team_id))
-        }
-      }
-
-      setVisibleTrackers(initialTrackers)
-    }
-  }, [trackerLocations.length, isTracking, isTokenValid])
+      return changed ? next : prev
+    })
+  }, [trackerLocations, hiddenTrackers])
 
   const handleTrackerVisibility = (teamId: string, visible: boolean) => {
-    const newSet = new Set(visibleTrackers)
-    if (visible) {
-      newSet.add(teamId)
-    } else {
-      newSet.delete(teamId)
-    }
-    setVisibleTrackers(newSet)
+    setHiddenTrackers(prev => {
+      const next = new Set(prev)
+      if (visible) next.delete(teamId)
+      else next.add(teamId)
+      return next
+    })
+    setVisibleTrackers(prev => {
+      const next = new Set(prev)
+      if (visible) next.add(teamId)
+      else next.delete(teamId)
+      return next
+    })
   }
 
   return (
