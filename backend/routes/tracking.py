@@ -68,8 +68,10 @@ def approve_tracking_request(request_id: str, db: Session = Depends(get_db)):
     if not tracking_req:
         raise HTTPException(status_code=404, detail="Tracking request not found")
 
-    # Find team by name — seeded teams have no code set, so match on name
+    # Find team by name, then by code — seeded teams may have no code set
     team = db.query(Team).filter(Team.name == tracking_req.team_name).first()
+    if not team and tracking_req.code:
+        team = db.query(Team).filter(Team.code == tracking_req.code).first()
 
     # If team doesn't exist, create one
     if not team:
