@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from datetime import datetime
 from database import get_db
-from models import TrackingRequest, Team
+from models import TrackingRequest, Team, Tracker
 from schemas import TrackingRequestCreate
 from auth import require_admin
 import uuid
@@ -68,8 +68,8 @@ def approve_tracking_request(request_id: str, db: Session = Depends(get_db)):
     if not tracking_req:
         raise HTTPException(status_code=404, detail="Tracking request not found")
 
-    # Find or create team with the team_name from the request
-    team = db.query(Team).filter(Team.code == tracking_req.code).first()
+    # Find team by name — seeded teams have no code set, so match on name
+    team = db.query(Team).filter(Team.name == tracking_req.team_name).first()
 
     # If team doesn't exist, create one
     if not team:
@@ -87,6 +87,22 @@ def approve_tracking_request(request_id: str, db: Session = Depends(get_db)):
     token = uuid.uuid4().hex
     team.current_token = token
     team.token_generated_at = datetime.utcnow()
+
+    # Ensure an approved Tracker row exists — update-location requires one
+    tracker = db.query(Tracker).filter(Tracker.team_id == team.id).first()
+    if not tracker:
+        tracker = Tracker(
+            id=str(uuid.uuid4()),
+            team_id=team.id,
+            code=team.id,  # use team ID as unique tracker code
+            email=tracking_req.email,
+            status="approved",
+            approved_at=datetime.utcnow(),
+        )
+        db.add(tracker)
+    else:
+        tracker.status = "approved"
+        tracker.approved_at = datetime.utcnow()
 
     # Update tracking request status
     tracking_req.status = "approved"

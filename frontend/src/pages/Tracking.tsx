@@ -56,7 +56,7 @@ export const Tracking = ({ onNavigate }: { onNavigate?: (view: string) => void }
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           team_name: selectedTeam.name,
-          code: selectedTeam.name, // Use team name as code if not available
+          code: selectedTeam.name,
           email: email.trim(),
         }),
       })
