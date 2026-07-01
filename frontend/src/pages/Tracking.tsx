@@ -94,42 +94,39 @@ export const Tracking = ({ onNavigate }: { onNavigate?: (view: string) => void }
     try {
       const trimmedToken = token.trim()
 
-      // Check if user has team info from a previous request
-      let teamId = localStorage.getItem('tracking_team_id')
-      let teamName = localStorage.getItem('tracking_team_name')
+      // Validate token with backend first
+      const validateResponse = await fetch('/api/validate-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: trimmedToken }),
+      })
 
-      // If no saved team info, use the currently selected team from the Request Tracking form
-      if (!teamId && selectedTeamId) {
-        const team = teams.find(t => t.id === selectedTeamId)
-        if (team) {
-          teamId = team.id
-          teamName = team.name
-        }
-      }
-
-      if (!teamId) {
-        // No team info available
+      if (!validateResponse.ok) {
+        const error = await validateResponse.json()
         setTokenStatus('error')
-        setTokenMessage(
-          'Please select a team above or submit a tracking request first.'
-        )
-      } else {
-        // Store token and team info - token will be validated when location is submitted
-        localStorage.setItem('tracking_token', trimmedToken)
-        localStorage.setItem('tracking_team_id', teamId)
-        localStorage.setItem('tracking_team_name', teamName)
-
-        setTokenStatus('valid')
-        setTokenMessage(
-          `Token accepted for ${teamName}! Location tracking is now active.`
-        )
-        setToken('')
-
-        // Redirect to map after brief delay
-        setTimeout(() => {
-          onNavigate?.('map')
-        }, 1500)
+        setTokenMessage(error.detail || 'Token is invalid or expired')
+        return
       }
+
+      const validationData = await validateResponse.json()
+      const teamId = validationData.team_id
+      const teamName = validationData.team_name
+
+      // Store validated token and team info
+      localStorage.setItem('tracking_token', trimmedToken)
+      localStorage.setItem('tracking_team_id', teamId)
+      localStorage.setItem('tracking_team_name', teamName)
+
+      setTokenStatus('valid')
+      setTokenMessage(
+        `Token accepted for ${teamName}! Location tracking is now active.`
+      )
+      setToken('')
+
+      // Redirect to map after brief delay
+      setTimeout(() => {
+        onNavigate?.('map')
+      }, 1500)
     } catch (err) {
       setTokenStatus('error')
       setTokenMessage('Failed to activate tracking. Please try again.')

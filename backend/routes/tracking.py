@@ -11,6 +11,30 @@ import uuid
 router = APIRouter(prefix="/api", tags=["tracking"])
 
 
+@router.post("/validate-token")
+def validate_token(body: dict, db: Session = Depends(get_db)):
+    """Validate a tracking token before storing it"""
+    token = body.get('token', '').strip()
+    if not token:
+        raise HTTPException(status_code=400, detail="Token is required")
+
+    # Find team with this token
+    team = db.query(Team).filter(Team.current_token == token).first()
+    if not team:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    # Check if tracker exists and is approved
+    tracker = db.query(Tracker).filter(Tracker.team_id == team.id).first()
+    if not tracker or tracker.status != "approved":
+        raise HTTPException(status_code=403, detail="Team tracking not approved")
+
+    return {
+        "valid": True,
+        "team_id": team.id,
+        "team_name": team.name,
+    }
+
+
 @router.post("/tracking-request")
 def submit_tracking_request(
     req: TrackingRequestCreate,
