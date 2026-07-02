@@ -99,3 +99,39 @@ def _migrate():
                 )
             """)
             conn.commit()
+
+        # Migration: create token_history table if missing
+        tables = [r[0] for r in conn.exec_driver_sql(
+            "SELECT name FROM sqlite_master WHERE type='table'"
+        ).fetchall()]
+        if "token_history" not in tables:
+            conn.exec_driver_sql("""
+                CREATE TABLE token_history (
+                    id TEXT PRIMARY KEY,
+                    token TEXT NOT NULL,
+                    team_id TEXT NOT NULL,
+                    team_name TEXT NOT NULL,
+                    token_generated_at TEXT NOT NULL,
+                    token_archived_at TEXT DEFAULT (datetime('now')),
+                    location_count TEXT DEFAULT '0',
+                    created_at TEXT DEFAULT (datetime('now')),
+                    FOREIGN KEY (team_id) REFERENCES teams (id)
+                )
+            """)
+            conn.commit()
+
+        # Migration: create token_location_archives table if missing
+        if "token_location_archives" not in tables:
+            conn.exec_driver_sql("""
+                CREATE TABLE token_location_archives (
+                    id TEXT PRIMARY KEY,
+                    token_history_id TEXT NOT NULL,
+                    latitude REAL NOT NULL,
+                    longitude REAL NOT NULL,
+                    accuracy REAL,
+                    timestamp TEXT NOT NULL,
+                    created_at TEXT DEFAULT (datetime('now')),
+                    FOREIGN KEY (token_history_id) REFERENCES token_history (id)
+                )
+            """)
+            conn.commit()

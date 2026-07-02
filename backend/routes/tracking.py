@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from datetime import datetime
 from database import get_db
-from models import TrackingRequest, Team, Tracker, TrackerLocation
+from models import TrackingRequest, Team, Tracker, TrackerLocation, TokenHistory, TokenLocationArchive
 from schemas import TrackingRequestCreate
 from auth import require_admin
 import uuid
@@ -224,22 +224,72 @@ def get_team_token_info(team_id: str, db: Session = Depends(get_db)):
     }
 
 
+@router.get("/admin/token-history", dependencies=[Depends(require_admin)])
+def list_token_history(db: Session = Depends(get_db)):
+    """List all archived token history (admin only)"""
+    histories = db.query(TokenHistory).order_by(desc(TokenHistory.token_archived_at)).all()
+    return [
+        {
+            "id": h.id,
+            "token": h.token,
+            "team_id": h.team_id,
+            "team_name": h.team_name,
+            "token_generated_at": h.token_generated_at,
+            "token_archived_at": h.token_archived_at,
+            "location_count": int(h.location_count),
+        }
+        for h in histories
+    ]
+
+
 @router.post("/admin/teams/{team_id}/clear-history", dependencies=[Depends(require_admin)])
 def clear_team_location_history(team_id: str, db: Session = Depends(get_db)):
-    """Clear all location history for a team (admin only)"""
+    """Archive all location history for a team (admin only)"""
     team = db.query(Team).filter(Team.id == team_id).first()
     if not team:
         raise HTTPException(status_code=404, detail="Team not found")
 
-    # Delete all location records for this team
-    deleted_count = db.query(TrackerLocation).filter(
+    # Get all locations for this team
+    locations = db.query(TrackerLocation).filter(
         TrackerLocation.team_id == team_id
-    ).delete()
+    ).all()
+
+    location_count = len(locations)
+
+    if location_count > 0:
+        # Create token history record (if token exists, archive it)
+        token_history = TokenHistory(
+            id=str(uuid.uuid4()),
+            token=team.current_token or f"no-token-{team_id}",
+            team_id=team_id,
+            team_name=team.name,
+            token_generated_at=team.token_generated_at or datetime.utcnow(),
+            token_archived_at=datetime.utcnow(),
+            location_count=str(location_count),
+        )
+        db.add(token_history)
+        db.flush()  # Get the token_history ID
+
+        # Archive all locations
+        for loc in locations:
+            archive = TokenLocationArchive(
+                id=str(uuid.uuid4()),
+                token_history_id=token_history.id,
+                latitude=loc.latitude,
+                longitude=loc.longitude,
+                accuracy=loc.accuracy,
+                timestamp=loc.timestamp,
+            )
+            db.add(archive)
+
+        # Delete the original locations
+        for loc in locations:
+            db.delete(loc)
 
     db.commit()
 
     return {
         "team_id": team.id,
-        "message": f"Cleared {deleted_count} location records.",
-        "deleted_count": deleted_count,
+        "message": f"Archived {location_count} location records.",
+        "archived_count": location_count,
     }

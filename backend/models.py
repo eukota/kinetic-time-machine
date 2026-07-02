@@ -76,3 +76,27 @@ class Photo(Base):
     mime_type = Column(String, nullable=True)
     uploaded_at = Column(DateTime, default=datetime.utcnow)
     submission = relationship("Submission", back_populates="photos")
+
+class TokenHistory(Base):
+    __tablename__ = "token_history"
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    token = Column(String, nullable=False, index=True)
+    team_id = Column(String, ForeignKey("teams.id"), nullable=False, index=True)
+    team_name = Column(String, nullable=False)
+    token_generated_at = Column(DateTime, nullable=False)
+    token_archived_at = Column(DateTime, default=datetime.utcnow)
+    location_count = Column(String, default="0")  # Count of archived locations
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    locations = relationship("TokenLocationArchive", back_populates="token_history", cascade="all, delete-orphan")
+    team = relationship("Team", foreign_keys=[team_id])
+
+class TokenLocationArchive(Base):
+    __tablename__ = "token_location_archives"
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    token_history_id = Column(String, ForeignKey("token_history.id"), nullable=False, index=True)
+    latitude = Column(Float, nullable=False)
+    longitude = Column(Float, nullable=False)
+    accuracy = Column(Float, nullable=True)
+    timestamp = Column(DateTime, nullable=False, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    token_history = relationship("TokenHistory", back_populates="locations")
