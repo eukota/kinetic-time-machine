@@ -270,6 +270,26 @@ export const Admin = () => {
     }
   }
 
+  const clearTeamHistory = async (teamId: string) => {
+    if (!confirm('Clear all location history for this team?')) return
+    setBusyIds((prev) => new Set(prev).add(teamId))
+    try {
+      const r = await fetch(`/api/admin/teams/${teamId}/clear-history`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (r.ok) {
+        const data = await r.json()
+        setSuccessMessage(`Cleared ${data.deleted_count} location records.`)
+        setTimeout(() => setSuccessMessage(null), 3000)
+        // Refresh the tracker locations on the map
+        window.location.reload()
+      }
+    } finally {
+      setBusyIds((prev) => { const n = new Set(prev); n.delete(teamId); return n })
+    }
+  }
+
   const copyToken = (token: string) => {
     navigator.clipboard.writeText(token)
     setSuccessMessage('Token copied to clipboard!')
@@ -481,6 +501,14 @@ export const Admin = () => {
                               title="Disable token"
                             >
                               🚫
+                            </button>
+                            <button
+                              onClick={() => clearTeamHistory(team.team_id)}
+                              disabled={busy}
+                              className="text-xs font-bold px-2 py-1 rounded bg-kinetic-navy text-kinetic-cream hover:bg-kinetic-navy/80 disabled:opacity-50"
+                              title="Clear location history"
+                            >
+                              🗑️
                             </button>
                           </div>
                         </td>

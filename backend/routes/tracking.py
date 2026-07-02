@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from datetime import datetime
 from database import get_db
-from models import TrackingRequest, Team, Tracker
+from models import TrackingRequest, Team, Tracker, TrackerLocation
 from schemas import TrackingRequestCreate
 from auth import require_admin
 import uuid
@@ -221,4 +221,25 @@ def get_team_token_info(team_id: str, db: Session = Depends(get_db)):
         "last_token_used_at": team.last_token_used_at,
         "last_location_lat": team.last_location_lat,
         "last_location_lon": team.last_location_lon,
+    }
+
+
+@router.post("/admin/teams/{team_id}/clear-history", dependencies=[Depends(require_admin)])
+def clear_team_location_history(team_id: str, db: Session = Depends(get_db)):
+    """Clear all location history for a team (admin only)"""
+    team = db.query(Team).filter(Team.id == team_id).first()
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found")
+
+    # Delete all location records for this team
+    deleted_count = db.query(TrackerLocation).filter(
+        TrackerLocation.team_id == team_id
+    ).delete()
+
+    db.commit()
+
+    return {
+        "team_id": team.id,
+        "message": f"Cleared {deleted_count} location records.",
+        "deleted_count": deleted_count,
     }
