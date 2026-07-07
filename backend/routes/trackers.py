@@ -1,68 +1,46 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_
 from datetime import datetime
+import secrets
 from database import get_db
+from limiter import limiter
 from models import Tracker, TrackerLocation, Team
-from schemas import (
-    TrackerRegisterRequest,
-    TrackerLocationUpdate,
-    CurrentLocationResponse,
-)
+from schemas import TrackerLocationUpdate
 import uuid
 
 router = APIRouter(prefix="/api/trackers", tags=["trackers"])
 
 
-@router.post("/register")
-def register_tracker(req: TrackerRegisterRequest, db: Session = Depends(get_db)):
-    """Register a new tracker with a team code"""
-    # Find team by code
-    team = db.query(Team).filter(Team.code == req.code).first()
-    if not team:
-        raise HTTPException(status_code=404, detail="Team code not found")
-
-    # Check if tracker already exists for this team
-    existing = db.query(Tracker).filter(Tracker.team_id == team.id).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Tracker already registered for this team")
-
-    # Create new tracker record
-    tracker = Tracker(
-        id=str(uuid.uuid4()),
-        team_id=team.id,
-        code=req.code,
-        email=req.email,
-        status="pending"
-    )
-    db.add(tracker)
-    db.commit()
-    db.refresh(tracker)
-
-    return {
-        "status": "pending",
-        "message": "Registration submitted. Waiting for admin approval.",
-        "tracker_id": tracker.id
-    }
-
-
 @router.post("/update-location")
-def update_location(req: TrackerLocationUpdate, db: Session = Depends(get_db)):
-    """Submit current location for an approved tracker"""
-    # Find tracker by team_id
-    tracker = db.query(Tracker).filter(
-        Tracker.team_id == req.team_id,
-        Tracker.status == "approved"
-    ).first()
+@limiter.limit("30/minute")
+def update_location(request: Request, req: TrackerLocationUpdate, db: Session = Depends(get_db)):
+    """Submit current location for a team. The team's token is the credential:
+    it must be present and match teams.current_token (constant-time)."""
+    # Validate the token up front — nothing is written on a failed auth.
+    team = db.query(Team).filter(Team.id == req.team_id).first()
+    if (
+        not team
+        or not team.current_token
+        or not secrets.compare_digest(req.token, team.current_token)
+    ):
+        raise HTTPException(status_code=401, detail="Invalid or missing token")
 
+    # Resolve (or lazily create) a tracker row purely for historical FK
+    # continuity — it is no longer the credential.
+    tracker = db.query(Tracker).filter(Tracker.team_id == req.team_id).first()
     if not tracker:
-        raise HTTPException(status_code=403, detail="Tracker not found or not approved")
+        tracker = Tracker(
+            id=str(uuid.uuid4()),
+            team_id=req.team_id,
+            code=req.team_id,  # team ID is unique; used as the tracker code
+            status="approved",
+            approved_at=datetime.utcnow(),
+        )
+        db.add(tracker)
+        db.flush()
 
-    # Validate team_id consistency (defensive check)
-    if tracker.team_id != req.team_id:
-        raise HTTPException(status_code=400, detail="Team ID mismatch")
-
-    # Record the location
+    # Record the location.
     location = TrackerLocation(
         id=str(uuid.uuid4()),
         tracker_id=tracker.id,
@@ -70,21 +48,14 @@ def update_location(req: TrackerLocationUpdate, db: Session = Depends(get_db)):
         latitude=req.latitude,
         longitude=req.longitude,
         accuracy=req.accuracy,
-        timestamp=req.timestamp
+        timestamp=req.timestamp,
     )
     db.add(location)
 
-    # If token is provided, validate it and log token usage
-    if req.token:
-        team = db.query(Team).filter(Team.id == req.team_id).first()
-        if team and team.current_token == req.token:
-            # Log token usage
-            team.last_token_used_at = datetime.utcnow()
-            team.last_location_lat = req.latitude
-            team.last_location_lon = req.longitude
-        elif team:
-            # Token provided but doesn't match
-            raise HTTPException(status_code=401, detail="Invalid token")
+    # Log token usage / last-known position.
+    team.last_token_used_at = datetime.utcnow()
+    team.last_location_lat = req.latitude
+    team.last_location_lon = req.longitude
 
     db.commit()
 
@@ -93,7 +64,7 @@ def update_location(req: TrackerLocationUpdate, db: Session = Depends(get_db)):
 
 @router.get("/current-locations")
 def get_current_locations(db: Session = Depends(get_db)):
-    """Get latest location for all approved trackers"""
+    """Get latest location for every team that currently holds a token."""
     # Subquery to find latest location per tracker
     subq = (
         db.query(
@@ -104,7 +75,8 @@ def get_current_locations(db: Session = Depends(get_db)):
         .subquery()
     )
 
-    # Get latest locations with team info in a single optimized query
+    # A team is trackable when it holds a token. Historical locations from a
+    # team whose token was disabled (set to null) are excluded.
     locations = (
         db.query(TrackerLocation, Team.name)
         .join(subq, and_(
@@ -112,8 +84,7 @@ def get_current_locations(db: Session = Depends(get_db)):
             TrackerLocation.created_at == subq.c.latest_time
         ))
         .join(Team, TrackerLocation.team_id == Team.id)
-        .join(Tracker, TrackerLocation.tracker_id == Tracker.id)
-        .filter(Tracker.status == "approved")
+        .filter(Team.current_token.isnot(None))
         .all()
     )
 

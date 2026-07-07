@@ -516,12 +516,12 @@ class TestTokenLogging:
             }
         )
         assert r.status_code == 401
-        assert r.json()["detail"] == "Invalid token"
+        assert r.json()["detail"] == "Invalid or missing token"
 
-    def test_location_update_without_token(self):
-        """Test that location update works without token"""
+    def test_location_update_without_token_is_rejected(self):
+        """Regression: the token is required — omitting it must be rejected."""
         db = TestingSessionLocal()
-        team = Team(name="Team", color="#000000", code="TEAM")
+        team = Team(name="Team", color="#000000", code="TEAM", current_token="a" * 32)
         db.add(team)
         db.commit()
         team_id = team.id
@@ -531,7 +531,7 @@ class TestTokenLogging:
         db.commit()
         db.close()
 
-        # Update location without token (should still work)
+        # Update location without token (must be rejected — 422 missing field)
         now = datetime.utcnow()
         r = client.post(
             "/api/trackers/update-location",
@@ -543,7 +543,11 @@ class TestTokenLogging:
                 "timestamp": now.isoformat()
             }
         )
-        assert r.status_code == 200
+        assert r.status_code == 422
+        # And nothing was written
+        db = TestingSessionLocal()
+        assert db.query(TrackerLocation).filter(TrackerLocation.team_id == team_id).count() == 0
+        db.close()
 
     def test_location_update_logs_last_location_coords(self):
         """Test that last location coordinates are logged with token"""

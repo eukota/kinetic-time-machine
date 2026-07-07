@@ -9,18 +9,13 @@ class TrackingRequestCreate(BaseModel):
     code: str = Field(..., min_length=1)
 
 
-class TrackerRegisterRequest(BaseModel):
-    code: str = Field(..., min_length=1, max_length=50)
-    email: Optional[str] = None
-
-
 class TrackerLocationUpdate(BaseModel):
     team_id: str
     latitude: float = Field(..., ge=-90, le=90)
     longitude: float = Field(..., ge=-180, le=180)
     accuracy: Optional[float] = None
     timestamp: datetime
-    token: Optional[str] = None
+    token: str = Field(..., min_length=1)
 
 
 class TrackerLocationResponse(BaseModel):

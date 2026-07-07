@@ -11,16 +11,14 @@ import { TrackerFilter } from './components/TrackerFilter'
 import { BuildInfoStamp } from './components/BuildInfoStamp'
 import { KineticLogo } from './components/KineticLogo'
 import { TabIcon, SidebarToggleIcon, SidebarFiltersIcon } from './components/TabIcons'
-import { RegisterTracker } from './pages/RegisterTracker'
 import { TeamDetail } from './pages/TeamDetail'
-import { TrackLocation } from './pages/TrackLocation'
 import { Tracking } from './pages/Tracking'
 import { useViewRoute, viewToPath, type AppView } from './hooks/useViewRoute'
 import { useTrackerLocations } from './hooks/useTrackerLocations'
 import { useTokenTracking } from './hooks/useTokenTracking'
 import { isTrackingActive, getTrackingTeamName } from './utils/trackingStorage'
 
-type NavTabId = Exclude<AppView, 'admin' | 'register-tracker' | 'team-detail' | 'track-location'>
+type NavTabId = Exclude<AppView, 'admin' | 'team-detail'>
 
 const TABS: { id: NavTabId; label: string }[] = [
   { id: 'map', label: 'Map' },
@@ -231,19 +229,6 @@ export default function App() {
             </div>
           )}
 
-          {view === 'register-tracker' && (
-            <div
-              data-component="register-tracker-page"
-              data-component-version="1.0"
-              data-component-category="content"
-              data-entity-type="page"
-              data-entity-id="page_register_tracker"
-              className="flex-1 min-h-0 flex flex-col overflow-y-auto bg-kinetic-cream"
-            >
-              <RegisterTracker onNavigate={setView} />
-            </div>
-          )}
-
           {view === 'team-detail' && teamId && (
             <div
               data-component="team-detail-page"
@@ -254,19 +239,6 @@ export default function App() {
               className="flex-1 min-h-0 flex flex-col"
             >
               <TeamDetail teamId={teamId} onBack={() => setView('map')} />
-            </div>
-          )}
-
-          {view === 'track-location' && teamId && (
-            <div
-              data-component="track-location-page"
-              data-component-version="1.0"
-              data-component-category="content"
-              data-entity-type="page"
-              data-entity-id="page_track_location"
-              className="flex-1 min-h-0 flex flex-col overflow-y-auto bg-kinetic-cream"
-            >
-              <TrackLocation teamId={teamId} />
             </div>
           )}
 

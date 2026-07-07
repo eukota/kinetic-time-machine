@@ -1,6 +1,6 @@
-export type AppView = 'map' | 'gallery' | 'about' | 'admin' | 'register-tracker' | 'team-detail' | 'track-location' | 'tracking'
+export type AppView = 'map' | 'gallery' | 'about' | 'admin' | 'team-detail' | 'tracking'
 
-const VIEWS: AppView[] = ['map', 'gallery', 'about', 'admin', 'register-tracker', 'team-detail', 'track-location', 'tracking']
+const VIEWS: AppView[] = ['map', 'gallery', 'about', 'admin', 'team-detail', 'tracking']
 
 export interface RouteState {
   view: AppView;
@@ -10,7 +10,6 @@ export interface RouteState {
 export function viewToPath(view: AppView, teamId?: string): string {
   if (view === 'map') return '/'
   if (view === 'team-detail' && teamId) return `/team/${teamId}`
-  if (view === 'track-location' && teamId) return `/track/${teamId}`
   return `/${view}`
 }
 
@@ -21,7 +20,6 @@ export function pathToView(pathname: string): RouteState {
 
   if (segment === '' || segment === 'map') return { view: 'map' }
   if (segment === 'team' && parts[1]) return { view: 'team-detail', teamId: parts[1] }
-  if (segment === 'track' && parts[1]) return { view: 'track-location', teamId: parts[1] }
   if (VIEWS.includes(segment as AppView)) return { view: segment as AppView }
   return { view: 'map' }
 }

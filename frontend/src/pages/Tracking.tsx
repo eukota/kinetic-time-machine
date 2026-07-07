@@ -280,7 +280,7 @@ export const Tracking = ({ onNavigate }: { onNavigate?: (view: string) => void }
               <li>Admin approves your request and sends you a token</li>
               <li>Enter the token here to activate tracking</li>
               <li>Your device's location will be shared in real-time</li>
-              <li>Token expires after a period of inactivity</li>
+              <li>Your token stays valid until an admin disables or resets it</li>
             </ul>
           </div>
         </div>
