@@ -4,7 +4,7 @@ A race-day photo tracker for the [Kinetic Grand Championship](https://kineticgra
 
 ## What it does
 
-Spectators and crew submit geotagged photos from the course. Each photo is plotted on an interactive map showing the race route across three days (Arcata → Eureka → Crab Park → Ferndale). A gallery view lets anyone browse all submissions in real time, filter by team, and sort chronologically.
+Spectators and crew submit geotagged photos from the course. Each photo is plotted on an interactive map showing the race route across three days (Arcata → Eureka → Crab Park → Ferndale), color-coded per day, with a switchable street / satellite basemap. A gallery view lets anyone browse all submissions in real time, filter by team, and sort chronologically.
 
 ## The race
 
