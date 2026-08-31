@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, LayersControl, useMap, useMapEvents } from 'react-leaflet'
 import MarkerClusterGroup from 'react-leaflet-cluster'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -72,7 +72,7 @@ const RaceCourseOverlay = () => {
           const { day, color } = feature.properties
           if (selectedDay !== null && day !== selectedDay) return
           const opacity = selectedDay === null ? 0.75 : 1.0
-          const weight = selectedDay === null ? 3 : 4
+          const weight = selectedDay === null ? 5 : 7
           const layer = L.geoJSON(feature, {
             style: { color, weight, opacity, fill: false },
           }).addTo(map)
@@ -154,12 +154,22 @@ export const Map = () => {
       zoom={11}
       style={{ height: '100%', width: '100%' }}
     >
-      <TileLayer
-        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-        subdomains="abcd"
-        maxZoom={20}
-      />
+      <LayersControl position="topright">
+        <LayersControl.BaseLayer checked name="Street">
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            maxZoom={19}
+          />
+        </LayersControl.BaseLayer>
+        <LayersControl.BaseLayer name="Satellite">
+          <TileLayer
+            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+            attribution='Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community'
+            maxZoom={19}
+          />
+        </LayersControl.BaseLayer>
+      </LayersControl>
       <RaceCourseOverlay />
       <SubmissionMarkers />
       <MapZoomTracker />
