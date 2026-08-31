@@ -1,10 +1,11 @@
 import { useStore } from '../store'
 import { CourseDayHeadingIcon } from './TabIcons'
+import { dayColor } from '../lib/dayColors'
 
 const DAYS = [
-  { day: 1, label: 'Day 1', sublabel: 'Arcata → Eureka', color: '#2563eb' },
-  { day: 2, label: 'Day 2', sublabel: 'Eureka → Crab Park', color: '#16a34a' },
-  { day: 3, label: 'Day 3', sublabel: 'Crab Park → Ferndale', color: '#F77F00' },
+  { day: 1, label: 'Day 1', sublabel: 'Arcata → Eureka' },
+  { day: 2, label: 'Day 2', sublabel: 'Eureka → Crab Park' },
+  { day: 3, label: 'Day 3', sublabel: 'Crab Park → Ferndale' },
 ]
 
 export const CourseFilter = () => {
@@ -32,7 +33,7 @@ export const CourseFilter = () => {
         >
           All Days
         </button>
-        {DAYS.map(({ day, label, sublabel, color }) => (
+        {DAYS.map(({ day, label, sublabel }) => (
           <button
             key={day}
             type="button"
@@ -45,7 +46,7 @@ export const CourseFilter = () => {
           >
             <span
               className="inline-block w-4 h-1.5 rounded-full flex-shrink-0"
-              style={{ backgroundColor: color }}
+              style={{ backgroundColor: dayColor(day) }}
             />
             <span>
               <span className="font-bold">{label}</span>

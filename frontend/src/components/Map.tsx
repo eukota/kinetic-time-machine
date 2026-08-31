@@ -5,6 +5,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useStore, Submission } from '../store'
 import { useSubmissions } from '../hooks/useSubmissions'
+import { dayColor } from '../lib/dayColors'
 
 delete (L.Icon.Default.prototype as any)._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -69,12 +70,12 @@ const RaceCourseOverlay = () => {
 
         const visibleLayers: L.GeoJSON[] = []
         geojson.features.forEach((feature: any) => {
-          const { day, color } = feature.properties
+          const { day } = feature.properties
           if (selectedDay !== null && day !== selectedDay) return
           const opacity = selectedDay === null ? 0.75 : 1.0
           const weight = selectedDay === null ? 5 : 7
           const layer = L.geoJSON(feature, {
-            style: { color, weight, opacity, fill: false },
+            style: { color: dayColor(day), weight, opacity, fill: false },
           }).addTo(map)
           layersRef.current.push(layer)
           visibleLayers.push(layer)
@@ -146,8 +147,26 @@ const SubmissionMarkers = () => {
   )
 }
 
+const BASEMAP_STORAGE_KEY = 'ktm_basemap'
+
+const getSavedBasemap = (): string => {
+  if (typeof window === 'undefined') return 'Street'
+  return localStorage.getItem(BASEMAP_STORAGE_KEY) || 'Street'
+}
+
+/** Remembers the selected base layer across reloads. */
+const BasemapMemory = () => {
+  useMapEvents({
+    baselayerchange: (e) => {
+      localStorage.setItem(BASEMAP_STORAGE_KEY, (e as L.LayersControlEvent).name)
+    },
+  })
+  return null
+}
+
 export const Map = () => {
   useSubmissions()
+  const savedBasemap = getSavedBasemap()
   return (
     <MapContainer
       center={[40.72, -124.18]}
@@ -155,14 +174,14 @@ export const Map = () => {
       style={{ height: '100%', width: '100%' }}
     >
       <LayersControl position="topright">
-        <LayersControl.BaseLayer checked name="Street">
+        <LayersControl.BaseLayer checked={savedBasemap === 'Street'} name="Street">
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             maxZoom={19}
           />
         </LayersControl.BaseLayer>
-        <LayersControl.BaseLayer name="Satellite">
+        <LayersControl.BaseLayer checked={savedBasemap === 'Satellite'} name="Satellite">
           <TileLayer
             url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
             attribution='Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community'
@@ -174,6 +193,7 @@ export const Map = () => {
       <SubmissionMarkers />
       <MapZoomTracker />
       <MapResizeObserver />
+      <BasemapMemory />
     </MapContainer>
   )
 }
